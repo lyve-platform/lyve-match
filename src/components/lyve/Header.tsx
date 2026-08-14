@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { useI18n } from "@/i18n";
+import { useAuth } from "@/auth/AuthProvider";
 
 export function Header() {
   const { t } = useI18n();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
 
   const links = [
