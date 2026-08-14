@@ -148,6 +148,113 @@ export type Database = {
         }
         Relationships: []
       }
+      billing_accounts: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          locale: string | null
+          profile_id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_customer_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency?: string
+          id?: string
+          locale?: string | null
+          profile_id: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_customer_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency?: string
+          id?: string
+          locale?: string | null
+          profile_id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_customer_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_accounts_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      billing_events: {
+        Row: {
+          created_at: string
+          error: string | null
+          event_created_at: string | null
+          event_type: string
+          id: string
+          payload_summary: Json
+          processed_at: string | null
+          profile_id: string | null
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_event_id: string
+          received_at: string
+          signature_verified: boolean
+          status: Database["public"]["Enums"]["billing_event_status"]
+          subscription_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          error?: string | null
+          event_created_at?: string | null
+          event_type: string
+          id?: string
+          payload_summary?: Json
+          processed_at?: string | null
+          profile_id?: string | null
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_event_id: string
+          received_at?: string
+          signature_verified?: boolean
+          status?: Database["public"]["Enums"]["billing_event_status"]
+          subscription_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          error?: string | null
+          event_created_at?: string | null
+          event_type?: string
+          id?: string
+          payload_summary?: Json
+          processed_at?: string | null
+          profile_id?: string | null
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_event_id?: string
+          received_at?: string
+          signature_verified?: boolean
+          status?: Database["public"]["Enums"]["billing_event_status"]
+          subscription_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_events_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_events_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       blocks: {
         Row: {
           blocked_id: string
@@ -271,6 +378,72 @@ export type Database = {
             columns: ["profile_b"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entitlements: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          granted_by: string | null
+          id: string
+          key: string
+          metadata: Json
+          profile_id: string
+          reason: string | null
+          revoke_reason: string | null
+          revoked_at: string | null
+          source: Database["public"]["Enums"]["entitlement_source"]
+          starts_at: string
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          key: string
+          metadata?: Json
+          profile_id: string
+          reason?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          source?: Database["public"]["Enums"]["entitlement_source"]
+          starts_at?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          granted_by?: string | null
+          id?: string
+          key?: string
+          metadata?: Json
+          profile_id?: string
+          reason?: string | null
+          revoke_reason?: string | null
+          revoked_at?: string | null
+          source?: Database["public"]["Enums"]["entitlement_source"]
+          starts_at?: string
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entitlements_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entitlements_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
             referencedColumns: ["id"]
           },
         ]
@@ -1099,6 +1272,84 @@ export type Database = {
           },
         ]
       }
+      subscriptions: {
+        Row: {
+          billing_account_id: string
+          billing_interval: Database["public"]["Enums"]["billing_interval"]
+          cancel_at_period_end: boolean
+          canceled_at: string | null
+          created_at: string
+          currency: string | null
+          current_period_end: string | null
+          current_period_start: string | null
+          ended_at: string | null
+          id: string
+          plan_code: string
+          profile_id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_subscription_id: string | null
+          purchase_source: Database["public"]["Enums"]["entitlement_source"]
+          status: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          billing_account_id: string
+          billing_interval?: Database["public"]["Enums"]["billing_interval"]
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          ended_at?: string | null
+          id?: string
+          plan_code: string
+          profile_id: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_subscription_id?: string | null
+          purchase_source?: Database["public"]["Enums"]["entitlement_source"]
+          status?: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          billing_account_id?: string
+          billing_interval?: Database["public"]["Enums"]["billing_interval"]
+          cancel_at_period_end?: boolean
+          canceled_at?: string | null
+          created_at?: string
+          currency?: string | null
+          current_period_end?: string | null
+          current_period_start?: string | null
+          ended_at?: string | null
+          id?: string
+          plan_code?: string
+          profile_id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          provider_subscription_id?: string | null
+          purchase_source?: Database["public"]["Enums"]["entitlement_source"]
+          status?: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subscriptions_billing_account_id_fkey"
+            columns: ["billing_account_id"]
+            isOneToOne: false
+            referencedRelation: "billing_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subscriptions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1132,6 +1383,26 @@ export type Database = {
     }
     Functions: {
       account_can_act: { Args: { _profile: string }; Returns: boolean }
+      admin_billing_overview: {
+        Args: { p_profile: string }
+        Returns: {
+          billing_interval: Database["public"]["Enums"]["billing_interval"]
+          cancel_at_period_end: boolean
+          canceled_at: string
+          created_at: string
+          currency: string
+          current_period_end: string
+          current_period_start: string
+          entitlement_keys: string[]
+          plan_code: string
+          profile_id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
+          provider_subscription_id: string
+          purchase_source: Database["public"]["Enums"]["entitlement_source"]
+          status: Database["public"]["Enums"]["subscription_status"]
+          trial_ends_at: string
+        }[]
+      }
       admin_case_reports: {
         Args: { p_case: string }
         Returns: {
@@ -1161,6 +1432,15 @@ export type Database = {
           p_status: Database["public"]["Enums"]["appeal_status"]
         }
         Returns: boolean
+      }
+      admin_grant_entitlement: {
+        Args: {
+          p_days: number
+          p_key: string
+          p_reason: string
+          p_target: string
+        }
+        Returns: string
       }
       admin_list_appeals: {
         Args: { p_limit?: number; p_offset?: number }
@@ -1268,6 +1548,10 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["account_status"]
       }
+      admin_revoke_entitlement: {
+        Args: { p_entitlement: string; p_reason: string }
+        Returns: boolean
+      }
       admin_set_role: {
         Args: {
           p_grant: boolean
@@ -1287,6 +1571,31 @@ export type Database = {
       }
       approx_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
+        Returns: number
+      }
+      billing_apply_subscription: {
+        Args: {
+          p_cancel_at_period_end: boolean
+          p_currency: string
+          p_entitlements: string[]
+          p_interval: Database["public"]["Enums"]["billing_interval"]
+          p_period_end: string
+          p_period_start: string
+          p_plan_code: string
+          p_profile: string
+          p_provider: Database["public"]["Enums"]["billing_provider"]
+          p_provider_subscription_id: string
+          p_source: Database["public"]["Enums"]["entitlement_source"]
+          p_status: Database["public"]["Enums"]["subscription_status"]
+        }
+        Returns: string
+      }
+      billing_revoke_subscription_entitlements: {
+        Args: {
+          p_provider: Database["public"]["Enums"]["billing_provider"]
+          p_provider_subscription_id: string
+          p_reason: string
+        }
         Returns: number
       }
       can_read_conversation: {
@@ -1327,6 +1636,10 @@ export type Database = {
       effective_account_status: {
         Args: { _profile: string }
         Returns: Database["public"]["Enums"]["account_status"]
+      }
+      has_entitlement: {
+        Args: { _key: string; _user: string }
+        Returns: boolean
       }
       has_permission: {
         Args: { _permission: string; _user_id: string }
@@ -1382,6 +1695,14 @@ export type Database = {
           unread_count: number
         }[]
       }
+      my_entitlements: {
+        Args: never
+        Returns: {
+          expires_at: string
+          key: string
+          source: Database["public"]["Enums"]["entitlement_source"]
+        }[]
+      }
       my_matches: {
         Args: never
         Returns: {
@@ -1428,6 +1749,21 @@ export type Database = {
         | "deleted"
       app_role: "super_admin" | "moderator" | "support"
       appeal_status: "pending" | "reviewing" | "granted" | "denied"
+      billing_event_status:
+        | "received"
+        | "processed"
+        | "duplicate"
+        | "ignored"
+        | "failed"
+      billing_interval: "month" | "year"
+      billing_provider:
+        | "none"
+        | "mock"
+        | "stripe"
+        | "paddle"
+        | "apple"
+        | "google"
+        | "manual"
       children_plan:
         | "want_children"
         | "do_not_want_children"
@@ -1442,6 +1778,12 @@ export type Database = {
         | "prefer_not_to_say"
       deletion_request_status: "pending" | "cancelled" | "completed"
       drinking_habit: "never" | "socially" | "regularly" | "prefer_not_to_say"
+      entitlement_source:
+        | "web"
+        | "ios"
+        | "android"
+        | "promotional"
+        | "admin_grant"
       exercise_habit: "rarely" | "sometimes" | "often" | "prefer_not_to_say"
       gender_type:
         | "woman"
@@ -1496,6 +1838,14 @@ export type Database = {
         | "ambivert"
         | "extrovert"
         | "prefer_not_to_say"
+      subscription_status:
+        | "trialing"
+        | "active"
+        | "past_due"
+        | "paused"
+        | "canceled"
+        | "expired"
+        | "incomplete"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1632,6 +1982,23 @@ export const Constants = {
       ],
       app_role: ["super_admin", "moderator", "support"],
       appeal_status: ["pending", "reviewing", "granted", "denied"],
+      billing_event_status: [
+        "received",
+        "processed",
+        "duplicate",
+        "ignored",
+        "failed",
+      ],
+      billing_interval: ["month", "year"],
+      billing_provider: [
+        "none",
+        "mock",
+        "stripe",
+        "paddle",
+        "apple",
+        "google",
+        "manual",
+      ],
       children_plan: [
         "want_children",
         "do_not_want_children",
@@ -1648,6 +2015,13 @@ export const Constants = {
       ],
       deletion_request_status: ["pending", "cancelled", "completed"],
       drinking_habit: ["never", "socially", "regularly", "prefer_not_to_say"],
+      entitlement_source: [
+        "web",
+        "ios",
+        "android",
+        "promotional",
+        "admin_grant",
+      ],
       exercise_habit: ["rarely", "sometimes", "often", "prefer_not_to_say"],
       gender_type: ["woman", "man", "non_binary", "other", "prefer_not_to_say"],
       match_status: ["active", "unmatched", "blocked"],
@@ -1702,6 +2076,15 @@ export const Constants = {
         "ambivert",
         "extrovert",
         "prefer_not_to_say",
+      ],
+      subscription_status: [
+        "trialing",
+        "active",
+        "past_due",
+        "paused",
+        "canceled",
+        "expired",
+        "incomplete",
       ],
     },
   },
