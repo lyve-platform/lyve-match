@@ -1,9 +1,9 @@
-import { Heart, Infinity as InfinityIcon, Rings, Sparkles, Users } from "lucide-react";
+import { Heart, Gem, Infinity as InfinityIcon, Sparkles, Users } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useI18n } from "@/i18n";
 import { Section } from "./Section";
 
-const icons: LucideIcon[] = [Sparkles, Heart, Rings, Users, InfinityIcon];
+const icons: LucideIcon[] = [Sparkles, Heart, Gem, Users, InfinityIcon];
 
 export function Intent() {
   const { t } = useI18n();
