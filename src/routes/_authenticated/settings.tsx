@@ -171,6 +171,14 @@ function SettingsPage() {
         </div>
       </section>
 
+      <section aria-labelledby="billing-heading" className="surface-panel space-y-3 p-5">
+        <h2 id="billing-heading" className="text-base font-semibold">
+          {t.billingSettings.title}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t.billingSettings.subtitle}</p>
+        <BillingSettings />
+      </section>
+
       <section aria-labelledby="blocked-heading" className="surface-panel space-y-3 p-5">
         <h2 id="blocked-heading" className="text-base font-semibold">
           {t.blockedList.title}
@@ -178,6 +186,7 @@ function SettingsPage() {
         <p className="text-sm text-muted-foreground">{t.blockedList.hint}</p>
         <BlockedMembers />
       </section>
+
 
       <section aria-labelledby="account-heading" className="surface-panel space-y-4 p-5">
         <h2 id="account-heading" className="text-base font-semibold">
