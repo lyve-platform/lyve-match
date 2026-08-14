@@ -17,6 +17,8 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
+import { Route as AuthenticatedAppealRouteImport } from './routes/_authenticated/appeal'
 import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
 import { Route as AuthenticatedLikesRouteImport } from './routes/_authenticated/likes'
 import { Route as AuthenticatedMatchesRouteImport } from './routes/_authenticated/matches'
@@ -64,6 +66,16 @@ const TermsRoute = TermsRouteImport.update({
   id: '/terms',
   path: '/terms',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAppealRoute = AuthenticatedAppealRouteImport.update({
+  id: '/appeal',
+  path: '/appeal',
+  getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDiscoverRoute = AuthenticatedDiscoverRouteImport.update({
   id: '/discover',
@@ -116,6 +128,8 @@ export interface FileRoutesByFullPath {
   '/reset-password': typeof ResetPasswordRoute
   '/safety': typeof SafetyRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/appeal': typeof AuthenticatedAppealRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/likes': typeof AuthenticatedLikesRoute
   '/matches': typeof AuthenticatedMatchesRoute
@@ -133,6 +147,8 @@ export interface FileRoutesByTo {
   '/reset-password': typeof ResetPasswordRoute
   '/safety': typeof SafetyRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AuthenticatedAdminRoute
+  '/appeal': typeof AuthenticatedAppealRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/likes': typeof AuthenticatedLikesRoute
   '/matches': typeof AuthenticatedMatchesRoute
@@ -152,6 +168,8 @@ export interface FileRoutesById {
   '/reset-password': typeof ResetPasswordRoute
   '/safety': typeof SafetyRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/appeal': typeof AuthenticatedAppealRoute
   '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
   '/_authenticated/likes': typeof AuthenticatedLikesRoute
   '/_authenticated/matches': typeof AuthenticatedMatchesRoute
@@ -171,6 +189,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/safety'
     | '/terms'
+    | '/admin'
+    | '/appeal'
     | '/discover'
     | '/likes'
     | '/matches'
@@ -188,6 +208,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/safety'
     | '/terms'
+    | '/admin'
+    | '/appeal'
     | '/discover'
     | '/likes'
     | '/matches'
@@ -206,6 +228,8 @@ export interface FileRouteTypes {
     | '/reset-password'
     | '/safety'
     | '/terms'
+    | '/_authenticated/admin'
+    | '/_authenticated/appeal'
     | '/_authenticated/discover'
     | '/_authenticated/likes'
     | '/_authenticated/matches'
@@ -285,6 +309,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/appeal': {
+      id: '/_authenticated/appeal'
+      path: '/appeal'
+      fullPath: '/appeal'
+      preLoaderRoute: typeof AuthenticatedAppealRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/discover': {
       id: '/_authenticated/discover'
       path: '/discover'
@@ -345,6 +383,8 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAppealRoute: typeof AuthenticatedAppealRoute
   AuthenticatedDiscoverRoute: typeof AuthenticatedDiscoverRoute
   AuthenticatedLikesRoute: typeof AuthenticatedLikesRoute
   AuthenticatedMatchesRoute: typeof AuthenticatedMatchesRoute
@@ -356,6 +396,8 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAppealRoute: AuthenticatedAppealRoute,
   AuthenticatedDiscoverRoute: AuthenticatedDiscoverRoute,
   AuthenticatedLikesRoute: AuthenticatedLikesRoute,
   AuthenticatedMatchesRoute: AuthenticatedMatchesRoute,
