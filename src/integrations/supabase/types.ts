@@ -94,6 +94,97 @@ export type Database = {
           },
         ]
       }
+      conversation_members: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          last_read_at: string | null
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          last_read_at?: string | null
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          last_read_at?: string | null
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversation_members_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversation_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      conversations: {
+        Row: {
+          created_at: string
+          id: string
+          last_message_at: string | null
+          match_id: string
+          profile_a: string
+          profile_b: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          match_id: string
+          profile_a: string
+          profile_b: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          last_message_at?: string | null
+          match_id?: string
+          profile_a?: string
+          profile_b?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: true
+            referencedRelation: "matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_profile_a_fkey"
+            columns: ["profile_a"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "conversations_profile_b_fkey"
+            columns: ["profile_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interests: {
         Row: {
           category: string | null
@@ -215,6 +306,177 @@ export type Database = {
           {
             foreignKeyName: "matches_profile_b_fkey"
             columns: ["profile_b"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reads: {
+        Row: {
+          conversation_id: string
+          created_at: string
+          id: string
+          message_id: string
+          read_at: string
+          reader_id: string
+        }
+        Insert: {
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_id: string
+          read_at?: string
+          reader_id: string
+        }
+        Update: {
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          read_at?: string
+          reader_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reads_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reads_reader_id_fkey"
+            columns: ["reader_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      message_reports: {
+        Row: {
+          category: Database["public"]["Enums"]["report_category"]
+          conversation_id: string
+          created_at: string
+          description: string | null
+          id: string
+          message_id: string
+          reported_id: string
+          reporter_id: string
+          status: Database["public"]["Enums"]["report_status"]
+          updated_at: string
+        }
+        Insert: {
+          category: Database["public"]["Enums"]["report_category"]
+          conversation_id: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          message_id: string
+          reported_id: string
+          reporter_id: string
+          status?: Database["public"]["Enums"]["report_status"]
+          updated_at?: string
+        }
+        Update: {
+          category?: Database["public"]["Enums"]["report_category"]
+          conversation_id?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          message_id?: string
+          reported_id?: string
+          reporter_id?: string
+          status?: Database["public"]["Enums"]["report_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "message_reports_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reports_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reports_reported_id_fkey"
+            columns: ["reported_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "message_reports_reporter_id_fkey"
+            columns: ["reporter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          body: string | null
+          conversation_id: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          message_type: Database["public"]["Enums"]["message_type"]
+          moderation_flags: string[]
+          moderation_status: Database["public"]["Enums"]["message_moderation_status"]
+          sender_id: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string | null
+          conversation_id: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          message_type?: Database["public"]["Enums"]["message_type"]
+          moderation_flags?: string[]
+          moderation_status?: Database["public"]["Enums"]["message_moderation_status"]
+          sender_id: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string | null
+          conversation_id?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          message_type?: Database["public"]["Enums"]["message_type"]
+          moderation_flags?: string[]
+          moderation_status?: Database["public"]["Enums"]["message_moderation_status"]
+          sender_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -589,6 +851,11 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      can_read_conversation: {
+        Args: { p_conversation: string }
+        Returns: boolean
+      }
+      can_send_message: { Args: { p_conversation: string }; Returns: boolean }
       discover_candidates: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -616,6 +883,10 @@ export type Database = {
         }[]
       }
       is_blocked_pair: { Args: { a: string; b: string }; Returns: boolean }
+      is_conversation_member: {
+        Args: { p_conversation: string; p_profile: string }
+        Returns: boolean
+      }
       likes_received: {
         Args: never
         Returns: {
@@ -629,6 +900,28 @@ export type Database = {
           photo_paths: string[]
           profile_id: string
           relationship_intent: Database["public"]["Enums"]["relationship_intent"]
+        }[]
+      }
+      mark_conversation_read: {
+        Args: { p_conversation: string }
+        Returns: number
+      }
+      my_conversations: {
+        Args: never
+        Returns: {
+          age: number
+          can_send: boolean
+          conversation_id: string
+          created_at: string
+          first_name: string
+          last_message_at: string
+          last_message_deleted: boolean
+          last_message_preview: string
+          last_message_sender_id: string
+          match_id: string
+          other_profile_id: string
+          photo_path: string
+          unread_count: number
         }[]
       }
       my_matches: {
@@ -673,6 +966,12 @@ export type Database = {
         | "prefer_not_to_say"
       match_status: "active" | "unmatched" | "blocked"
       message_audience: "everyone" | "matches_only" | "no_one"
+      message_moderation_status:
+        | "unreviewed"
+        | "cleared"
+        | "flagged"
+        | "removed"
+      message_type: "text"
       profile_visibility: "everyone" | "matches_only" | "hidden"
       relationship_intent:
         | "dating"
@@ -846,6 +1145,13 @@ export const Constants = {
       gender_type: ["woman", "man", "non_binary", "other", "prefer_not_to_say"],
       match_status: ["active", "unmatched", "blocked"],
       message_audience: ["everyone", "matches_only", "no_one"],
+      message_moderation_status: [
+        "unreviewed",
+        "cleared",
+        "flagged",
+        "removed",
+      ],
+      message_type: ["text"],
       profile_visibility: ["everyone", "matches_only", "hidden"],
       relationship_intent: [
         "dating",

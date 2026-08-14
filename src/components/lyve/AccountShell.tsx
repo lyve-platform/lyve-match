@@ -55,6 +55,9 @@ export function AccountShell({
             <Button asChild variant="ghost" size="sm" className="rounded-full">
               <Link to="/matches">{t.discoverNav.matches}</Link>
             </Button>
+            <Button asChild variant="ghost" size="sm" className="rounded-full">
+              <Link to="/messages">{t.messagingNav.messages}</Link>
+            </Button>
             <Button asChild variant="ghost" size="sm" className="hidden rounded-full sm:inline-flex">
               <Link to="/profile">{t.authNav.profile}</Link>
             </Button>
