@@ -21,40 +21,48 @@ Recommended launch shape: a small **Tier 1** set first, then widen.
 
 **Country configuration** is data, not code. A `countries` config table drives, per ISO country code: availability (`live` / `waitlist` / `blocked`), default locale and text direction, currency, minimum age (18 global, higher where local law requires), tax treatment, active legal document versions, and which payment methods are offered. Client code never hard-codes a country rule; it reads the resolved config. Country is derived server-side (edge geo + account country of record), never from a client-supplied header alone.
 
-## 2. Web vs iOS vs Android billing architecture
+## 2. Mobile billing architecture (iOS + Android at launch, Web deferred)
 
-Three purchase channels, one entitlement truth.
+Two live purchase channels at launch, one entitlement truth, with a third slot reserved.
 
 ```text
-  Web checkout        iOS IAP            Android Billing
-   (provider)      (App Store)          (Google Play)
-        |                |                     |
-   webhook          server-side           Real-time
-   (signed)         notifications        Developer Notifications
-        \_______________ | _____________________/
-                         v
-              billing_apply_subscription
-                         v
-                    entitlements   <- the only thing the app reads
+      iOS IAP                 Android Billing          [ Web checkout — DEFERRED ]
+    (App Store)                (Google Play)            (Paddle/Stripe, later phase)
+         |                           |                              :
+  App Store Server         Real-time Developer                   signed
+   Notifications V2          Notifications                       webhook
+   + server-side              + server-side                         :
+   receipt/txn check        purchase-token check                    :
+         \___________________________|______________________________:
+                                     v
+                        billing_apply_subscription   (single authoritative write)
+                                     v
+                              entitlements   <- the only thing any feature reads
 ```
 
 Rules:
-- The existing provider abstraction from Phase 5 gains two more providers (`apple`, `google`). No feature gate ever learns which channel paid.
-- **Apple and Google require their own IAP for digital subscriptions inside their apps.** No external checkout link, no price steering inside the app binary, in the launch build.
-- Receipts and purchase tokens are validated **server-side** against Apple/Google APIs; the client's word is never trusted.
-- Cross-channel restore: an account already Premium via web keeps Premium in the apps (read-only state, "managed on the web"), and vice versa. The UI must show *where* a subscription is managed and deep-link to the right cancellation surface.
-- Store-mandated pricing tiers differ from web pricing. Expect ~30% (or 15% small-business) store commission and set web pricing accordingly, without violating anti-steering rules inside the app.
+- The Phase 5 provider abstraction gains `apple` and `google` adapters now; `stripe`/`paddle` remain unimplemented slots in the same registry. No feature gate ever learns which channel paid — adding web later is a new adapter, not a change to the authorization model.
+- **The client never grants Premium.** The app sends only an opaque receipt/purchase token; entitlement is written exclusively by the server after validation.
+- Apple: validate with the App Store Server API (JWS transaction/renewal info, signed-payload chain verified against Apple root certs), keyed by `originalTransactionId`. Google: validate with `purchases.subscriptionsv2.get` via a service account, keyed by the purchase token / linked purchase token chain, and acknowledge within the required window.
+- Store server notifications (ASSN V2, Google RTDN via Pub/Sub push) are the source of lifecycle truth: renew, grace period, billing retry, expire, refund, revoke. Each notification is verified, deduplicated in the existing immutable `billing_events` ledger, and applied idempotently.
+- One account may hold at most one active subscription; a second channel purchase for an already-Premium account is recorded and surfaced as "managed on <channel>" rather than double-billing. The UI deep-links to the correct store cancellation surface.
+- Restore purchases is server-side: the app asks the server to re-validate the store account's entitlements; local receipt state is never authoritative.
+- Anti-steering: no external checkout link, no price steering inside the launch app binary.
+
+**Future web phase (no rework required):** add a `stripe`/`paddle` adapter + signed webhook route that calls the same `billing_apply_subscription`. Entitlement reads, feature gates, admin tooling and tests stay untouched.
 
 ## 3. Payment provider options and tradeoffs
 
 | Option | Strengths | Tradeoffs | Fit for LYVE |
 | --- | --- | --- | --- |
-| **Stripe** | Best-in-class API, subscriptions, strong SCA/3DS, wide method coverage, good dispute tooling | You are merchant of record: you own VAT/sales-tax registration and remittance (Stripe Tax reduces but does not remove this) | Strong fit if you have or will get a UAE/EU entity and accept tax duty |
-| **Paddle** | Merchant of record — Paddle owns global VAT/GST/sales tax, invoicing, and much of chargeback handling | Less flexible subscription primitives, higher effective rate, stricter content review for dating | Strong fit if you want to avoid multi-country tax registration |
-| **Apple / Google IAP** | Mandatory in-app; frictionless conversion; store handles tax and refunds | 15–30% commission, no customer data, refund decisions out of your control | Required, not optional, for the mobile apps |
-| Regional (Tap, Checkout.com, Network Intl.) | Local GCC methods (mada, KNET, Apple Pay local acquiring), better auth rates in-region | Extra integration, no single global subscription model | Consider as an added web method in Wave 1, not the primary rail |
+| **Apple IAP** (launch) | Mandatory in-app; frictionless conversion; Apple handles tax, invoicing and refunds | 15–30% commission, minimal customer data, refunds decided by Apple | Required launch channel for iOS |
+| **Google Play Billing** (launch) | Same as above for Android; strong lifecycle notifications | 15–30% commission, refunds decided by Google | Required launch channel for Android |
+| Stripe (deferred) | Best-in-class subscription API, SCA/3DS, dispute tooling | You are merchant of record: you own VAT/sales-tax registration | Revisit when web launches |
+| Paddle (deferred) | Merchant of record — owns global VAT/GST, invoicing, chargebacks | Less flexible primitives, higher effective rate, stricter dating review | Revisit when web launches |
+| Regional (Tap, Checkout.com, Network Intl.) | Local GCC methods, better in-region auth rates | Extra integration, no global subscription model | Only relevant to a future web rail |
 
-**Recommendation:** Paddle for web if you want tax handled for you and a lean team; Stripe for web if you want maximum control and already have tax capability. Either way, Apple + Google for the mobile apps. Because Phase 5 is provider-agnostic, this decision is reversible and does not touch entitlement logic.
+**Decision:** Apple + Google only for the initial production launch. The merchant-of-record question (Paddle vs Stripe) is explicitly **not decided now** and does not block launch, because Phase 5's abstraction makes it a later, additive choice.
+
 
 ## 4. Subscription plans and entitlement strategy
 
