@@ -557,11 +557,11 @@ async function main() {
       check("realtime does not deliver messages to a non-member", received.length === 0, received.length);
       await outsiderClient.removeChannel(channel);
 
-      const anonReceived: unknown[] = [];
+      const anonReceived: Array<{ new?: Record<string, unknown>; errors?: unknown }> = [];
       const anonChannel = anon
         .channel(`audit-anon-${stamp}`)
         .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, (payload) => {
-          anonReceived.push(payload);
+          anonReceived.push(payload as never);
         });
       await new Promise<void>((resolve) => {
         anonChannel.subscribe(() => resolve());
@@ -569,7 +569,13 @@ async function main() {
       });
       await send(a, pair.conversationId, "Anonymous realtime probe.");
       await new Promise((resolve) => setTimeout(resolve, 2500));
-      check("realtime does not deliver messages to signed-out listeners", anonReceived.length === 0, anonReceived.length);
+      const anonRows = anonReceived.filter((p) => Object.keys(p.new ?? {}).length > 0);
+      check("realtime delivers no message rows to signed-out listeners", anonRows.length === 0, anonReceived);
+      check(
+        "signed-out realtime subscriptions are rejected as unauthorized",
+        anonReceived.every((p) => Array.isArray(p.errors) && p.errors.length > 0) || anonReceived.length === 0,
+        anonReceived,
+      );
       await anon.removeChannel(anonChannel);
     }
 
