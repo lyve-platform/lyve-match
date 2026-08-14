@@ -1,8 +1,11 @@
 # Phase 6 — Launch Readiness & Production Payments: Architecture Proposal
 
-Status: **proposal only**. No production database change, no payment provider connection, no store submission. Nothing in this document is implemented until you approve it.
+**Launch shape (corrected):** LYVE is **mobile-first**. Initial production platforms are **iOS and Android only**. **Web is deferred** to a later phase — no web checkout, and neither Paddle nor Stripe is the initial production billing provider. The only initial Premium purchase sources are **Apple In-App Purchase** and **Google Play Billing**, both verified server-side.
+
+Status: **proposal only**. No production database change, no payment provider connection, no store submission, and no production Apple/Google credentials. Nothing here is implemented until you approve it.
 
 ---
+
 
 ## 1. Target launch markets and country configuration
 
