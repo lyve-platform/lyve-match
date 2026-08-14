@@ -1272,6 +1272,114 @@ export type Database = {
           },
         ]
       }
+      store_purchase_audit: {
+        Row: {
+          attempted_profile_id: string | null
+          created_at: string
+          event_id: string | null
+          event_type: string | null
+          id: string
+          metadata: Json
+          outcome: string
+          owner_profile_id: string | null
+          provider: Database["public"]["Enums"]["billing_provider"]
+          purchase_ref_hash: string
+        }
+        Insert: {
+          attempted_profile_id?: string | null
+          created_at?: string
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          metadata?: Json
+          outcome: string
+          owner_profile_id?: string | null
+          provider: Database["public"]["Enums"]["billing_provider"]
+          purchase_ref_hash: string
+        }
+        Update: {
+          attempted_profile_id?: string | null
+          created_at?: string
+          event_id?: string | null
+          event_type?: string | null
+          id?: string
+          metadata?: Json
+          outcome?: string
+          owner_profile_id?: string | null
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          purchase_ref_hash?: string
+        }
+        Relationships: []
+      }
+      store_purchases: {
+        Row: {
+          created_at: string
+          environment: string
+          id: string
+          latest_event_at: string | null
+          latest_event_id: string | null
+          linked_at: string
+          plan_code: string
+          product_id: string
+          profile_id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
+          purchase_ref: string
+          revoked_at: string | null
+          status: Database["public"]["Enums"]["subscription_status"]
+          subscription_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          environment?: string
+          id?: string
+          latest_event_at?: string | null
+          latest_event_id?: string | null
+          linked_at?: string
+          plan_code: string
+          product_id: string
+          profile_id: string
+          provider: Database["public"]["Enums"]["billing_provider"]
+          purchase_ref: string
+          revoked_at?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          environment?: string
+          id?: string
+          latest_event_at?: string | null
+          latest_event_id?: string | null
+          linked_at?: string
+          plan_code?: string
+          product_id?: string
+          profile_id?: string
+          provider?: Database["public"]["Enums"]["billing_provider"]
+          purchase_ref?: string
+          revoked_at?: string | null
+          status?: Database["public"]["Enums"]["subscription_status"]
+          subscription_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "store_purchases_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "store_purchases_subscription_id_fkey"
+            columns: ["subscription_id"]
+            isOneToOne: false
+            referencedRelation: "subscriptions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subscriptions: {
         Row: {
           billing_account_id: string
@@ -1587,6 +1695,25 @@ export type Database = {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
       }
+      billing_apply_store_event: {
+        Args: {
+          p_cancel_at_period_end: boolean
+          p_currency: string
+          p_entitlements: string[]
+          p_event_at: string
+          p_event_id: string
+          p_interval: Database["public"]["Enums"]["billing_interval"]
+          p_period_end: string
+          p_period_start: string
+          p_plan_code: string
+          p_provider: Database["public"]["Enums"]["billing_provider"]
+          p_purchase_ref: string
+          p_reason?: string
+          p_revoke?: boolean
+          p_status: Database["public"]["Enums"]["subscription_status"]
+        }
+        Returns: string
+      }
       billing_apply_subscription: {
         Args: {
           p_cancel_at_period_end: boolean
@@ -1601,6 +1728,17 @@ export type Database = {
           p_provider_subscription_id: string
           p_source: Database["public"]["Enums"]["entitlement_source"]
           p_status: Database["public"]["Enums"]["subscription_status"]
+        }
+        Returns: string
+      }
+      billing_link_store_purchase: {
+        Args: {
+          p_environment: string
+          p_plan_code: string
+          p_product_id: string
+          p_profile: string
+          p_provider: Database["public"]["Enums"]["billing_provider"]
+          p_purchase_ref: string
         }
         Returns: string
       }
