@@ -50,7 +50,9 @@ export function Header() {
           <ThemeToggle />
 
           <Button asChild className="hidden shrink-0 rounded-full sm:inline-flex">
-            <a href="/#final-cta">{t.nav.getStarted}</a>
+            <Link to={isAuthenticated ? "/profile" : "/auth"}>
+              {isAuthenticated ? t.authNav.profile : t.nav.getStarted}
+            </Link>
           </Button>
 
           <Button
@@ -89,9 +91,9 @@ export function Header() {
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <LanguageSwitcher />
             <Button asChild className="rounded-full">
-              <a href="/#final-cta" onClick={() => setOpen(false)}>
-                {t.nav.getStarted}
-              </a>
+              <Link to={isAuthenticated ? "/profile" : "/auth"} onClick={() => setOpen(false)}>
+                {isAuthenticated ? t.authNav.profile : t.nav.getStarted}
+              </Link>
             </Button>
           </div>
         </nav>
