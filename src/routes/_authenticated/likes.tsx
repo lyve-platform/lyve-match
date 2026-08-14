@@ -1,10 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { SafetyMenu } from "@/components/lyve/SafetyMenu";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
 import { useI18n } from "@/i18n";
 import { useDecision, useLikesReceived } from "@/hooks/useDiscovery";
 
