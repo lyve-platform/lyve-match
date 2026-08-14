@@ -1,6 +1,6 @@
-> # LYVE mandatory security gate.
-> # The full suite must pass before any deploy, and before production store
-> # billing may be enabled. No job may skip or soft-fail it.
+# LYVE mandatory security gate.
+# The full suite must pass before any deploy, and before production store
+# billing may be enabled. No job may skip or soft-fail it.
 name: Security suite
 
 on:
