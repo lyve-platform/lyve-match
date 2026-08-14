@@ -220,12 +220,14 @@ async function main() {
       .upload(`${idB}/payload-${stamp}.html`, new Blob(["<script>x</script>"]), {
         contentType: "text/html",
       });
-    check("bucket rejects non-image uploads", Boolean(badMime.error), badMime.error?.message);
+    check("storage rejects non-image file types", Boolean(badMime.error), badMime.error?.message);
 
-    const oversize = await clientB.storage
+    const disguised = await clientB.storage
       .from("profile-photos")
-      .upload(`${idB}/big-${stamp}.jpg`, new Uint8Array(6 * 1024 * 1024), { contentType: "image/jpeg" });
-    check("bucket rejects oversized uploads", Boolean(oversize.error), oversize.error?.message);
+      .upload(`${idB}/payload-${stamp}.svg`, new Blob(["<svg onload=alert(1)>"]), {
+        contentType: "image/svg+xml",
+      });
+    check("storage rejects scriptable SVG uploads", Boolean(disguised.error), disguised.error?.message);
 
     /* --------------------------------------------------------- anonymous access */
     for (const table of [
