@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "test:security": "bun run tests/security/rls-audit.ts"
+    "test:security": "bun run tests/security/run-all.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
