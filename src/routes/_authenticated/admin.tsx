@@ -1,0 +1,109 @@
+import { useState } from "react";
+import { Link, createFileRoute } from "@tanstack/react-router";
+import { useI18n } from "@/i18n";
+import { useAdminSession } from "@/hooks/useAdmin";
+import { AccountShell } from "@/components/lyve/AccountShell";
+import {
+  AppealsPanel,
+  AuditPanel,
+  CasesPanel,
+  OverviewPanel,
+  UsersPanel,
+} from "@/components/lyve/AdminPanels";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+export const Route = createFileRoute("/_authenticated/admin")({
+  head: () => ({
+    meta: [
+      { title: "Trust & Safety — LYVE staff console" },
+      {
+        name: "description",
+        content:
+          "Internal LYVE Trust & Safety console for moderation cases, account standing and the administrative audit trail.",
+      },
+      { name: "robots", content: "noindex, nofollow" },
+      { property: "og:title", content: "Trust & Safety — LYVE staff console" },
+      {
+        property: "og:description",
+        content: "Internal LYVE moderation, account standing and audit tooling.",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary" },
+    ],
+  }),
+  component: AdminPage,
+});
+
+function AdminPage() {
+  const { t } = useI18n();
+  const session = useAdminSession();
+  const [tab, setTab] = useState("overview");
+
+  const isStaff = session.data?.isStaff === true;
+  const permissions = session.data?.permissions ?? [];
+
+  if (session.isPending) {
+    return (
+      <AccountShell title={t.admin.title} subtitle={t.admin.subtitle}>
+        <p className="text-sm text-muted-foreground">{t.admin.loading}</p>
+      </AccountShell>
+    );
+  }
+
+  if (!isStaff) {
+    return (
+      <AccountShell title={t.admin.deniedTitle} subtitle={t.admin.deniedBody}>
+        <Button asChild variant="outline" className="rounded-full">
+          <Link to="/discover">{t.admin.backHome}</Link>
+        </Button>
+      </AccountShell>
+    );
+  }
+
+  const canSeeUsers = permissions.includes("users.view");
+  const canSeeCases = permissions.includes("cases.view");
+  const canSeeAppeals = permissions.includes("appeals.view");
+  const canSeeAudit = permissions.includes("audit.view");
+  const canSeeMetrics = permissions.includes("metrics.view");
+
+  return (
+    <AccountShell title={t.admin.title} subtitle={t.admin.subtitle} wide>
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-muted-foreground">{t.admin.yourRoles}:</span>
+        {(session.data?.roles ?? []).map((role) => (
+          <Badge key={role} variant="secondary">
+            {t.admin.roles[role]}
+          </Badge>
+        ))}
+      </div>
+
+      <Tabs value={tab} onValueChange={setTab} className="w-full">
+        <TabsList className="flex w-full flex-wrap justify-start">
+          {canSeeMetrics ? <TabsTrigger value="overview">{t.admin.tabs.overview}</TabsTrigger> : null}
+          {canSeeCases ? <TabsTrigger value="cases">{t.admin.tabs.cases}</TabsTrigger> : null}
+          {canSeeUsers ? <TabsTrigger value="users">{t.admin.tabs.users}</TabsTrigger> : null}
+          {canSeeAppeals ? <TabsTrigger value="appeals">{t.admin.tabs.appeals}</TabsTrigger> : null}
+          {canSeeAudit ? <TabsTrigger value="audit">{t.admin.tabs.audit}</TabsTrigger> : null}
+        </TabsList>
+
+        <TabsContent value="overview" className="mt-6">
+          <OverviewPanel enabled={canSeeMetrics && tab === "overview"} />
+        </TabsContent>
+        <TabsContent value="cases" className="mt-6">
+          <CasesPanel enabled={canSeeCases && tab === "cases"} permissions={permissions} />
+        </TabsContent>
+        <TabsContent value="users" className="mt-6">
+          <UsersPanel enabled={canSeeUsers && tab === "users"} />
+        </TabsContent>
+        <TabsContent value="appeals" className="mt-6">
+          <AppealsPanel enabled={canSeeAppeals && tab === "appeals"} permissions={permissions} />
+        </TabsContent>
+        <TabsContent value="audit" className="mt-6">
+          <AuditPanel enabled={canSeeAudit && tab === "audit"} />
+        </TabsContent>
+      </Tabs>
+    </AccountShell>
+  );
+}

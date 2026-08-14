@@ -14,6 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_appeals: {
+        Row: {
+          body: string
+          case_id: string | null
+          created_at: string
+          decided_at: string | null
+          decided_by: string | null
+          decision_note: string | null
+          id: string
+          profile_id: string
+          status: Database["public"]["Enums"]["appeal_status"]
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          case_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          profile_id: string
+          status?: Database["public"]["Enums"]["appeal_status"]
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          case_id?: string | null
+          created_at?: string
+          decided_at?: string | null
+          decided_by?: string | null
+          decision_note?: string | null
+          id?: string
+          profile_id?: string
+          status?: Database["public"]["Enums"]["appeal_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "account_appeals_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "moderation_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "account_appeals_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       account_deletion_requests: {
         Row: {
           created_at: string
@@ -57,6 +111,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      admin_audit_logs: {
+        Row: {
+          action: string
+          actor_id: string | null
+          case_id: string | null
+          created_at: string
+          id: string
+          metadata: Json
+          reason: string | null
+          target_id: string | null
+          target_type: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          case_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          target_id?: string | null
+          target_type: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          case_id?: string | null
+          created_at?: string
+          id?: string
+          metadata?: Json
+          reason?: string | null
+          target_id?: string | null
+          target_type?: string
+        }
+        Relationships: []
       }
       blocks: {
         Row: {
@@ -483,6 +573,85 @@ export type Database = {
           },
         ]
       }
+      moderation_cases: {
+        Row: {
+          assigned_to: string | null
+          case_number: number
+          category: Database["public"]["Enums"]["report_category"] | null
+          created_at: string
+          id: string
+          message_report_id: string | null
+          priority: Database["public"]["Enums"]["moderation_priority"]
+          report_count: number
+          report_id: string | null
+          resolution_note: string | null
+          resolved_at: string | null
+          signal_count: number
+          source: Database["public"]["Enums"]["moderation_source"]
+          status: Database["public"]["Enums"]["moderation_case_status"]
+          subject_id: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          case_number?: never
+          category?: Database["public"]["Enums"]["report_category"] | null
+          created_at?: string
+          id?: string
+          message_report_id?: string | null
+          priority?: Database["public"]["Enums"]["moderation_priority"]
+          report_count?: number
+          report_id?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          signal_count?: number
+          source: Database["public"]["Enums"]["moderation_source"]
+          status?: Database["public"]["Enums"]["moderation_case_status"]
+          subject_id: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          case_number?: never
+          category?: Database["public"]["Enums"]["report_category"] | null
+          created_at?: string
+          id?: string
+          message_report_id?: string | null
+          priority?: Database["public"]["Enums"]["moderation_priority"]
+          report_count?: number
+          report_id?: string | null
+          resolution_note?: string | null
+          resolved_at?: string | null
+          signal_count?: number
+          source?: Database["public"]["Enums"]["moderation_source"]
+          status?: Database["public"]["Enums"]["moderation_case_status"]
+          subject_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "moderation_cases_message_report_id_fkey"
+            columns: ["message_report_id"]
+            isOneToOne: false
+            referencedRelation: "message_reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_cases_report_id_fkey"
+            columns: ["report_id"]
+            isOneToOne: false
+            referencedRelation: "reports"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "moderation_cases_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_progress: {
         Row: {
           completed_steps: string[]
@@ -709,6 +878,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: Database["public"]["Enums"]["account_status"]
           approx_latitude: number | null
           approx_longitude: number | null
           bio: string | null
@@ -734,9 +904,13 @@ export type Database = {
             | null
           smoking: Database["public"]["Enums"]["smoking_habit"] | null
           social_energy: Database["public"]["Enums"]["social_energy"] | null
+          status_changed_at: string | null
+          status_reason: string | null
+          suspended_until: string | null
           updated_at: string
         }
         Insert: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           approx_latitude?: number | null
           approx_longitude?: number | null
           bio?: string | null
@@ -762,9 +936,13 @@ export type Database = {
             | null
           smoking?: Database["public"]["Enums"]["smoking_habit"] | null
           social_energy?: Database["public"]["Enums"]["social_energy"] | null
+          status_changed_at?: string | null
+          status_reason?: string | null
+          suspended_until?: string | null
           updated_at?: string
         }
         Update: {
+          account_status?: Database["public"]["Enums"]["account_status"]
           approx_latitude?: number | null
           approx_longitude?: number | null
           bio?: string | null
@@ -790,6 +968,9 @@ export type Database = {
             | null
           smoking?: Database["public"]["Enums"]["smoking_habit"] | null
           social_energy?: Database["public"]["Enums"]["social_energy"] | null
+          status_changed_at?: string | null
+          status_reason?: string | null
+          suspended_until?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -842,11 +1023,268 @@ export type Database = {
           },
         ]
       }
+      role_permissions: {
+        Row: {
+          created_at: string
+          id: string
+          permission: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          permission: string
+          role: Database["public"]["Enums"]["app_role"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          permission?: string
+          role?: Database["public"]["Enums"]["app_role"]
+        }
+        Relationships: []
+      }
+      safety_signals: {
+        Row: {
+          case_id: string | null
+          categories: string[]
+          created_at: string
+          id: string
+          message_id: string | null
+          risk_level: Database["public"]["Enums"]["safety_risk_level"]
+          screener: string
+          subject_id: string
+        }
+        Insert: {
+          case_id?: string | null
+          categories?: string[]
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          risk_level?: Database["public"]["Enums"]["safety_risk_level"]
+          screener: string
+          subject_id: string
+        }
+        Update: {
+          case_id?: string | null
+          categories?: string[]
+          created_at?: string
+          id?: string
+          message_id?: string | null
+          risk_level?: Database["public"]["Enums"]["safety_risk_level"]
+          screener?: string
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_signals_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "moderation_cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_signals_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "safety_signals_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          granted_by: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          granted_by?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      account_can_act: { Args: { _profile: string }; Returns: boolean }
+      admin_case_reports: {
+        Args: { p_case: string }
+        Returns: {
+          category: Database["public"]["Enums"]["report_category"]
+          created_at: string
+          description: string
+          kind: string
+          report_id: string
+          reporter_id: string
+          status: Database["public"]["Enums"]["report_status"]
+        }[]
+      }
+      admin_case_signals: {
+        Args: { p_case: string }
+        Returns: {
+          categories: string[]
+          created_at: string
+          risk_level: Database["public"]["Enums"]["safety_risk_level"]
+          screener: string
+          signal_id: string
+        }[]
+      }
+      admin_decide_appeal: {
+        Args: {
+          p_appeal: string
+          p_note?: string
+          p_status: Database["public"]["Enums"]["appeal_status"]
+        }
+        Returns: boolean
+      }
+      admin_list_appeals: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          account_status: Database["public"]["Enums"]["account_status"]
+          body: string
+          created_at: string
+          decided_at: string
+          decision_note: string
+          first_name: string
+          id: string
+          profile_id: string
+          status: Database["public"]["Enums"]["appeal_status"]
+        }[]
+      }
+      admin_list_audit: {
+        Args: { p_limit?: number; p_offset?: number }
+        Returns: {
+          action: string
+          actor_id: string
+          actor_name: string
+          case_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          reason: string
+          target_id: string
+          target_type: string
+        }[]
+      }
+      admin_list_cases: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_status?: Database["public"]["Enums"]["moderation_case_status"]
+        }
+        Returns: {
+          case_id: string
+          case_number: number
+          category: Database["public"]["Enums"]["report_category"]
+          created_at: string
+          priority: Database["public"]["Enums"]["moderation_priority"]
+          report_count: number
+          signal_count: number
+          source: Database["public"]["Enums"]["moderation_source"]
+          status: Database["public"]["Enums"]["moderation_case_status"]
+          subject_id: string
+          subject_name: string
+          subject_status: Database["public"]["Enums"]["account_status"]
+          updated_at: string
+        }[]
+      }
+      admin_list_users: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_status?: Database["public"]["Enums"]["account_status"]
+        }
+        Returns: {
+          account_status: Database["public"]["Enums"]["account_status"]
+          block_count: number
+          created_at: string
+          deleted_at: string
+          effective_status: Database["public"]["Enums"]["account_status"]
+          first_name: string
+          last_active_at: string
+          open_case_id: string
+          open_case_status: Database["public"]["Enums"]["moderation_case_status"]
+          photo_count: number
+          profile_complete: boolean
+          profile_id: string
+          report_count: number
+          status_reason: string
+          suspended_until: string
+        }[]
+      }
+      admin_metrics: {
+        Args: never
+        Returns: {
+          active_30d: number
+          active_users: number
+          banned_accounts: number
+          block_rate: number
+          blocks_total: number
+          deleted_accounts: number
+          high_risk_signals_7d: number
+          new_users_7d: number
+          open_appeals: number
+          open_cases: number
+          pending_reports: number
+          report_rate: number
+          reports_total: number
+          restricted_accounts: number
+          suspended_accounts: number
+          total_users: number
+        }[]
+      }
+      admin_moderate_account: {
+        Args: {
+          p_action: string
+          p_case?: string
+          p_days?: number
+          p_reason?: string
+          p_target: string
+        }
+        Returns: Database["public"]["Enums"]["account_status"]
+      }
+      admin_set_role: {
+        Args: {
+          p_grant: boolean
+          p_role: Database["public"]["Enums"]["app_role"]
+          p_target: string
+        }
+        Returns: boolean
+      }
+      admin_update_case: {
+        Args: {
+          p_case: string
+          p_note?: string
+          p_priority?: Database["public"]["Enums"]["moderation_priority"]
+          p_status?: Database["public"]["Enums"]["moderation_case_status"]
+        }
+        Returns: string
+      }
       approx_distance_km: {
         Args: { lat1: number; lat2: number; lng1: number; lng2: number }
         Returns: number
@@ -856,6 +1294,10 @@ export type Database = {
         Returns: boolean
       }
       can_send_message: { Args: { p_conversation: string }; Returns: boolean }
+      category_priority: {
+        Args: { _category: Database["public"]["Enums"]["report_category"] }
+        Returns: Database["public"]["Enums"]["moderation_priority"]
+      }
       discover_candidates: {
         Args: { p_limit?: number; p_offset?: number }
         Returns: {
@@ -882,11 +1324,27 @@ export type Database = {
           they_want_my_intent: boolean
         }[]
       }
+      effective_account_status: {
+        Args: { _profile: string }
+        Returns: Database["public"]["Enums"]["account_status"]
+      }
+      has_permission: {
+        Args: { _permission: string; _user_id: string }
+        Returns: boolean
+      }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_blocked_pair: { Args: { a: string; b: string }; Returns: boolean }
       is_conversation_member: {
         Args: { p_conversation: string; p_profile: string }
         Returns: boolean
       }
+      is_staff: { Args: { _user_id: string }; Returns: boolean }
       likes_received: {
         Args: never
         Returns: {
@@ -941,8 +1399,35 @@ export type Database = {
         }[]
       }
       profile_completeness: { Args: { p_id: string }; Returns: number }
+      purge_expired_accounts: {
+        Args: { p_dry_run?: boolean }
+        Returns: {
+          purged_profile_id: string
+        }[]
+      }
+      require_permission: { Args: { _permission: string }; Returns: string }
+      write_audit: {
+        Args: {
+          _action: string
+          _actor: string
+          _case?: string
+          _metadata?: Json
+          _reason?: string
+          _target_id: string
+          _target_type: string
+        }
+        Returns: string
+      }
     }
     Enums: {
+      account_status:
+        | "active"
+        | "restricted"
+        | "suspended"
+        | "banned"
+        | "deleted"
+      app_role: "super_admin" | "moderator" | "support"
+      appeal_status: "pending" | "reviewing" | "granted" | "denied"
       children_plan:
         | "want_children"
         | "do_not_want_children"
@@ -972,6 +1457,18 @@ export type Database = {
         | "flagged"
         | "removed"
       message_type: "text"
+      moderation_case_status:
+        | "open"
+        | "investigating"
+        | "action_required"
+        | "resolved"
+        | "dismissed"
+      moderation_priority: "low" | "medium" | "high" | "critical"
+      moderation_source:
+        | "profile_report"
+        | "message_report"
+        | "safety_signal"
+        | "manual"
       profile_visibility: "everyone" | "matches_only" | "hidden"
       relationship_intent:
         | "dating"
@@ -992,6 +1489,7 @@ export type Database = {
         | "financial_solicitation"
         | "other"
       report_status: "open" | "reviewing" | "actioned" | "dismissed"
+      safety_risk_level: "none" | "low" | "medium" | "high"
       smoking_habit: "never" | "socially" | "regularly" | "prefer_not_to_say"
       social_energy:
         | "introvert"
@@ -1125,6 +1623,15 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      account_status: [
+        "active",
+        "restricted",
+        "suspended",
+        "banned",
+        "deleted",
+      ],
+      app_role: ["super_admin", "moderator", "support"],
+      appeal_status: ["pending", "reviewing", "granted", "denied"],
       children_plan: [
         "want_children",
         "do_not_want_children",
@@ -1152,6 +1659,20 @@ export const Constants = {
         "removed",
       ],
       message_type: ["text"],
+      moderation_case_status: [
+        "open",
+        "investigating",
+        "action_required",
+        "resolved",
+        "dismissed",
+      ],
+      moderation_priority: ["low", "medium", "high", "critical"],
+      moderation_source: [
+        "profile_report",
+        "message_report",
+        "safety_signal",
+        "manual",
+      ],
       profile_visibility: ["everyone", "matches_only", "hidden"],
       relationship_intent: [
         "dating",
@@ -1174,6 +1695,7 @@ export const Constants = {
         "other",
       ],
       report_status: ["open", "reviewing", "actioned", "dismissed"],
+      safety_risk_level: ["none", "low", "medium", "high"],
       smoking_habit: ["never", "socially", "regularly", "prefer_not_to_say"],
       social_energy: [
         "introvert",

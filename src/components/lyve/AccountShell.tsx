@@ -9,17 +9,24 @@ import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/auth/AuthProvider";
+import { useAdminSession, useMyStanding } from "@/hooks/useAdmin";
+import { fill } from "@/lib/format";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 export function AccountShell({
   title,
   subtitle,
+  wide,
   children,
 }: {
   title: string;
   subtitle: string;
+  wide?: boolean;
   children: ReactNode;
 }) {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const session = useAdminSession();
+  const standing = useMyStanding();
   const { user } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -64,6 +71,11 @@ export function AccountShell({
             <Button asChild variant="ghost" size="sm" className="rounded-full">
               <Link to="/settings">{t.authNav.settings}</Link>
             </Button>
+            {session.data?.isStaff ? (
+              <Button asChild variant="ghost" size="sm" className="rounded-full">
+                <Link to="/admin">{t.adminNav.admin}</Link>
+              </Button>
+            ) : null}
             <LanguageSwitcher className="hidden sm:inline-flex" />
             <ThemeToggle />
             <Button
@@ -81,13 +93,39 @@ export function AccountShell({
       </header>
 
       <main id="main" className="px-4 pb-20 pt-8 sm:px-6">
-        <div className="mx-auto w-full max-w-3xl">
+        <div className={wide ? "mx-auto w-full max-w-5xl" : "mx-auto w-full max-w-3xl"}>
           <h1 className="text-2xl font-semibold text-balance md:text-3xl">{title}</h1>
           <p className="mt-2 text-pretty text-sm text-muted-foreground">{subtitle}</p>
           {user?.email ? (
             <p className="mt-1 text-xs text-muted-foreground">
               {t.authNav.signedInAs} {user.email}
             </p>
+          ) : null}
+          {standing.data && standing.data.status !== "active" && standing.data.status !== "deleted" ? (
+            <Alert className="mt-6">
+              <AlertTitle>
+                {standing.data.status === "restricted"
+                  ? t.standing.bannerRestricted
+                  : standing.data.status === "suspended"
+                    ? t.standing.bannerSuspended
+                    : t.standing.bannerBanned}
+              </AlertTitle>
+              <AlertDescription className="flex flex-wrap items-center gap-2">
+                {standing.data.suspendedUntil ? (
+                  <span>
+                    {fill(t.standing.until, {
+                      date: new Date(standing.data.suspendedUntil).toLocaleDateString(
+                        locale === "ar" ? "ar" : "en",
+                        { dateStyle: "medium" },
+                      ),
+                    })}
+                  </span>
+                ) : null}
+                <Link to="/appeal" className="underline underline-offset-4">
+                  {t.standing.appealLink}
+                </Link>
+              </AlertDescription>
+            </Alert>
           ) : null}
           <div className="mt-8 space-y-6">{children}</div>
         </div>

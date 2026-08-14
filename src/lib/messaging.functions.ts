@@ -163,7 +163,7 @@ export const sendMessage = createServerFn({ method: "POST" })
       .single();
     if (error) throw error;
 
-    await recordModerationHints(row.id, data.body);
+    await recordModerationHints(row.id, data.body, context.userId);
     return toChatMessage(row);
   });
 

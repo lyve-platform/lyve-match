@@ -4,17 +4,23 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { screenMessage } from "@/lib/moderation";
+import { assessContent } from "@/lib/safety-engine";
 
 type Client = SupabaseClient<Database>;
 
 /**
- * Runs the local safety screener and, when something matches, records the
- * advisory flags on the message for future review. Uses privileged access
- * because moderation columns are deliberately not writable by members.
- * Screening never blocks or alters delivery.
+ * Runs the local Safety Engine and records advisory results for moderation:
+ * flags on the message, plus a staff-only safety signal when the assessment
+ * reaches medium or high risk (which raises the priority of a moderation case
+ * for human review). Screening never blocks or alters delivery, never notifies
+ * anyone, and never takes an enforcement action on its own.
  */
-export async function recordModerationHints(messageId: string, body: string): Promise<void> {
-  const verdict = await screenMessage(body);
+export async function recordModerationHints(
+  messageId: string,
+  body: string,
+  senderId: string,
+): Promise<void> {
+  const [verdict, assessment] = await Promise.all([screenMessage(body), assessContent(body)]);
   if (!verdict.flagged) return;
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
@@ -22,7 +28,18 @@ export async function recordModerationHints(messageId: string, body: string): Pr
     .from("messages")
     .update({ moderation_status: "flagged", moderation_flags: verdict.flags })
     .eq("id", messageId);
+
+  if (assessment.riskLevel === "medium" || assessment.riskLevel === "high") {
+    await supabaseAdmin.from("safety_signals").insert({
+      subject_id: senderId,
+      message_id: messageId,
+      risk_level: assessment.riskLevel,
+      categories: assessment.categories,
+      screener: assessment.screener,
+    });
+  }
 }
+
 
 /**
  * Resolves the header for a conversation the database has already confirmed
