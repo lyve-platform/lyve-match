@@ -23,6 +23,7 @@ import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedLikesRouteImport } from './routes/_authenticated/likes'
 import { Route as AuthenticatedMatchesRouteImport } from './routes/_authenticated/matches'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
+import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
@@ -98,6 +99,11 @@ const AuthenticatedOnboardingRoute = AuthenticatedOnboardingRouteImport.update({
   path: '/onboarding',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPremiumRoute = AuthenticatedPremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
@@ -141,6 +147,7 @@ export interface FileRoutesByFullPath {
   '/likes': typeof AuthenticatedLikesRoute
   '/matches': typeof AuthenticatedMatchesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/premium': typeof AuthenticatedPremiumRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -161,6 +168,7 @@ export interface FileRoutesByTo {
   '/likes': typeof AuthenticatedLikesRoute
   '/matches': typeof AuthenticatedMatchesRoute
   '/onboarding': typeof AuthenticatedOnboardingRoute
+  '/premium': typeof AuthenticatedPremiumRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -183,6 +191,7 @@ export interface FileRoutesById {
   '/_authenticated/likes': typeof AuthenticatedLikesRoute
   '/_authenticated/matches': typeof AuthenticatedMatchesRoute
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
+  '/_authenticated/premium': typeof AuthenticatedPremiumRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -205,6 +214,7 @@ export interface FileRouteTypes {
     | '/likes'
     | '/matches'
     | '/onboarding'
+    | '/premium'
     | '/profile'
     | '/settings'
     | '/messages/$conversationId'
@@ -225,6 +235,7 @@ export interface FileRouteTypes {
     | '/likes'
     | '/matches'
     | '/onboarding'
+    | '/premium'
     | '/profile'
     | '/settings'
     | '/messages/$conversationId'
@@ -246,6 +257,7 @@ export interface FileRouteTypes {
     | '/_authenticated/likes'
     | '/_authenticated/matches'
     | '/_authenticated/onboarding'
+    | '/_authenticated/premium'
     | '/_authenticated/profile'
     | '/_authenticated/settings'
     | '/_authenticated/messages/$conversationId'
@@ -365,6 +377,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedOnboardingRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/premium': {
+      id: '/_authenticated/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof AuthenticatedPremiumRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/profile': {
       id: '/_authenticated/profile'
       path: '/profile'
@@ -410,6 +429,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedLikesRoute: typeof AuthenticatedLikesRoute
   AuthenticatedMatchesRoute: typeof AuthenticatedMatchesRoute
   AuthenticatedOnboardingRoute: typeof AuthenticatedOnboardingRoute
+  AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedMessagesConversationIdRoute: typeof AuthenticatedMessagesConversationIdRoute
@@ -423,6 +443,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedLikesRoute: AuthenticatedLikesRoute,
   AuthenticatedMatchesRoute: AuthenticatedMatchesRoute,
   AuthenticatedOnboardingRoute: AuthenticatedOnboardingRoute,
+  AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedMessagesConversationIdRoute:
