@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { I18nProvider, useI18n } from "@/i18n";
+import { useI18n } from "@/i18n";
 import { Header } from "@/components/lyve/Header";
 import { Hero } from "@/components/lyve/Hero";
 import { HowItWorks } from "@/components/lyve/HowItWorks";
@@ -30,7 +30,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-function Landing() {
+function Index() {
   const { t } = useI18n();
   return (
     <div className="min-h-screen bg-background">
@@ -54,13 +54,5 @@ function Landing() {
       </main>
       <Footer />
     </div>
-  );
-}
-
-function Index() {
-  return (
-    <I18nProvider>
-      <Landing />
-    </I18nProvider>
   );
 }
