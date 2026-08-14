@@ -3,6 +3,7 @@ import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
+import { ThemeToggle } from "./ThemeToggle";
 import { useI18n } from "@/i18n";
 
 export function Header() {
@@ -10,18 +11,18 @@ export function Header() {
   const [open, setOpen] = useState(false);
 
   const links = [
-    { href: "#how-it-works", label: t.nav.howItWorks },
-    { href: "#compatibility", label: t.nav.compatibility },
-    { href: "#intent", label: t.nav.intent },
-    { href: "#safety", label: t.nav.safety },
-    { href: "#premium", label: t.nav.premium },
-    { href: "#faq", label: t.nav.faq },
+    { href: "/#how-it-works", label: t.nav.howItWorks },
+    { href: "/#compatibility", label: t.nav.compatibility },
+    { href: "/#intent", label: t.nav.intent },
+    { href: "/#safety", label: t.nav.safety },
+    { href: "/#premium", label: t.nav.premium },
+    { href: "/#faq", label: t.nav.faq },
   ];
 
   return (
     <header className="sticky top-0 z-50 border-b border-border/70 bg-background/85 backdrop-blur">
       <div className="mx-auto grid max-w-6xl grid-cols-[minmax(0,1fr)_auto] items-center gap-4 px-4 py-3 sm:px-6">
-        <a href="#top" className="min-w-0" aria-label={t.brand.name}>
+        <a href="/" className="min-w-0" aria-label={t.brand.name}>
           <Logo />
         </a>
 
@@ -43,8 +44,10 @@ export function Header() {
 
           <LanguageSwitcher className="hidden md:inline-flex" />
 
+          <ThemeToggle />
+
           <Button asChild className="hidden shrink-0 rounded-full sm:inline-flex">
-            <a href="#final-cta">{t.nav.getStarted}</a>
+            <a href="/#final-cta">{t.nav.getStarted}</a>
           </Button>
 
           <Button
@@ -83,7 +86,7 @@ export function Header() {
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <LanguageSwitcher />
             <Button asChild className="rounded-full">
-              <a href="#final-cta" onClick={() => setOpen(false)}>
+              <a href="/#final-cta" onClick={() => setOpen(false)}>
                 {t.nav.getStarted}
               </a>
             </Button>

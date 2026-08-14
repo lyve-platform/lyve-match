@@ -213,10 +213,148 @@ export const en = {
       terms: "Terms of Service",
       cookies: "Cookie Policy",
       guidelines: "Community Guidelines",
+      safetyCentre: "Safety Centre",
     },
     comingSoon: "Coming soon",
     rights: "All rights reserved.",
     ageNotice: "18+ only",
+  },
+  theme: {
+    label: "Appearance",
+    light: "Light",
+    dark: "Dark",
+    switchToDark: "Switch to dark mode",
+    switchToLight: "Switch to light mode",
+  },
+  legal: {
+    backToHome: "Back to home",
+    statusLabel: "Status",
+    statusValue: "Draft — not final",
+    draftTitle: "This document is a draft",
+    draftBody:
+      "The text below is a structural placeholder created during early product design. It is not legal advice, not a binding agreement, and it has not been reviewed by a lawyer. Final wording will be published before LYVE opens to the public.",
+    outlineTitle: "What this document will cover",
+    questionsTitle: "Questions about this page",
+    questionsBody:
+      "Contact details will be published together with the final version of this document.",
+    pages: {
+      privacy: {
+        title: "Privacy Policy",
+        description:
+          "Draft outline of how LYVE plans to handle personal data, choices, and controls.",
+        intro:
+          "This page will explain what information LYVE collects, why it is collected, how long it is kept, and the controls you have over it.",
+        sections: [
+          {
+            title: "Information we plan to collect",
+            body: "Account details, profile content you choose to share, and technical data needed to run the service.",
+          },
+          {
+            title: "How information will be used",
+            body: "To operate your account, suggest people, keep the platform safe, and improve the product.",
+          },
+          {
+            title: "What we will never display",
+            body: "Your phone number, email address, exact address, precise location, and payment data are never shown to other members.",
+          },
+          {
+            title: "Your choices and controls",
+            body: "Visibility settings, data export, correction, and account deletion will be described here in detail.",
+          },
+          {
+            title: "Retention and deletion",
+            body: "How long different categories of data are kept, and what happens after you delete your account.",
+          },
+        ],
+      },
+      terms: {
+        title: "Terms of Service",
+        description:
+          "Draft outline of the rules for using LYVE, eligibility, and account responsibilities.",
+        intro:
+          "This page will set out the agreement between you and LYVE: who may use the service, what is expected of members, and how accounts can end.",
+        sections: [
+          {
+            title: "Eligibility",
+            body: "LYVE is for adults aged 18 and over. Accounts belonging to minors are removed.",
+          },
+          {
+            title: "Your account",
+            body: "Accuracy of the information you provide, keeping access secure, and one account per person.",
+          },
+          {
+            title: "Acceptable use",
+            body: "Behaviour that is not allowed, including harassment, impersonation, solicitation, and fraud.",
+          },
+          {
+            title: "Content you share",
+            body: "What you remain responsible for, and the limited permissions LYVE needs to display it.",
+          },
+          {
+            title: "Suspension and ending an account",
+            body: "When access may be limited, how appeals work, and how you can close your account.",
+          },
+        ],
+      },
+      guidelines: {
+        title: "Community Guidelines",
+        description:
+          "Draft outline of the behaviour LYVE expects and what is not tolerated.",
+        intro:
+          "These guidelines will describe the tone of the community: respectful, honest, and free from pressure.",
+        sections: [
+          {
+            title: "Be genuine",
+            body: "Use your own photos, your real age, and describe yourself honestly.",
+          },
+          {
+            title: "Be respectful",
+            body: "No harassment, hate speech, threats, or unsolicited explicit content.",
+          },
+          {
+            title: "Respect intent",
+            body: "Every member chooses what they are looking for. Do not pressure anyone to change it.",
+          },
+          {
+            title: "No commercial or financial activity",
+            body: "No selling, promotion, fundraising, or requests for money of any kind.",
+          },
+          {
+            title: "How enforcement will work",
+            body: "Warnings, feature limits, and removal, with a route to appeal a decision.",
+          },
+        ],
+      },
+      safety: {
+        title: "Safety Centre",
+        description:
+          "Draft outline of LYVE safety guidance, reporting tools, and planned protections.",
+        intro:
+          "This page will bring together practical safety advice and the tools available inside LYVE. Some tools described in the product are planned and not yet operational.",
+        sections: [
+          {
+            title: "Before you meet",
+            body: "Take your time, keep chats on the platform, and share plans with someone you trust.",
+          },
+          {
+            title: "Meeting in person",
+            body: "Choose a public place, arrange your own transport, and leave whenever you want to.",
+          },
+          {
+            title: "Recognising romance scams",
+            body: "Requests for money, urgency, refusal to video call, and stories that keep changing.",
+          },
+          {
+            title: "Reporting and blocking",
+            body: "How to report a profile, photo, or message, and how blocking will work.",
+          },
+          {
+            title: "Local emergency help",
+            body: "If you are in immediate danger, contact your local emergency services first.",
+          },
+        ],
+      },
+    },
   },
 };
 
