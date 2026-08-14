@@ -103,16 +103,20 @@ Dating apps get elevated review scrutiny. Prepare before submitting:
 - Demo account credentials with seeded matches and messages for reviewers, or review will fail.
 - IAP only for digital goods; correct product IDs, localized store metadata in EN + AR; subscription terms, price and renewal disclosed on the paywall screen itself.
 - Apple additionally requires a moderation/response commitment for user-generated content and a plan for objectionable-content takedown within 24h.
-- Google Play requires a Data Deletion URL reachable without login.
+- Google Play requires a Data Deletion URL reachable without login (served from the marketing/legal site even though the product web app is deferred).
+- Store review is now on the critical path: both apps must be approved before any launch date is committed, and every server-side change must stay backward-compatible with the oldest approved binary.
 
-## 8. Production authentication and account security
+## 8. Production authentication and mobile account security
 
-- Email + password with breach-password rejection, plus Google sign-in; optional Apple sign-in required if any other social sign-in is present in the iOS build.
+- Email + password with breach-password rejection, plus Google sign-in and **Sign in with Apple** (mandatory on iOS once any other social sign-in exists).
 - Verified email required before discovery is unlocked; no anonymous sign-ups.
-- Session hardening: short-lived access tokens with rotating refresh, device/session list with remote revoke, forced re-auth for sensitive actions (email change, delete account, billing changes).
+- Mobile session hardening: short-lived access tokens with rotating refresh, refresh tokens stored only in the platform secure store (iOS Keychain / Android Keystore-backed EncryptedSharedPreferences) — never in plain app storage or logs; device/session list with remote revoke.
+- Forced re-auth (and biometric prompt where available) for sensitive actions: email change, delete account, subscription management.
+- App-level hardening: certificate pinning on API calls, jailbreak/root signal recorded as a risk factor, no sensitive data in screenshots/app-switcher snapshots, deep links validated server-side (universal links / App Links only, no custom-scheme trust).
 - Optional TOTP 2FA for members; **mandatory** 2FA for every staff/admin role.
-- Admin console behind role checks already in place, plus IP-allowlist option and separate staff accounts (never a member account with a role bolted on).
+- Admin console behind role checks already in place, plus IP-allowlist option and separate staff accounts (never a member account with a role bolted on). Admin remains web-only and is not part of the store builds.
 - Recovery flows are single-use, short-expiry, and never reveal whether an address exists.
+
 
 ## 9. Rate limiting and anti-abuse controls
 
