@@ -1,13 +1,16 @@
 import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { useI18n } from "@/i18n";
+import { useAuth } from "@/auth/AuthProvider";
 
 export function Header() {
   const { t } = useI18n();
+  const { isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
 
   const links = [
@@ -47,7 +50,9 @@ export function Header() {
           <ThemeToggle />
 
           <Button asChild className="hidden shrink-0 rounded-full sm:inline-flex">
-            <a href="/#final-cta">{t.nav.getStarted}</a>
+            <Link to={isAuthenticated ? "/profile" : "/auth"}>
+              {isAuthenticated ? t.authNav.profile : t.nav.getStarted}
+            </Link>
           </Button>
 
           <Button
@@ -86,9 +91,9 @@ export function Header() {
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <LanguageSwitcher />
             <Button asChild className="rounded-full">
-              <a href="/#final-cta" onClick={() => setOpen(false)}>
-                {t.nav.getStarted}
-              </a>
+              <Link to={isAuthenticated ? "/profile" : "/auth"} onClick={() => setOpen(false)}>
+                {isAuthenticated ? t.authNav.profile : t.nav.getStarted}
+              </Link>
             </Button>
           </div>
         </nav>

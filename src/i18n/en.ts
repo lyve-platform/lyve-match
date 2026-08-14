@@ -1,3 +1,5 @@
+import { enAuth } from "./en.auth";
+
 export const en = {
   meta: {
     languageName: "English",
@@ -356,6 +358,7 @@ export const en = {
       },
     },
   },
+  ...enAuth,
 };
 
 export type Dictionary = typeof en;
