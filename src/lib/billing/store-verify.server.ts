@@ -31,7 +31,23 @@ import {
   type StoreEnvironment,
   type StoreId,
   type VerifiedStoreEvent,
+  type StoreSnapshot,
 } from "./store-core";
+import {
+  appleRail,
+  configuredStoreEnvironment,
+  googleRail,
+  hasMisplacedAppleCredentials,
+  hasMisplacedGoogleCredentials,
+} from "./store-env.server";
+import { fetchAppleSubscriptionState } from "./apple-store.server";
+import { appleConfig } from "./store-env.server";
+import {
+  authenticatePubSubPush,
+  decodePubSubEnvelope,
+  fetchGoogleSubscriptionState,
+} from "./google-store.server";
+import { verifyAppleJws } from "./jws.server";
 
 export const STORE_SIGNATURE_HEADER = "x-lyve-store-signature";
 export const STORE_TIMESTAMP_HEADER = "x-lyve-store-timestamp";
@@ -46,7 +62,9 @@ export type StoreVerifyFailure =
   | "MALFORMED_PAYLOAD"
   | "WRONG_ENVIRONMENT"
   | "UNSUPPORTED_EVENT"
-  | "UNKNOWN_PRODUCT";
+  | "UNKNOWN_PRODUCT"
+  | "MISCONFIGURED"
+  | "UPSTREAM_UNAVAILABLE";
 
 export type StoreMode = "disabled" | "sandbox" | "production";
 
@@ -55,9 +73,11 @@ export type StoreMode = "disabled" | "sandbox" | "production";
  * phase, so this can only ever return `sandbox` or `disabled` today.
  */
 export function storeMode(): StoreMode {
-  const appleReady = Boolean(process.env["APPLE_IAP_ISSUER_ID"] && process.env["APPLE_IAP_PRIVATE_KEY"]);
-  const googleReady = Boolean(process.env["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"]);
-  if (appleReady || googleReady) return "production";
+  if (appleRail() === "api" || googleRail() === "api") {
+    return configuredStoreEnvironment() === "production" ? "production" : "sandbox";
+  }
+  if (hasMisplacedAppleCredentials() || hasMisplacedGoogleCredentials()) return "disabled";
+  if (configuredStoreEnvironment() === "production") return "disabled";
   return storeSecret() ? "sandbox" : "disabled";
 }
 
@@ -135,10 +155,13 @@ export async function verifyStorePurchase(
 ): Promise<PurchaseVerification> {
   if (!isStoreId(store)) return { ok: false, reason: "MALFORMED_PAYLOAD" };
 
-  const mode = storeMode();
-  // Production verification (App Store Server API / Google Play Developer API)
-  // is intentionally unimplemented until credentials are provisioned.
-  if (mode !== "sandbox") return { ok: false, reason: "NOT_CONFIGURED" };
+  const misplaced = store === "apple" ? hasMisplacedAppleCredentials() : hasMisplacedGoogleCredentials();
+  if (misplaced) return { ok: false, reason: "MISCONFIGURED" };
+
+  const rail = store === "apple" ? appleRail() : googleRail();
+  if (rail === "none") return { ok: false, reason: "NOT_CONFIGURED" };
+  // Store credentials present → the store API is the only authority.
+  if (rail === "api") return verifyPurchaseWithStoreApi(store, receipt);
 
   const secret = storeSecret();
   if (!secret) return { ok: false, reason: "NOT_CONFIGURED" };
@@ -168,9 +191,10 @@ export async function verifyStorePurchase(
   const env = environment(claims["environment"]);
   if (!purchaseRef || !productId || !env) return { ok: false, reason: "MALFORMED_PAYLOAD" };
 
-  // A sandbox receipt may never claim production. Production receipts require
-  // production credentials, which do not exist in this phase.
-  if (env !== "sandbox") return { ok: false, reason: "WRONG_ENVIRONMENT" };
+  // The internal test rail is sandbox-only and may never claim production.
+  if (env !== "sandbox" || configuredStoreEnvironment() !== "sandbox") {
+    return { ok: false, reason: "WRONG_ENVIRONMENT" };
+  }
 
   const product = productFor(store, productId);
   if (!product) return { ok: false, reason: "UNKNOWN_PRODUCT" };
@@ -202,8 +226,16 @@ export async function verifyStoreNotification(
   rawBody: string,
   headers: Headers,
 ): Promise<StoreEventVerification> {
-  const mode = storeMode();
-  if (mode !== "sandbox") return { ok: false, reason: "NOT_CONFIGURED" };
+  const misplaced = store === "apple" ? hasMisplacedAppleCredentials() : hasMisplacedGoogleCredentials();
+  if (misplaced) return { ok: false, reason: "MISCONFIGURED" };
+
+  const rail = store === "apple" ? appleRail() : googleRail();
+  if (rail === "none") return { ok: false, reason: "NOT_CONFIGURED" };
+  if (rail === "api") {
+    return store === "apple"
+      ? verifyAppleNotification(rawBody)
+      : verifyGoogleNotification(rawBody, headers);
+  }
 
   const secret = storeSecret();
   if (!secret) return { ok: false, reason: "NOT_CONFIGURED" };
@@ -252,7 +284,7 @@ export function normalizeAppleEvent(parsed: unknown): StoreEventVerification {
   if (!eventId || !type || !purchaseRef || !productId || !env) {
     return { ok: false, reason: "MALFORMED_PAYLOAD" };
   }
-  if (env !== "sandbox") return { ok: false, reason: "WRONG_ENVIRONMENT" };
+  if (env !== configuredStoreEnvironment()) return { ok: false, reason: "WRONG_ENVIRONMENT" };
   if (!productFor("apple", productId)) return { ok: false, reason: "UNKNOWN_PRODUCT" };
 
   const lifecycle = appleLifecycle(type, subtype);
@@ -299,7 +331,7 @@ export function normalizeGoogleEvent(parsed: unknown): StoreEventVerification {
   if (!eventId || !purchaseRef || !productId || !Number.isInteger(notificationType) || !env) {
     return { ok: false, reason: "MALFORMED_PAYLOAD" };
   }
-  if (env !== "sandbox") return { ok: false, reason: "WRONG_ENVIRONMENT" };
+  if (env !== configuredStoreEnvironment()) return { ok: false, reason: "WRONG_ENVIRONMENT" };
   if (!productFor("google", productId)) return { ok: false, reason: "UNKNOWN_PRODUCT" };
 
   const lifecycle = googleLifecycle(notificationType);
@@ -318,6 +350,158 @@ export function normalizeGoogleEvent(parsed: unknown): StoreEventVerification {
       periodStart: iso(sub["startTime"]),
       periodEnd: iso(sub["expiryTime"]),
       lifecycle,
+    },
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* 3. Real store rails (App Store Server API / Google Play)             */
+/* ------------------------------------------------------------------ */
+
+function snapshotToPurchase(snapshot: StoreSnapshot): VerifiedPurchase {
+  const product = productFor(snapshot.store, snapshot.productId)!;
+  return {
+    store: snapshot.store,
+    purchaseRef: snapshot.purchaseRef,
+    productId: snapshot.productId,
+    planCode: product.planCode,
+    environment: snapshot.environment,
+    periodStart: snapshot.periodStart,
+    periodEnd: snapshot.periodEnd,
+  };
+}
+
+const API_FAILURES: Record<string, StoreVerifyFailure> = {
+  NOT_CONFIGURED: "NOT_CONFIGURED",
+  CREDENTIAL_MISPLACED: "MISCONFIGURED",
+  INVALID_CREDENTIAL: "MISCONFIGURED",
+  UNAUTHORIZED: "MISCONFIGURED",
+  NOT_FOUND: "INVALID_SIGNATURE",
+  RATE_LIMITED: "UPSTREAM_UNAVAILABLE",
+  UPSTREAM_ERROR: "UPSTREAM_UNAVAILABLE",
+  MALFORMED_RESPONSE: "MALFORMED_PAYLOAD",
+  SIGNATURE_INVALID: "INVALID_SIGNATURE",
+  WRONG_ENVIRONMENT: "WRONG_ENVIRONMENT",
+  UNKNOWN_PRODUCT: "UNKNOWN_PRODUCT",
+  UNSUPPORTED_STATE: "UNSUPPORTED_EVENT",
+};
+
+/**
+ * With store credentials connected, a "receipt" from the app is only a
+ * pointer: Apple's originalTransactionId or Google's purchaseToken. The state
+ * that matters is read back from the store, never taken from the client.
+ */
+export async function verifyPurchaseWithStoreApi(
+  store: StoreId,
+  receipt: unknown,
+): Promise<PurchaseVerification> {
+  const pointer = typeof receipt === "string" ? receipt.trim() : "";
+  if (!pointer || pointer.length > 4_000) return { ok: false, reason: "MALFORMED_PAYLOAD" };
+
+  const result =
+    store === "apple"
+      ? await fetchAppleSubscriptionState(pointer)
+      : await fetchGoogleSubscriptionState(pointer);
+
+  if (!result.ok) return { ok: false, reason: API_FAILURES[result.reason] ?? "MALFORMED_PAYLOAD" };
+  if (result.snapshot.environment !== configuredStoreEnvironment()) {
+    return { ok: false, reason: "WRONG_ENVIRONMENT" };
+  }
+  return { ok: true, purchase: snapshotToPurchase(result.snapshot) };
+}
+
+function millisToIso(value: unknown): string | null {
+  const millis = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(millis) || millis <= 0) return null;
+  return new Date(millis).toISOString();
+}
+
+/** Apple App Store Server Notification V2: `{ signedPayload }`, ES256 + x5c. */
+export async function verifyAppleNotification(rawBody: string): Promise<StoreEventVerification> {
+  let envelope: Record<string, unknown>;
+  try {
+    envelope = JSON.parse(rawBody) as Record<string, unknown>;
+  } catch {
+    return { ok: false, reason: "MALFORMED_PAYLOAD" };
+  }
+  const signedPayload = envelope["signedPayload"];
+  if (typeof signedPayload !== "string") return { ok: false, reason: "MISSING_SIGNATURE" };
+
+  const roots = appleTrustedRootsForVerification();
+  const outer = await verifyAppleJws<Record<string, unknown>>(signedPayload, roots);
+  if (!outer.ok) return { ok: false, reason: "INVALID_SIGNATURE" };
+
+  const data = (outer.payload["data"] ?? {}) as Record<string, unknown>;
+  const signedTransaction = data["signedTransactionInfo"];
+  if (typeof signedTransaction !== "string") return { ok: false, reason: "MALFORMED_PAYLOAD" };
+
+  const transaction = await verifyAppleJws<Record<string, unknown>>(signedTransaction, roots);
+  if (!transaction.ok) return { ok: false, reason: "INVALID_SIGNATURE" };
+  const info = transaction.payload;
+
+  return normalizeAppleEvent({
+    notificationUUID: outer.payload["notificationUUID"],
+    notificationType: outer.payload["notificationType"],
+    subtype: outer.payload["subtype"],
+    signedDate: millisToIso(outer.payload["signedDate"]),
+    data: {
+      originalTransactionId: info["originalTransactionId"],
+      productId: info["productId"],
+      environment:
+        typeof data["environment"] === "string" ? String(data["environment"]).toLowerCase() : info["environment"],
+      purchaseDate: millisToIso(info["purchaseDate"]),
+      expiresDate: millisToIso(info["expiresDate"]),
+    },
+  });
+}
+
+function appleTrustedRootsForVerification(): { trustedRootFingerprints?: readonly string[] } {
+  const config = appleConfig();
+  const roots = config.ok ? config.config.trustedRootFingerprints : [];
+  return roots.length ? { trustedRootFingerprints: roots } : {};
+}
+
+/**
+ * Google RTDN arrives as an authenticated Pub/Sub push. The push tells us
+ * WHAT changed; the Play Developer API tells us what is TRUE.
+ */
+export async function verifyGoogleNotification(
+  rawBody: string,
+  headers: Headers,
+): Promise<StoreEventVerification> {
+  const authenticated = await authenticatePubSubPush(headers);
+  if (!authenticated.ok) {
+    if (authenticated.reason === "PUSH_NOT_CONFIGURED") return { ok: false, reason: "NOT_CONFIGURED" };
+    if (authenticated.reason === "MISSING_TOKEN") return { ok: false, reason: "MISSING_SIGNATURE" };
+    return { ok: false, reason: "INVALID_SIGNATURE" };
+  }
+
+  const envelope = decodePubSubEnvelope(rawBody);
+  if (!envelope.ok) return { ok: false, reason: "MALFORMED_PAYLOAD" };
+
+  const normalized = normalizeGoogleEvent({
+    ...envelope.message,
+    messageId: envelope.messageId,
+    environment: configuredStoreEnvironment(),
+  });
+  if (!normalized.ok) return normalized;
+
+  // Authoritative re-read. A push that cannot be corroborated is not applied.
+  const state = await fetchGoogleSubscriptionState(normalized.event.purchaseRef);
+  if (!state.ok) return { ok: false, reason: API_FAILURES[state.reason] ?? "MALFORMED_PAYLOAD" };
+  if (state.snapshot.productId !== normalized.event.productId) {
+    return { ok: false, reason: "MALFORMED_PAYLOAD" };
+  }
+
+  return {
+    ok: true,
+    event: {
+      ...normalized.event,
+      environment: state.snapshot.environment,
+      periodStart: state.snapshot.periodStart,
+      periodEnd: state.snapshot.periodEnd,
+      // Revocation from the API always wins over an optimistic push.
+      lifecycle: state.snapshot.lifecycle.revoke ? state.snapshot.lifecycle : normalized.event.lifecycle,
     },
   };
 }
