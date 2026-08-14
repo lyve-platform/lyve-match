@@ -107,6 +107,14 @@ export const enDiscover = {
     unmatched: "Match ended.",
     matchedOn: "Matched {date}",
   },
+  blockedList: {
+    title: "Blocked people",
+    hint: "Blocked members can't see you and you can't see them. Unblocking does not restore past likes or matches.",
+    empty: "You haven't blocked anyone.",
+    unblock: "Unblock",
+    unblocked: "Unblocked.",
+    unknown: "Member",
+  },
   locationField: {
     title: "Approximate location",
     action: "Use my approximate location",
