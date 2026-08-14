@@ -1493,6 +1493,20 @@ export type Database = {
           updated_at: string
         }[]
       }
+      admin_list_entitlements: {
+        Args: { p_profile: string }
+        Returns: {
+          created_at: string
+          expires_at: string
+          id: string
+          key: string
+          reason: string
+          revoke_reason: string
+          revoked_at: string
+          source: Database["public"]["Enums"]["entitlement_source"]
+          starts_at: string
+        }[]
+      }
       admin_list_users: {
         Args: {
           p_limit?: number
