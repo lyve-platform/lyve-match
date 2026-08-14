@@ -1,11 +1,14 @@
 import { Globe } from "lucide-react";
-import { LOCALES, useI18n, type Locale } from "@/i18n";
+import { ENABLED_LOCALES, useI18n, type Locale } from "@/i18n";
 import { cn } from "@/lib/utils";
 
 const labels: Record<Locale, string> = { en: "English", ar: "العربية" };
 
 export function LanguageSwitcher({ className }: { className?: string }) {
   const { locale, setLocale, t } = useI18n();
+
+  // English-only production launch: hide the switcher until a second locale ships.
+  if (ENABLED_LOCALES.length < 2) return null;
 
   return (
     <div
@@ -17,7 +20,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
       aria-label={t.nav.changeLanguage}
     >
       <Globe aria-hidden="true" className="ms-2 size-4 text-muted-foreground" />
-      {LOCALES.map((code) => (
+      {ENABLED_LOCALES.map((code) => (
         <button
           key={code}
           type="button"
