@@ -287,7 +287,11 @@ async function main() {
           deleted_at: new Date().toISOString(),
         })
         .select();
-      check("a message cannot be inserted already withdrawn", Boolean(preDeleted.error) || (preDeleted.data ?? []).length === 0);
+      check(
+        "a client-supplied withdrawn flag is stripped on insert",
+        Boolean(preDeleted.error) || (preDeleted.data?.[0]?.["deleted_at"] ?? null) === null,
+        preDeleted.data?.[0]?.["deleted_at"],
+      );
     }
 
     /* ============================================ immutability and withdraw */
