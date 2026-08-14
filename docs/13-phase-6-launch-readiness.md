@@ -1,8 +1,11 @@
 # Phase 6 — Launch Readiness & Production Payments: Architecture Proposal
 
-Status: **proposal only**. No production database change, no payment provider connection, no store submission. Nothing in this document is implemented until you approve it.
+**Launch shape (corrected):** LYVE is **mobile-first**. Initial production platforms are **iOS and Android only**. **Web is deferred** to a later phase — no web checkout, and neither Paddle nor Stripe is the initial production billing provider. The only initial Premium purchase sources are **Apple In-App Purchase** and **Google Play Billing**, both verified server-side.
+
+Status: **proposal only**. No production database change, no payment provider connection, no store submission, and no production Apple/Google credentials. Nothing here is implemented until you approve it.
 
 ---
+
 
 ## 1. Target launch markets and country configuration
 
@@ -18,40 +21,48 @@ Recommended launch shape: a small **Tier 1** set first, then widen.
 
 **Country configuration** is data, not code. A `countries` config table drives, per ISO country code: availability (`live` / `waitlist` / `blocked`), default locale and text direction, currency, minimum age (18 global, higher where local law requires), tax treatment, active legal document versions, and which payment methods are offered. Client code never hard-codes a country rule; it reads the resolved config. Country is derived server-side (edge geo + account country of record), never from a client-supplied header alone.
 
-## 2. Web vs iOS vs Android billing architecture
+## 2. Mobile billing architecture (iOS + Android at launch, Web deferred)
 
-Three purchase channels, one entitlement truth.
+Two live purchase channels at launch, one entitlement truth, with a third slot reserved.
 
 ```text
-  Web checkout        iOS IAP            Android Billing
-   (provider)      (App Store)          (Google Play)
-        |                |                     |
-   webhook          server-side           Real-time
-   (signed)         notifications        Developer Notifications
-        \_______________ | _____________________/
-                         v
-              billing_apply_subscription
-                         v
-                    entitlements   <- the only thing the app reads
+      iOS IAP                 Android Billing          [ Web checkout — DEFERRED ]
+    (App Store)                (Google Play)            (Paddle/Stripe, later phase)
+         |                           |                              :
+  App Store Server         Real-time Developer                   signed
+   Notifications V2          Notifications                       webhook
+   + server-side              + server-side                         :
+   receipt/txn check        purchase-token check                    :
+         \___________________________|______________________________:
+                                     v
+                        billing_apply_subscription   (single authoritative write)
+                                     v
+                              entitlements   <- the only thing any feature reads
 ```
 
 Rules:
-- The existing provider abstraction from Phase 5 gains two more providers (`apple`, `google`). No feature gate ever learns which channel paid.
-- **Apple and Google require their own IAP for digital subscriptions inside their apps.** No external checkout link, no price steering inside the app binary, in the launch build.
-- Receipts and purchase tokens are validated **server-side** against Apple/Google APIs; the client's word is never trusted.
-- Cross-channel restore: an account already Premium via web keeps Premium in the apps (read-only state, "managed on the web"), and vice versa. The UI must show *where* a subscription is managed and deep-link to the right cancellation surface.
-- Store-mandated pricing tiers differ from web pricing. Expect ~30% (or 15% small-business) store commission and set web pricing accordingly, without violating anti-steering rules inside the app.
+- The Phase 5 provider abstraction gains `apple` and `google` adapters now; `stripe`/`paddle` remain unimplemented slots in the same registry. No feature gate ever learns which channel paid — adding web later is a new adapter, not a change to the authorization model.
+- **The client never grants Premium.** The app sends only an opaque receipt/purchase token; entitlement is written exclusively by the server after validation.
+- Apple: validate with the App Store Server API (JWS transaction/renewal info, signed-payload chain verified against Apple root certs), keyed by `originalTransactionId`. Google: validate with `purchases.subscriptionsv2.get` via a service account, keyed by the purchase token / linked purchase token chain, and acknowledge within the required window.
+- Store server notifications (ASSN V2, Google RTDN via Pub/Sub push) are the source of lifecycle truth: renew, grace period, billing retry, expire, refund, revoke. Each notification is verified, deduplicated in the existing immutable `billing_events` ledger, and applied idempotently.
+- One account may hold at most one active subscription; a second channel purchase for an already-Premium account is recorded and surfaced as "managed on <channel>" rather than double-billing. The UI deep-links to the correct store cancellation surface.
+- Restore purchases is server-side: the app asks the server to re-validate the store account's entitlements; local receipt state is never authoritative.
+- Anti-steering: no external checkout link, no price steering inside the launch app binary.
+
+**Future web phase (no rework required):** add a `stripe`/`paddle` adapter + signed webhook route that calls the same `billing_apply_subscription`. Entitlement reads, feature gates, admin tooling and tests stay untouched.
 
 ## 3. Payment provider options and tradeoffs
 
 | Option | Strengths | Tradeoffs | Fit for LYVE |
 | --- | --- | --- | --- |
-| **Stripe** | Best-in-class API, subscriptions, strong SCA/3DS, wide method coverage, good dispute tooling | You are merchant of record: you own VAT/sales-tax registration and remittance (Stripe Tax reduces but does not remove this) | Strong fit if you have or will get a UAE/EU entity and accept tax duty |
-| **Paddle** | Merchant of record — Paddle owns global VAT/GST/sales tax, invoicing, and much of chargeback handling | Less flexible subscription primitives, higher effective rate, stricter content review for dating | Strong fit if you want to avoid multi-country tax registration |
-| **Apple / Google IAP** | Mandatory in-app; frictionless conversion; store handles tax and refunds | 15–30% commission, no customer data, refund decisions out of your control | Required, not optional, for the mobile apps |
-| Regional (Tap, Checkout.com, Network Intl.) | Local GCC methods (mada, KNET, Apple Pay local acquiring), better auth rates in-region | Extra integration, no single global subscription model | Consider as an added web method in Wave 1, not the primary rail |
+| **Apple IAP** (launch) | Mandatory in-app; frictionless conversion; Apple handles tax, invoicing and refunds | 15–30% commission, minimal customer data, refunds decided by Apple | Required launch channel for iOS |
+| **Google Play Billing** (launch) | Same as above for Android; strong lifecycle notifications | 15–30% commission, refunds decided by Google | Required launch channel for Android |
+| Stripe (deferred) | Best-in-class subscription API, SCA/3DS, dispute tooling | You are merchant of record: you own VAT/sales-tax registration | Revisit when web launches |
+| Paddle (deferred) | Merchant of record — owns global VAT/GST, invoicing, chargebacks | Less flexible primitives, higher effective rate, stricter dating review | Revisit when web launches |
+| Regional (Tap, Checkout.com, Network Intl.) | Local GCC methods, better in-region auth rates | Extra integration, no global subscription model | Only relevant to a future web rail |
 
-**Recommendation:** Paddle for web if you want tax handled for you and a lean team; Stripe for web if you want maximum control and already have tax capability. Either way, Apple + Google for the mobile apps. Because Phase 5 is provider-agnostic, this decision is reversible and does not touch entitlement logic.
+**Decision:** Apple + Google only for the initial production launch. The merchant-of-record question (Paddle vs Stripe) is explicitly **not decided now** and does not block launch, because Phase 5's abstraction makes it a later, additive choice.
+
 
 ## 4. Subscription plans and entitlement strategy
 
@@ -62,23 +73,24 @@ Keep the plan set small and honest.
 - **Premium+ (Phase 7 candidate)** — priority visibility, weekly boosts, travel/global discovery. Do **not** ship at launch; prove Premium first.
 - **Consumables** (boosts, super-likes) — deferred; they add refund and store-accounting complexity.
 
-Billing periods: monthly, 3-month, 12-month, with the discount shown as a real per-month figure. Intro offers only where store rules and local consumer law allow. Entitlements remain the single read surface — plan changes are a mapping table (`plan_code → entitlement keys`), never new `if` statements in feature code.
+Billing periods: monthly, 3-month, 12-month, published as App Store / Play subscription groups with the discount shown as a real per-month figure. Intro offers only where store rules and local consumer law allow. Entitlements remain the single read surface — plan changes are a mapping table (`plan_code → entitlement keys`, with `store_product_id → plan_code` resolved server-side), never new `if` statements in feature code. When web arrives later, it maps its own product IDs into the same `plan_code` table.
 
 ## 5. Currency and localization architecture
 
-- **Price books, not FX math.** Each plan has explicit, human-approved prices per currency, with psychologically sane rounding. Never multiply a USD price by a live FX rate at runtime.
-- Launch currencies: AED, SAR, USD, EUR, GBP. Everything else falls back to USD until a price book entry exists.
-- Currency is chosen from the account's country of record, then locked for the life of the subscription; a country change creates a new subscription rather than silently repricing.
-- Display: `Intl.NumberFormat` with the user's locale; Arabic uses Arabic-Indic digits only if that is the confirmed preference, RTL layout everywhere.
-- Tax: prices displayed **inclusive** of VAT in GCC/EU markets, exclusive where that is the local norm (US). Invoices are generated by the provider, never hand-rolled.
-- All billing UI strings go through the existing `en.billing.ts` / `ar.billing.ts` files; no untranslated provider text is shown to the user.
+- **Store price tiers, not FX math.** Each plan has explicit, human-approved App Store / Play price points per storefront. Never multiply a USD price by a live FX rate at runtime.
+- Launch currencies: AED, SAR, USD, EUR, GBP via store storefronts; everything else falls back to the store's own USD tier.
+- Currency and storefront come from the user's store account and are fixed by the store for the life of the subscription.
+- Display: prices shown in-app come from the store's localized product metadata (`StoreKit` / Play Billing), formatted with `Intl.NumberFormat`; RTL layout everywhere, Arabic-Indic digits only if that is the confirmed preference.
+- Tax and invoicing are handled entirely by Apple and Google at launch; LYVE never hand-rolls an invoice. (Tax ownership only becomes ours if a future web rail uses Stripe.)
+- All billing UI strings go through the existing `en.billing.ts` / `ar.billing.ts` files; no untranslated store text is shown to the user.
 
 ## 6. Refund, cancellation and chargeback handling
 
-- **Cancellation** never revokes access immediately: the subscription enters `cancel_at_period_end`, entitlement expires at period end, and the UI states the exact end date. One-tap cancel on web; store-managed cancel deep-links for iOS/Android.
-- **Refunds** follow a written policy: statutory cooling-off honoured where law requires (EU/UK 14 days unless service was consumed with consent), goodwill refunds at staff discretion inside a bounded window, no refunds for accounts terminated for safety violations. Refund events revoke entitlement through the existing ledger path.
-- **Store refunds** are decided by Apple/Google; we react to their notifications, we do not argue with them in-app.
-- **Chargebacks**: automatic entitlement revocation plus account flag; evidence packs (consent timestamp, IP, usage log, terms version accepted) are assembled from existing audit data. Repeat chargeback accounts are blocked from repurchase.
+- **Cancellation** never revokes access immediately: the subscription enters `cancel_at_period_end`, entitlement expires at period end, and the UI states the exact end date. At launch, cancellation is store-managed — deep-link to the App Store / Play subscription screen; LYVE reacts to the resulting notification.
+- **Refunds** are decided by Apple and Google at launch; we react to `REFUND` / `REVOKE` notifications by revoking entitlement through the existing ledger path, and we publish a policy explaining that store purchases follow store refund rules. Statutory cooling-off rights are satisfied by the stores' own processes.
+- **Grace period and billing retry** states keep entitlement alive exactly as long as the store says, then expire; the UI prompts a store-side payment-method fix rather than an in-app charge.
+- **Chargebacks / revocations** trigger automatic entitlement revocation plus an account flag; evidence (consent timestamp, terms version accepted, usage log) is assembled from existing audit data. Repeat-revocation accounts are blocked from re-entitlement.
+
 - Every one of these paths already has a lifecycle event type in the Phase 5 ledger; Phase 6 adds operator tooling and policy text, not new state machines.
 
 ## 7. App Store and Google Play considerations
@@ -91,16 +103,20 @@ Dating apps get elevated review scrutiny. Prepare before submitting:
 - Demo account credentials with seeded matches and messages for reviewers, or review will fail.
 - IAP only for digital goods; correct product IDs, localized store metadata in EN + AR; subscription terms, price and renewal disclosed on the paywall screen itself.
 - Apple additionally requires a moderation/response commitment for user-generated content and a plan for objectionable-content takedown within 24h.
-- Google Play requires a Data Deletion URL reachable without login.
+- Google Play requires a Data Deletion URL reachable without login (served from the marketing/legal site even though the product web app is deferred).
+- Store review is now on the critical path: both apps must be approved before any launch date is committed, and every server-side change must stay backward-compatible with the oldest approved binary.
 
-## 8. Production authentication and account security
+## 8. Production authentication and mobile account security
 
-- Email + password with breach-password rejection, plus Google sign-in; optional Apple sign-in required if any other social sign-in is present in the iOS build.
+- Email + password with breach-password rejection, plus Google sign-in and **Sign in with Apple** (mandatory on iOS once any other social sign-in exists).
 - Verified email required before discovery is unlocked; no anonymous sign-ups.
-- Session hardening: short-lived access tokens with rotating refresh, device/session list with remote revoke, forced re-auth for sensitive actions (email change, delete account, billing changes).
+- Mobile session hardening: short-lived access tokens with rotating refresh, refresh tokens stored only in the platform secure store (iOS Keychain / Android Keystore-backed EncryptedSharedPreferences) — never in plain app storage or logs; device/session list with remote revoke.
+- Forced re-auth (and biometric prompt where available) for sensitive actions: email change, delete account, subscription management.
+- App-level hardening: certificate pinning on API calls, jailbreak/root signal recorded as a risk factor, no sensitive data in screenshots/app-switcher snapshots, deep links validated server-side (universal links / App Links only, no custom-scheme trust).
 - Optional TOTP 2FA for members; **mandatory** 2FA for every staff/admin role.
-- Admin console behind role checks already in place, plus IP-allowlist option and separate staff accounts (never a member account with a role bolted on).
+- Admin console behind role checks already in place, plus IP-allowlist option and separate staff accounts (never a member account with a role bolted on). Admin remains web-only and is not part of the store builds.
 - Recovery flows are single-use, short-expiry, and never reveal whether an address exists.
+
 
 ## 9. Rate limiting and anti-abuse controls
 
@@ -163,57 +179,65 @@ Terms of Service (with subscription and auto-renewal terms), Privacy Policy, Com
 
 ## 16. Final security audit strategy
 
-1. Re-run the full existing regression suite (Phases 1–5, 378+ assertions) against a production-shaped environment.
-2. Add a Phase 6 suite: real-provider webhook signature verification, receipt/purchase-token validation forgery attempts, cross-channel entitlement collisions, price/plan tampering at checkout, tax-country spoofing, rate-limit bypass, session fixation and refresh-token replay, email-verification link reuse, admin RBAC under production roles.
-3. Automated scans: dependency/CVE scan, database linter, secret scanning in CI, headers and TLS check.
-4. Manual review: threat model refresh, RLS diff review, staff-access review, log-leak review (no PII, no tokens).
-5. External **third-party penetration test** before public launch — non-negotiable for a dating product handling intimate data.
+1. Maintain and re-run the existing security baseline — **488/488 assertions must stay green** (Phases 1–5) — against a production-shaped environment. No Phase 6 change may reduce that count.
+2. Add a Phase 6 suite: Apple JWS/App Store notification signature verification, Google RTDN + purchase-token validation, forged and replayed receipt attempts, expired/sandbox receipt rejection in production, cross-channel entitlement collisions, product-ID→plan tampering, entitlement grant attempted from the client, rate-limit bypass, session fixation and refresh-token replay, secure-store token handling, email-verification link reuse, admin RBAC under production roles.
+3. Automated scans: dependency/CVE scan, database linter, secret scanning in CI, headers and TLS check, mobile binary scan (secrets in bundle, pinning present).
+4. Manual review: threat model refresh, RLS diff review, staff-access review, log-leak review (no PII, no tokens, no receipts).
+5. External **third-party penetration test** (API + both mobile binaries) before public launch — non-negotiable for a dating product handling intimate data.
 6. Ship a `SECURITY.md` and a coordinated vulnerability-disclosure contact.
 
 ## 17. Deployment architecture
 
-- Edge-served application with server functions; managed Postgres + realtime + private object storage behind it.
-- Three environments: preview (per branch), staging (production-shaped, seeded, real store sandbox + provider test mode), production.
-- CI pipeline: typecheck → lint → unit tests → full security regression suite → build → deploy. A failing security suite blocks the deploy.
-- Database changes ship as forward-only, reviewed migrations; every migration must be safe against the previous app version (expand → migrate → contract).
-- Feature flags for every launch-risk surface (payments, new markets, new plans) so exposure is a toggle, not a redeploy.
-- Custom domain with HSTS, strict CSP, and security headers; store apps built from the same tagged release as the web deploy.
+- Edge-served API and server functions; managed Postgres + realtime + private object storage behind it. The web surface at launch is API + marketing/legal + admin only — no consumer web app.
+- Three environments: preview (per branch), staging (production-shaped, seeded, **App Store Sandbox + Play license testers**), production.
+- CI pipeline: typecheck → lint → unit tests → full security regression suite (488+) → build → deploy. A failing security suite blocks the deploy.
+- Database changes ship as forward-only, reviewed migrations, always safe against the **oldest approved store binary** (expand → migrate → contract). Mobile clients cannot be force-updated instantly, so the API stays backward-compatible for at least two releases.
+- Feature flags for every launch-risk surface (billing channel, new markets, new plans) so exposure is a toggle, not a store resubmission. Add a minimum-supported-version gate for forced upgrades.
+- Custom domain with HSTS, strict CSP and security headers for the API/admin/legal surfaces; store apps built from the same tagged release as the backend deploy.
 
 ## 18. Launch checklist and rollback plan
 
 **Go/no-go checklist**
 - [ ] Legal documents published, versioned and accepted in-app
-- [ ] Payment provider live, tax configuration verified, real end-to-end purchase completed in each launch currency
-- [ ] Store apps approved, IAP products live, restore-purchases verified on both platforms
+- [ ] Apple + Google IAP products live, server-side validation verified end-to-end in sandbox and production, real purchase completed on both platforms
+- [ ] Restore-purchases and cross-device entitlement verified on both platforms
+- [ ] App Store Server Notifications V2 and Google RTDN endpoints receiving, verifying and applying events idempotently
+- [ ] Store apps approved with 18+ rating, EN + AR metadata, demo reviewer account seeded
 - [ ] Email deliverability verified (SPF/DKIM/DMARC pass, inbox placement checked)
-- [ ] Full security regression suite green; external pen-test findings resolved or accepted
+- [ ] Security regression suite green at 488/488 plus the Phase 6 additions; external pen-test findings resolved or accepted
 - [ ] Backups verified by an actual restore rehearsal
 - [ ] Monitoring, alerting and on-call rota active with runbooks linked
 - [ ] Moderation team trained, staffed for launch timezone coverage, SLAs agreed
 - [ ] Rate limits and anti-abuse thresholds tuned against staging load
-- [ ] Support inbox, refund workflow and escalation path staffed
+- [ ] Support inbox, refund-enquiry workflow and escalation path staffed
 
-**Rollout:** internal → closed beta (invite, single market) → soft launch Wave 1 with payments behind a flag at 10% → 50% → 100% → Wave 2.
+**Rollout:** internal → TestFlight / Play internal testing → closed beta (invite, single market) → staged store rollout with billing behind a server flag at 10% → 50% → 100% → Wave 2 markets.
 
-**Rollback:** application rollback is a redeploy of the previous tagged release (minutes). Payments roll back by flag — checkout closes, existing subscriptions keep working, webhooks keep processing into the ledger so nothing is lost. Database rollback is forward-fix plus, only in a true emergency, PITR restore with a documented data-loss window. Store builds cannot be un-shipped, so mobile risk is controlled by server-side flags and phased release percentages, never by hoping a build is fine.
+**Rollback:** backend rollback is a redeploy of the previous tagged release (minutes). Billing rolls back by server flag — the paywall closes, existing subscriptions keep working, store notifications keep processing into the idempotent ledger so nothing is lost. Database rollback is forward-fix plus, only in emergency, PITR with a documented data-loss window. Store builds cannot be un-shipped: mobile risk is controlled by server-side flags, staged rollout percentages and Play's halt-rollout control — never by hoping a build is fine.
 
 ---
 
 ## Recommended sequencing for Phase 6 implementation
 
-1. Production hardening that needs no provider: auth hardening, rate limiting, email, monitoring, backups, secrets, config tables.
+1. **Provider-independent production hardening** (current step): auth and mobile session hardening, rate limiting and anti-abuse, monitoring/logging/alerting, backups and disaster recovery, email security and verification, account protection, secrets and config tables — plus the mobile billing *architecture* (adapter interfaces, product→plan mapping, notification route skeletons) with **no production Apple/Google credentials connected**.
 2. Legal and policy content, versioned acceptance, retention jobs.
-3. Web payment provider integration behind a flag, in test mode, in staging.
-4. Store billing (iOS/Android) with server-side receipt validation.
+3. Apple IAP + Google Play Billing integration with server-side validation, in sandbox/test only, behind a flag.
+4. Store submission preparation and review.
 5. Final security audit + external pen test.
-6. Phased launch.
+6. Phased store launch.
+7. **Deferred:** web checkout via Paddle or Stripe as an additional adapter, no change to the entitlement model.
+
+**Stop point:** implementation stops at the end of step 1 and waits for explicit approval before any production billing integration.
 
 ## Open decisions for you
 
-1. Merchant of record: Paddle (tax handled for you) or Stripe (more control, you own tax)?
-2. Launch scope: GCC-only Wave 1, or GCC + EU/UK together?
-3. Mobile apps at launch, or web-first with apps in Phase 7?
-4. Legal entity and tax registration status — which country, and is it already incorporated?
-5. Moderation staffing model at launch (in-house, outsourced, hybrid)?
+1. Launch scope: GCC-only Wave 1, or GCC + EU/UK together?
+2. Mobile client approach for the store builds (native vs cross-platform wrapper around the existing product surface)?
+3. Legal entity and tax registration status — which country, and is it already incorporated?
+4. Moderation staffing model at launch (in-house, outsourced, hybrid)?
+5. Timing for the deferred web phase — immediately post-launch, or after Premium is proven on mobile?
 
-**Nothing here is built yet.** Say which options you want and approve the phase, and I will implement in the sequence above, stopping for review between steps.
+(The merchant-of-record question is intentionally deferred with the web channel.)
+
+**Nothing here is built yet.** Approve the hardening step and I will implement item 1 above, keeping the security baseline at 488/488, and stop for review before any billing integration.
+
