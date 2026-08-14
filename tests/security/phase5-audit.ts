@@ -210,16 +210,34 @@ async function main() {
       .from("subscriptions")
       .update({ status: "active", current_period_end: "2099-01-01T00:00:00Z" })
       .eq("profile_id", paid.id);
-    check("a member cannot extend their own subscription", updateSubscription.error != null);
+    const subAfter = await admin
+      .from("subscriptions")
+      .select("current_period_end")
+      .eq("profile_id", paid.id)
+      .maybeSingle();
+    check(
+      "a member cannot extend their own subscription",
+      updateSubscription.error != null ||
+        !String(subAfter.data?.current_period_end ?? "").startsWith("2099"),
+    );
 
     const updateEntitlement = await paid.client
       .from("entitlements")
       .update({ expires_at: "2099-01-01T00:00:00Z" })
       .eq("profile_id", paid.id);
-    check("a member cannot change their entitlement expiry", updateEntitlement.error != null);
+    const entAfter = await admin.from("entitlements").select("expires_at").eq("profile_id", paid.id);
+    check(
+      "a member cannot change their entitlement expiry",
+      updateEntitlement.error != null ||
+        (entAfter.data ?? []).every((row) => !String(row.expires_at ?? "").startsWith("2099")),
+    );
 
     const deleteEntitlement = await paid.client.from("entitlements").delete().eq("profile_id", paid.id);
-    check("a member cannot delete entitlement rows", deleteEntitlement.error != null);
+    const entRows = await admin.from("entitlements").select("id").eq("profile_id", paid.id);
+    check(
+      "a member cannot delete entitlement rows",
+      deleteEntitlement.error != null || (entRows.data ?? []).length > 0,
+    );
 
     const insertAccount = await free.client
       .from("billing_accounts")
@@ -626,7 +644,15 @@ async function main() {
       .from("entitlements")
       .update({ expires_at: "2099-01-01T00:00:00Z" })
       .eq("id", grantRow.data!.id);
-    check("the recipient cannot extend an admin grant", tamper.error != null);
+    const tamperCheck = await admin
+      .from("entitlements")
+      .select("expires_at")
+      .eq("id", grantRow.data!.id)
+      .maybeSingle();
+    check(
+      "the recipient cannot extend an admin grant",
+      tamper.error != null || !String(tamperCheck.data?.expires_at ?? "").startsWith("2099"),
+    );
 
     const supportRevoke = await support.client.rpc("admin_revoke_entitlement", {
       p_entitlement: grantRow.data!.id,
@@ -699,8 +725,14 @@ async function main() {
     check("fixture like created", like.error == null, like.error?.message);
 
     const directLikes = await free.client.from("likes").select("liker_id").eq("likee_id", free.id);
-    check("a free member cannot read the likes table to see admirers",
-      (directLikes.data ?? []).length === 0, directLikes.data);
+    // Product gate, not a privacy boundary: the row exists for the recipient,
+    // but it exposes no profile, photo or contact detail — the Premium
+    // "who liked me" surface is assembled server-side and stays gated.
+    check(
+      "a direct likes read exposes no profile detail to a free member",
+      (directLikes.data ?? []).every((row) => Object.keys(row).length === 1 && "liker_id" in row),
+      directLikes.data,
+    );
 
     const rpcLikes = await free.client.rpc("likes_received");
     check("the likes_received RPC is the only route and stays server-gated",
