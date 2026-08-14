@@ -28,6 +28,10 @@ import {
   signPhotoUrls,
   touchLastActive,
 } from "@/lib/discovery.server";
+import { hasEntitlement, requireEntitlement } from "@/lib/entitlements.server";
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
 
 export const getDiscoveryFeed = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
