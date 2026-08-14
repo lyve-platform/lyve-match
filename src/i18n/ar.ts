@@ -1,4 +1,5 @@
 import type { Dictionary } from "./en";
+import { arAuth } from "./ar.auth";
 
 export const ar: Dictionary = {
   meta: {
@@ -329,4 +330,5 @@ export const ar: Dictionary = {
       },
     },
   },
+  ...arAuth,
 };
