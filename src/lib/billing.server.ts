@@ -104,17 +104,20 @@ export async function applySubscriptionState(input: {
   const { data, error } = await supabaseAdmin.rpc("billing_apply_subscription", {
     p_profile: input.profileId,
     p_provider: input.provider,
-    p_provider_subscription_id: input.providerSubscriptionId,
     p_plan_code: input.planCode,
     p_status: input.status,
     p_interval: input.interval,
-    p_currency: input.currency,
-    p_period_start: input.periodStart,
-    p_period_end: input.periodEnd,
     p_cancel_at_period_end: input.cancelAtPeriodEnd,
     p_entitlements: entitlementsForPlan(input.planCode),
     p_source: input.source,
+    ...(input.providerSubscriptionId
+      ? { p_provider_subscription_id: input.providerSubscriptionId }
+      : {}),
+    ...(input.currency ? { p_currency: input.currency } : {}),
+    ...(input.periodStart ? { p_period_start: input.periodStart } : {}),
+    ...(input.periodEnd ? { p_period_end: input.periodEnd } : {}),
   });
+
   if (error) throw error;
   return String(data);
 }
