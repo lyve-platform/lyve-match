@@ -13,6 +13,15 @@ import { ar } from "./ar";
 export const LOCALES = ["en", "ar"] as const;
 export type Locale = (typeof LOCALES)[number];
 
+/**
+ * Production language strategy: English-only for the initial launch.
+ * The Arabic dictionary and RTL architecture stay in the codebase; to activate
+ * Arabic later, add "ar" here (then review translations and run RTL QA).
+ */
+export const ENABLED_LOCALES: readonly Locale[] = ["en"];
+export const DEFAULT_LOCALE: Locale = "en";
+export const isLocaleEnabled = (value: Locale) => ENABLED_LOCALES.includes(value);
+
 const dictionaries: Record<Locale, Dictionary> = { en, ar };
 const STORAGE_KEY = "lyve.locale";
 
@@ -29,16 +38,24 @@ function isLocale(value: string | null): value is Locale {
   return value === "en" || value === "ar";
 }
 
+function isSelectable(value: string | null): value is Locale {
+  return isLocale(value) && isLocaleEnabled(value);
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
 
   useEffect(() => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (isLocale(stored)) {
+    if (isSelectable(stored)) {
       setLocaleState(stored);
       return;
     }
-    if (typeof navigator !== "undefined" && navigator.language?.startsWith("ar")) {
+    if (
+      typeof navigator !== "undefined" &&
+      navigator.language?.startsWith("ar") &&
+      isLocaleEnabled("ar")
+    ) {
       setLocaleState("ar");
     }
   }, []);
@@ -51,6 +68,7 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   }, [locale, dir]);
 
   const setLocale = useCallback((next: Locale) => {
+    if (!isLocaleEnabled(next)) return;
     setLocaleState(next);
     try {
       window.localStorage.setItem(STORAGE_KEY, next);
