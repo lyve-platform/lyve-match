@@ -33,6 +33,7 @@ import {
   type RelationshipIntent,
 } from "@/config/lyve";
 import { LifestyleFields, type LifestyleForm } from "@/components/lyve/LifestyleFields";
+import { ApproximateLocation } from "@/components/lyve/ApproximateLocation";
 import { calculateAge } from "@/lib/age";
 import { toErrorKey, type AppErrorKey } from "@/lib/auth-errors";
 
@@ -356,6 +357,10 @@ function ProfilePage() {
               onChange={(event) => update({ maxDistanceKm: Number(event.target.value) })}
             />
             <p className="text-xs text-muted-foreground">{t.lifestyleFields.distanceHint}</p>
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <h3 className="text-sm font-medium">{t.locationField.title}</h3>
+            <ApproximateLocation hasLocation={account.profile.approx_latitude !== null} />
           </div>
         </div>
       </section>
