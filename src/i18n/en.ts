@@ -218,6 +218,6 @@ export const en = {
     rights: "All rights reserved.",
     ageNotice: "18+ only",
   },
-} as const;
+};
 
 export type Dictionary = typeof en;
