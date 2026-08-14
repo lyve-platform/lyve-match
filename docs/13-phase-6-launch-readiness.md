@@ -77,12 +77,14 @@ Billing periods: monthly, 3-month, 12-month, published as App Store / Play subsc
 
 ## 5. Currency and localization architecture
 
+**Launch language policy: English-only.** The initial production launch ships `en` as the sole selectable locale. The i18n architecture, the full Arabic dictionaries (`ar*.ts`), the `dir`/RTL handling and all RTL-safe logical CSS utilities (`ms-*`, `me-*`, `ps-*`, `pe-*`, `start/end`) remain in the codebase untouched. Arabic is disabled at the selector level only: `ENABLED_LOCALES` in `src/i18n/index.tsx` contains `["en"]`, `setLocale` ignores disabled locales, a stored or browser-preferred `ar` never activates, and `LanguageSwitcher` renders nothing while a single locale is enabled. This guarantees no partially-translated Arabic UI can surface. Activating Arabic later requires only: (1) add `"ar"` to `ENABLED_LOCALES`, (2) complete and review the Arabic dictionaries, (3) confirm RTL direction switching, (4) run RTL accessibility and visual QA. No component rewrites.
+
 - **Store price tiers, not FX math.** Each plan has explicit, human-approved App Store / Play price points per storefront. Never multiply a USD price by a live FX rate at runtime.
 - Launch currencies: AED, SAR, USD, EUR, GBP via store storefronts; everything else falls back to the store's own USD tier.
 - Currency and storefront come from the user's store account and are fixed by the store for the life of the subscription.
-- Display: prices shown in-app come from the store's localized product metadata (`StoreKit` / Play Billing), formatted with `Intl.NumberFormat`; RTL layout everywhere, Arabic-Indic digits only if that is the confirmed preference.
+- Display: prices shown in-app come from the store's localized product metadata (`StoreKit` / Play Billing), formatted with `Intl.NumberFormat`. Store listings at launch are English; RTL layout support stays in the codebase for the future Arabic activation.
 - Tax and invoicing are handled entirely by Apple and Google at launch; LYVE never hand-rolls an invoice. (Tax ownership only becomes ours if a future web rail uses Stripe.)
-- All billing UI strings go through the existing `en.billing.ts` / `ar.billing.ts` files; no untranslated store text is shown to the user.
+- All billing UI strings go through the localization system (`en.billing.ts` at launch, `ar.billing.ts` kept in sync-ready state); no hard-coded strings outside i18n, and no untranslated store text is shown to the user.
 
 ## 6. Refund, cancellation and chargeback handling
 
