@@ -66,3 +66,56 @@ export const ONBOARDING_STEPS = [
 export type OnboardingStepKey = (typeof ONBOARDING_STEPS)[number]["key"];
 
 export const FIRST_ONBOARDING_STEP: OnboardingStepKey = ONBOARDING_STEPS[0].key;
+
+/* ── Phase 2: lifestyle, personality, safety ─────────────────────────────── */
+
+export type Smoking = Database["public"]["Enums"]["smoking_habit"];
+export type Drinking = Database["public"]["Enums"]["drinking_habit"];
+export type Exercise = Database["public"]["Enums"]["exercise_habit"];
+export type ChildrenPlan = Database["public"]["Enums"]["children_plan"];
+export type SocialEnergy = Database["public"]["Enums"]["social_energy"];
+export type CommunicationStyle = Database["public"]["Enums"]["communication_style"];
+export type ReportCategory = Database["public"]["Enums"]["report_category"];
+
+export const SMOKING_OPTIONS: readonly Smoking[] = ["never", "socially", "regularly", "prefer_not_to_say"];
+export const DRINKING_OPTIONS: readonly Drinking[] = ["never", "socially", "regularly", "prefer_not_to_say"];
+export const EXERCISE_OPTIONS: readonly Exercise[] = ["rarely", "sometimes", "often", "prefer_not_to_say"];
+export const CHILDREN_OPTIONS: readonly ChildrenPlan[] = [
+  "want_children",
+  "do_not_want_children",
+  "open_to_children",
+  "have_children",
+  "prefer_not_to_say",
+];
+export const SOCIAL_ENERGY_OPTIONS: readonly SocialEnergy[] = [
+  "introvert",
+  "ambivert",
+  "extrovert",
+  "prefer_not_to_say",
+];
+export const COMMUNICATION_OPTIONS: readonly CommunicationStyle[] = [
+  "thoughtful",
+  "direct",
+  "playful",
+  "reserved",
+  "prefer_not_to_say",
+];
+
+export const REPORT_CATEGORIES: readonly ReportCategory[] = [
+  "fake_profile",
+  "scam",
+  "harassment",
+  "hate",
+  "sexual_content",
+  "threat",
+  "spam",
+  "underage_concern",
+  "impersonation",
+  "financial_solicitation",
+  "other",
+];
+
+/** Preference bounds shown in the UI. */
+export const MIN_DISTANCE_KM = 5;
+export const MAX_DISTANCE_KM = 500;
+export const REPORT_DESCRIPTION_MAX = 1000;

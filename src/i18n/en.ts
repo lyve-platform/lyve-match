@@ -1,4 +1,5 @@
 import { enAuth } from "./en.auth";
+import { enDiscover } from "./en.discover";
 
 export const en = {
   meta: {
@@ -359,6 +360,7 @@ export const en = {
     },
   },
   ...enAuth,
+  ...enDiscover,
 };
 
 export type Dictionary = typeof en;

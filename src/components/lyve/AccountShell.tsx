@@ -45,8 +45,17 @@ export function AccountShell({
           <Link to="/" aria-label={t.brand.name} className="min-w-0">
             <Logo />
           </Link>
-          <nav aria-label="Account" className="flex items-center gap-1.5">
+          <nav aria-label="Account" className="flex flex-wrap items-center justify-end gap-1">
             <Button asChild variant="ghost" size="sm" className="rounded-full">
+              <Link to="/discover">{t.discoverNav.discover}</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="rounded-full">
+              <Link to="/likes">{t.discoverNav.likes}</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="rounded-full">
+              <Link to="/matches">{t.discoverNav.matches}</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="hidden rounded-full sm:inline-flex">
               <Link to="/profile">{t.authNav.profile}</Link>
             </Button>
             <Button asChild variant="ghost" size="sm" className="rounded-full">

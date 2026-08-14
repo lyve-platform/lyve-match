@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AccountShell } from "@/components/lyve/AccountShell";
+import { BlockedMembers } from "@/components/lyve/BlockedMembers";
 import { PrivacyFields } from "@/routes/_authenticated/onboarding";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -168,6 +169,14 @@ function SettingsPage() {
             </span>
           ) : null}
         </div>
+      </section>
+
+      <section aria-labelledby="blocked-heading" className="surface-panel space-y-3 p-5">
+        <h2 id="blocked-heading" className="text-base font-semibold">
+          {t.blockedList.title}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t.blockedList.hint}</p>
+        <BlockedMembers />
       </section>
 
       <section aria-labelledby="account-heading" className="surface-panel space-y-4 p-5">

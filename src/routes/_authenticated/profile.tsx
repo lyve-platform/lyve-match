@@ -18,7 +18,22 @@ import {
   updatePreferences,
   updateProfile,
 } from "@/lib/account";
-import { GENDERS, RELATIONSHIP_INTENTS, type Gender, type RelationshipIntent } from "@/config/lyve";
+import {
+  GENDERS,
+  RELATIONSHIP_INTENTS,
+  SMOKING_OPTIONS,
+  DRINKING_OPTIONS,
+  EXERCISE_OPTIONS,
+  CHILDREN_OPTIONS,
+  SOCIAL_ENERGY_OPTIONS,
+  COMMUNICATION_OPTIONS,
+  MIN_DISTANCE_KM,
+  MAX_DISTANCE_KM,
+  type Gender,
+  type RelationshipIntent,
+} from "@/config/lyve";
+import { LifestyleFields, type LifestyleForm } from "@/components/lyve/LifestyleFields";
+import { ApproximateLocation } from "@/components/lyve/ApproximateLocation";
 import { calculateAge } from "@/lib/age";
 import { toErrorKey, type AppErrorKey } from "@/lib/auth-errors";
 
@@ -54,7 +69,8 @@ type Form = {
   intents: RelationshipIntent[];
   minAge: number;
   maxAge: number;
-};
+  maxDistanceKm: number;
+} & LifestyleForm;
 
 function ProfilePage() {
   const { t, locale } = useI18n();
@@ -84,6 +100,13 @@ function ProfilePage() {
       intents: account.preferences.intents,
       minAge: account.preferences.min_age,
       maxAge: account.preferences.max_age,
+      maxDistanceKm: account.preferences.max_distance_km,
+      smoking: account.profile.smoking,
+      drinking: account.profile.drinking,
+      exercise: account.profile.exercise,
+      children: account.profile.children,
+      social_energy: account.profile.social_energy,
+      communication_style: account.profile.communication_style,
     });
   }, [account]);
 
@@ -117,12 +140,19 @@ function ProfilePage() {
         occupation: form.occupation.trim() || null,
         education: form.education.trim() || null,
         bio: form.bio.trim() || null,
+        smoking: form.smoking,
+        drinking: form.drinking,
+        exercise: form.exercise,
+        children: form.children,
+        social_energy: form.social_energy,
+        communication_style: form.communication_style,
       });
       await updatePreferences(user.id, {
         preferred_genders: form.preferredGenders,
         intents: form.intents,
         min_age: form.minAge,
         max_age: form.maxAge,
+        max_distance_km: form.maxDistanceKm,
       });
       await setInterests(user.id, form.interestIds);
       await queryClient.invalidateQueries({ queryKey: accountQueryKey(user.id) });
@@ -316,7 +346,31 @@ function ProfilePage() {
               onChange={(event) => update({ maxAge: Number(event.target.value) })}
             />
           </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="profile-distance">{t.lifestyleFields.distance}</Label>
+            <Input
+              id="profile-distance"
+              type="number"
+              min={MIN_DISTANCE_KM}
+              max={MAX_DISTANCE_KM}
+              value={String(form.maxDistanceKm)}
+              onChange={(event) => update({ maxDistanceKm: Number(event.target.value) })}
+            />
+            <p className="text-xs text-muted-foreground">{t.lifestyleFields.distanceHint}</p>
+          </div>
+          <div className="space-y-2 sm:col-span-2">
+            <h3 className="text-sm font-medium">{t.locationField.title}</h3>
+            <ApproximateLocation hasLocation={account.profile.approx_latitude !== null} />
+          </div>
         </div>
+      </section>
+
+      <section aria-labelledby="lifestyle-heading" className="surface-panel space-y-4 p-5">
+        <h2 id="lifestyle-heading" className="text-base font-semibold">
+          {t.lifestyleFields.sectionTitle}
+        </h2>
+        <p className="text-sm text-muted-foreground">{t.lifestyleFields.sectionHint}</p>
+        <LifestyleFields value={form} onChange={(patch) => update(patch)} />
       </section>
 
       {errorKey ? (
