@@ -639,11 +639,11 @@ async function main() {
 
     /* ============================================== moderation screener */
     {
-      const scam = heuristicScreener.screen("Send me money via western union for a guaranteed profit");
+      const scam = await heuristicScreener.screen("Send me money via western union for a guaranteed profit");
       check("the screener flags financial solicitation", (scam as { flags: string[] }).flags.includes("financial_solicitation"));
-      const clean = heuristicScreener.screen("Would you like to get coffee this weekend?");
+      const clean = await heuristicScreener.screen("Would you like to get coffee this weekend?");
       check("the screener does not flag an ordinary message", (clean as { flagged: boolean }).flagged === false);
-      const threat = heuristicScreener.screen("i know where you live");
+      const threat = await heuristicScreener.screen("i know where you live");
       check("the screener flags threats", (threat as { flags: string[] }).flags.includes("threat"));
 
       const stored = await admin.from("messages").select("moderation_status").eq("conversation_id", pair.conversationId).limit(1).single();
