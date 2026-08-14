@@ -65,13 +65,15 @@ function PremiumPage() {
 
   async function subscribe(planCode: string) {
     const result = await actions.checkout.mutateAsync(planCode);
-    if (result.code !== "OK") {
+    const created = result.code === "CHECKOUT_CREATED" || result.code === "TEST_CHECKOUT_CREATED";
+    if (!created) {
       toast.error(copy.errors[result.code as keyof typeof copy.errors] ?? copy.errors.GENERIC);
       return;
     }
     if (result.url) window.location.assign(result.url);
     else toast.success(copy.checkoutOpened);
   }
+
 
   async function run(action: "cancel" | "resume" | "manage" | "restore") {
     try {
