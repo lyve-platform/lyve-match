@@ -12,11 +12,16 @@
 
 export const BILLING_STAGE = "architecture" as const;
 
-/** Which provider adapter the server should use. `none` = checkout disabled. */
-export const BILLING_PROVIDER = (process.env["BILLING_PROVIDER"] ?? "none") as BillingProviderId;
+/**
+ * Which provider adapter the server should use. `none` = checkout disabled.
+ * The active value is resolved SERVER-SIDE only (see `src/lib/billing/resolver.ts`);
+ * the browser learns it from the billing snapshot, never from an env read.
+ */
+export const DEFAULT_BILLING_PROVIDER = "none" as const;
 
 export const BILLING_PROVIDERS = ["none", "mock", "stripe", "paddle", "apple", "google", "manual"] as const;
 export type BillingProviderId = (typeof BILLING_PROVIDERS)[number];
+
 
 export const ENTITLEMENT_KEYS = [
   "premium",
