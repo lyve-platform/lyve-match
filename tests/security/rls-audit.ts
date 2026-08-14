@@ -263,12 +263,32 @@ async function main() {
         .from("account_deletion_requests")
         .update({ scheduled_purge_at: new Date(Date.now() + 5 * 365 * 86400000).toISOString() })
         .eq("id", deletion.data.id)
-        .select();
+        .select()
+        .single();
       check(
         "purge date cannot be pushed out by the account owner",
-        (tamper.data ?? []).length === 0 || Boolean(tamper.error),
-        tamper.data,
+        tamper.data?.scheduled_purge_at === deletion.data.scheduled_purge_at,
+        tamper.data?.scheduled_purge_at,
       );
+
+      const forceComplete = await clientB
+        .from("account_deletion_requests")
+        .update({ status: "completed" })
+        .eq("id", deletion.data.id)
+        .select();
+      check(
+        "owner cannot mark their deletion request completed",
+        Boolean(forceComplete.error),
+        forceComplete.error?.message,
+      );
+
+      const cancel = await clientB
+        .from("account_deletion_requests")
+        .update({ status: "cancelled" })
+        .eq("id", deletion.data.id)
+        .select()
+        .single();
+      check("owner can cancel their own deletion request", !cancel.error, cancel.error?.message);
     }
 
     /* ------------------------------------------------------------ expired token */
