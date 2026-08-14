@@ -22,7 +22,12 @@ import {
   type MatchCard,
   type ViewerFacts,
 } from "@/lib/discovery-core";
-import { loadViewerFacts, signPhotoUrls, touchLastActive } from "@/lib/discovery.server";
+import {
+  listBlockedNames,
+  loadViewerFacts,
+  signPhotoUrls,
+  touchLastActive,
+} from "@/lib/discovery.server";
 
 export const getDiscoveryFeed = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -97,4 +102,19 @@ export const getMatches = createServerFn({ method: "POST" })
       const { distanceBucketKm: _d, compatibility: _c, ...rest } = card;
       return { ...rest, matchId: row.match_id, matchedAt: row.matched_at };
     });
+  });
+
+export const getBlockedMembers = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<Array<{ profileId: string; firstName: string | null; blockedAt: string }>> => {
+    const { data, error } = await context.supabase
+      .from("blocks")
+      .select("blocked_id, created_at")
+      .eq("blocker_id", context.userId)
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+
+    return listBlockedNames(
+      (data ?? []).map((row) => ({ profileId: row.blocked_id, blockedAt: row.created_at })),
+    );
   });

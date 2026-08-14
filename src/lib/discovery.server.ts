@@ -71,3 +71,21 @@ export async function signPhotoUrls(paths: string[]): Promise<Record<string, str
 export async function touchLastActive(supabase: Client, userId: string): Promise<void> {
   await supabase.from("profiles").update({ last_active_at: new Date().toISOString() }).eq("id", userId);
 }
+
+/**
+ * Resolves first names for the member's own block list so they can recognise
+ * who they blocked. Nothing beyond a first name is ever returned.
+ */
+export async function listBlockedNames(
+  entries: Array<{ profileId: string; blockedAt: string }>,
+): Promise<Array<{ profileId: string; firstName: string | null; blockedAt: string }>> {
+  if (entries.length === 0) return [];
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data } = await supabaseAdmin
+    .from("profiles")
+    .select("id, first_name")
+    .in("id", entries.map((entry) => entry.profileId));
+
+  const names = new Map((data ?? []).map((row) => [row.id, row.first_name]));
+  return entries.map((entry) => ({ ...entry, firstName: names.get(entry.profileId) ?? null }));
+}
