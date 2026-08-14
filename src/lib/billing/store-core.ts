@@ -105,6 +105,73 @@ export function googleLifecycle(notificationType: number): StoreLifecycle | null
   return GOOGLE_NOTIFICATION_TYPES[notificationType] ?? null;
 }
 
+/* ------------------------------------------------------------------ */
+/* Reconciliation vocabulary (store API state, not notifications)      */
+/* ------------------------------------------------------------------ */
+
+/**
+ * Apple App Store Server API subscription status codes.
+ *   1 active · 2 expired · 3 billing retry · 4 billing grace · 5 revoked
+ * `autoRenew === false` means the member keeps access until period end.
+ */
+export function appleStatusLifecycle(status: number, autoRenew = true): StoreLifecycle | null {
+  switch (status) {
+    case 1:
+      return autoRenew
+        ? { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "api_active" }
+        : { status: "canceled", revoke: false, cancelAtPeriodEnd: true, reason: "api_auto_renew_off" };
+    case 2:
+      return { status: "expired", revoke: false, cancelAtPeriodEnd: false, reason: "api_expired" };
+    case 3:
+      return { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "api_billing_retry" };
+    case 4:
+      return { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "api_grace_period" };
+    case 5:
+      return { status: "expired", revoke: true, cancelAtPeriodEnd: false, reason: "api_revoked" };
+    default:
+      return null;
+  }
+}
+
+/** Google Play Developer API `subscriptionsv2` states. */
+export function googleStateLifecycle(state: string, autoRenew = true): StoreLifecycle | null {
+  switch (state) {
+    case "SUBSCRIPTION_STATE_ACTIVE":
+      return autoRenew
+        ? { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "api_active" }
+        : { status: "canceled", revoke: false, cancelAtPeriodEnd: true, reason: "api_auto_renew_off" };
+    case "SUBSCRIPTION_STATE_IN_GRACE_PERIOD":
+      return { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "api_grace_period" };
+    case "SUBSCRIPTION_STATE_ON_HOLD":
+      return { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "api_on_hold" };
+    case "SUBSCRIPTION_STATE_PAUSED":
+      return { status: "paused", revoke: false, cancelAtPeriodEnd: false, reason: "api_paused" };
+    case "SUBSCRIPTION_STATE_CANCELED":
+      return { status: "canceled", revoke: false, cancelAtPeriodEnd: true, reason: "api_canceled" };
+    case "SUBSCRIPTION_STATE_EXPIRED":
+      return { status: "expired", revoke: false, cancelAtPeriodEnd: false, reason: "api_expired" };
+    case "SUBSCRIPTION_STATE_PENDING":
+    case "SUBSCRIPTION_STATE_PENDING_PURCHASE_CANCELED":
+      return { status: "incomplete", revoke: false, cancelAtPeriodEnd: false, reason: "api_pending" };
+    default:
+      return null;
+  }
+}
+
+/** Authoritative store state for one purchase, as read back from the API. */
+export type StoreSnapshot = {
+  store: StoreId;
+  purchaseRef: string;
+  productId: string;
+  environment: StoreEnvironment;
+  periodStart: string | null;
+  periodEnd: string | null;
+  lifecycle: StoreLifecycle;
+  /** Store-issued marker used to build a stable idempotency key. */
+  stateToken: string;
+};
+
+
 /**
  * A store event after authenticity verification, before any database work.
  * `purchaseRef` is the stable ownership key:
@@ -133,7 +200,8 @@ export type StoreLinkResult =
   | "OWNED_BY_OTHER_ACCOUNT"
   | "VERIFICATION_FAILED"
   | "UNKNOWN_PRODUCT"
-  | "STORE_NOT_CONNECTED";
+  | "STORE_NOT_CONNECTED"
+  | "RATE_LIMITED";
 
 export type StoreEventResult =
   | "PROCESSED"

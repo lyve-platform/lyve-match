@@ -1272,6 +1272,48 @@ export type Database = {
           },
         ]
       }
+      store_alerts: {
+        Row: {
+          breached: boolean
+          details: Json
+          fingerprint: string
+          first_seen_at: string
+          id: string
+          kind: string
+          last_seen_at: string
+          occurrences: number
+          severity: string
+          threshold: number
+          window_start: string
+        }
+        Insert: {
+          breached?: boolean
+          details?: Json
+          fingerprint: string
+          first_seen_at?: string
+          id?: string
+          kind: string
+          last_seen_at?: string
+          occurrences?: number
+          severity: string
+          threshold?: number
+          window_start: string
+        }
+        Update: {
+          breached?: boolean
+          details?: Json
+          fingerprint?: string
+          first_seen_at?: string
+          id?: string
+          kind?: string
+          last_seen_at?: string
+          occurrences?: number
+          severity?: string
+          threshold?: number
+          window_start?: string
+        }
+        Relationships: []
+      }
       store_purchase_audit: {
         Row: {
           attempted_profile_id: string | null
@@ -1316,6 +1358,7 @@ export type Database = {
           created_at: string
           environment: string
           id: string
+          last_reconciled_at: string | null
           latest_event_at: string | null
           latest_event_id: string | null
           linked_at: string
@@ -1333,6 +1376,7 @@ export type Database = {
           created_at?: string
           environment?: string
           id?: string
+          last_reconciled_at?: string | null
           latest_event_at?: string | null
           latest_event_id?: string | null
           linked_at?: string
@@ -1350,6 +1394,7 @@ export type Database = {
           created_at?: string
           environment?: string
           id?: string
+          last_reconciled_at?: string | null
           latest_event_at?: string | null
           latest_event_id?: string | null
           linked_at?: string
@@ -1379,6 +1424,66 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      store_rate_limits: {
+        Row: {
+          bucket: string
+          hits: number
+          updated_at: string
+          window_start: string
+        }
+        Insert: {
+          bucket: string
+          hits?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Update: {
+          bucket?: string
+          hits?: number
+          updated_at?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
+      store_reconciliation_runs: {
+        Row: {
+          corrected: number
+          failed: number
+          finished_at: string | null
+          id: string
+          mode: string
+          notes: Json
+          scanned: number
+          skipped_revoked: number
+          started_at: string
+          unchanged: number
+        }
+        Insert: {
+          corrected?: number
+          failed?: number
+          finished_at?: string | null
+          id?: string
+          mode: string
+          notes?: Json
+          scanned?: number
+          skipped_revoked?: number
+          started_at?: string
+          unchanged?: number
+        }
+        Update: {
+          corrected?: number
+          failed?: number
+          finished_at?: string | null
+          id?: string
+          mode?: string
+          notes?: Json
+          scanned?: number
+          skipped_revoked?: number
+          started_at?: string
+          unchanged?: number
+        }
+        Relationships: []
       }
       subscriptions: {
         Row: {
@@ -1879,6 +1984,21 @@ export type Database = {
         }[]
       }
       require_permission: { Args: { _permission: string }; Returns: string }
+      store_raise_alert: {
+        Args: {
+          p_details?: Json
+          p_fingerprint: string
+          p_kind: string
+          p_severity: string
+          p_threshold?: number
+          p_window_seconds?: number
+        }
+        Returns: Json
+      }
+      store_rate_limit_hit: {
+        Args: { p_bucket: string; p_limit: number; p_window_seconds: number }
+        Returns: Json
+      }
       write_audit: {
         Args: {
           _action: string

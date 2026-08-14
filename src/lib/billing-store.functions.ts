@@ -20,8 +20,28 @@ export const linkStorePurchase = createServerFn({ method: "POST" })
   }))
   .handler(async ({ data, context }): Promise<{ result: StoreLinkResult }> => {
     if (!isStoreId(data.store)) return { result: "VERIFICATION_FAILED" };
+
+    // Linking is the only member-reachable path into store verification, so it
+    // is throttled per account: receipt guessing is not a viable strategy.
+    const { consumeRate, raiseStoreAlert, RATE_LIMITS } = await import("@/lib/billing/store-ops.server");
+    const rate = await consumeRate(`link:${context.userId}`, RATE_LIMITS.link);
+    if (!rate.allowed) {
+      await raiseStoreAlert("store_rate_limited", `link:${context.userId}`, {
+        store: data.store,
+        hits: rate.hits,
+        reason: "link_throttled",
+      });
+      return { result: "RATE_LIMITED" };
+    }
+
     const { linkVerifiedPurchase } = await import("@/lib/billing/store.server");
     const outcome = await linkVerifiedPurchase(context.userId, data.store, data.receipt);
+    if (outcome.result === "VERIFICATION_FAILED" || outcome.result === "OWNED_BY_OTHER_ACCOUNT") {
+      await raiseStoreAlert("store_link_rejected", `link:${context.userId}`, {
+        store: data.store,
+        result: outcome.result,
+      });
+    }
     return { result: outcome.result };
   });
 
