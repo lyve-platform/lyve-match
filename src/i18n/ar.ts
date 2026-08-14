@@ -1,5 +1,6 @@
 import type { Dictionary } from "./en";
 import { arDiscover } from "./ar.discover";
+import { arMessages } from "./ar.messages";
 import { arAuth } from "./ar.auth";
 
 export const ar: Dictionary = {
@@ -333,4 +334,5 @@ export const ar: Dictionary = {
   },
   ...arAuth,
   ...arDiscover,
+  ...arMessages,
 };
