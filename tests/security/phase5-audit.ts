@@ -500,7 +500,6 @@ async function main() {
     check("a renewed subscription restores Premium", restored.data === true);
 
     // Account standing overrides paid status.
-    await admin.rpc("admin_moderate_account", {} as never).catch(() => undefined);
     await admin
       .from("profiles")
       .update({ account_status: "suspended", suspended_until: new Date(Date.now() + 86_400_000).toISOString() })
