@@ -12,11 +12,16 @@
 
 export const BILLING_STAGE = "architecture" as const;
 
-/** Which provider adapter the server should use. `none` = checkout disabled. */
-export const BILLING_PROVIDER = (process.env["BILLING_PROVIDER"] ?? "none") as BillingProviderId;
+/**
+ * Which provider adapter the server should use. `none` = checkout disabled.
+ * The active value is resolved SERVER-SIDE only (see `src/lib/billing/resolver.ts`);
+ * the browser learns it from the billing snapshot, never from an env read.
+ */
+export const DEFAULT_BILLING_PROVIDER = "none" as const;
 
 export const BILLING_PROVIDERS = ["none", "mock", "stripe", "paddle", "apple", "google", "manual"] as const;
 export type BillingProviderId = (typeof BILLING_PROVIDERS)[number];
+
 
 export const ENTITLEMENT_KEYS = [
   "premium",
@@ -107,7 +112,32 @@ export function priceFor(plan: BillingPlan, currency: string): PlanPrice | undef
   return plan.prices.find((price) => price.currency === currency) ?? plan.prices[0];
 }
 
-/** True only when a real provider adapter is wired and configured. */
-export function isCheckoutConnected(): boolean {
-  return BILLING_PROVIDER !== "none";
+/** True only when a real (non-test) provider adapter is wired and configured. */
+export function isLiveCheckout(provider: BillingProviderId): boolean {
+  return provider !== "none" && provider !== "mock";
 }
+
+/** True when the UI may offer a checkout action at all (test or live). */
+export function isCheckoutOffered(provider: BillingProviderId): boolean {
+  return provider !== "none";
+}
+
+/** Feature gates enforced in the backend. Key = entitlement required. */
+export const FEATURE_GATES = {
+  who_liked_me: "who_liked_me",
+  advanced_preferences: "advanced_preferences",
+  compatibility_insights: "compatibility_insights",
+  rewind: "rewind",
+} as const satisfies Record<string, EntitlementKey>;
+
+export type GatedFeature = keyof typeof FEATURE_GATES;
+
+/**
+ * Grace period after a failed payment, in days.
+ *
+ * NOT CONFIGURED. `null` means LYVE adds no extra grace: a `past_due`
+ * subscription keeps Premium only for the remainder of the period it already
+ * paid for, and access ends at `current_period_end`. Do not invent a value.
+ */
+export const PAYMENT_FAILURE_GRACE_DAYS: number | null = null;
+

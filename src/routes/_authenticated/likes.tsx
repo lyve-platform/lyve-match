@@ -1,10 +1,12 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { Link, createFileRoute } from "@tanstack/react-router";
 import { Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { SafetyMenu } from "@/components/lyve/SafetyMenu";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+
 import { useI18n } from "@/i18n";
 import { useDecision, useLikesReceived } from "@/hooks/useDiscovery";
 
@@ -40,19 +42,37 @@ function LikesPage() {
     }
   }
 
+  const cards = data?.cards ?? [];
+
   return (
     <AccountShell title={t.likesPage.title} subtitle={t.likesPage.subtitle}>
       {isLoading ? (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <Loader2 className="size-4 animate-spin" aria-hidden="true" /> {t.discover.loading}
         </p>
-      ) : (data ?? []).length === 0 ? (
+      ) : data?.locked ? (
+        /* Free members only ever receive a count from the server — the
+           identities are never sent to this client at all. */
+        <div className="rounded-2xl border border-border/70 bg-card p-8 text-center">
+          <Badge variant="secondary" className="rounded-full">
+            {t.premiumLock.badge}
+          </Badge>
+          <h2 className="mt-3 font-display text-xl font-semibold">
+            {t.premiumLock.likesTitle.replace("{count}", String(data.count))}
+          </h2>
+          <p className="mt-2 text-sm text-muted-foreground">{t.premiumLock.likesBody}</p>
+          <Button asChild className="mt-5 min-h-11 rounded-full">
+            <Link to="/premium">{t.premiumLock.cta}</Link>
+          </Button>
+        </div>
+      ) : cards.length === 0 ? (
         <p className="rounded-2xl border border-border/70 bg-card p-8 text-center text-sm text-muted-foreground">
           {t.likesPage.empty}
         </p>
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
-          {(data ?? []).map((person) => (
+          {cards.map((person) => (
+
             <li key={person.profileId}>
               <Card className="flex gap-4 overflow-hidden p-4">
                 <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-muted">
