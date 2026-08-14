@@ -4,7 +4,9 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { AccountShell } from "@/components/lyve/AccountShell";
+import { BillingSettings } from "@/components/lyve/BillingSettings";
 import { BlockedMembers } from "@/components/lyve/BlockedMembers";
+
 import { PrivacyFields } from "@/routes/_authenticated/onboarding";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
