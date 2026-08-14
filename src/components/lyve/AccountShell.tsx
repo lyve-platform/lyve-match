@@ -66,8 +66,12 @@ export function AccountShell({
               <Link to="/messages">{t.messagingNav.messages}</Link>
             </Button>
             <Button asChild variant="ghost" size="sm" className="hidden rounded-full sm:inline-flex">
+              <Link to="/premium">{t.premiumPage.title}</Link>
+            </Button>
+            <Button asChild variant="ghost" size="sm" className="hidden rounded-full sm:inline-flex">
               <Link to="/profile">{t.authNav.profile}</Link>
             </Button>
+
             <Button asChild variant="ghost" size="sm" className="rounded-full">
               <Link to="/settings">{t.authNav.settings}</Link>
             </Button>
