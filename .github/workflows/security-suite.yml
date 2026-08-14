@@ -1,0 +1,57 @@
+# LYVE mandatory security gate.
+# The full suite must pass before any deploy, and before production store
+# billing may be enabled. No job may skip or soft-fail it.
+name: Security suite
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    name: Security regression suite (mandatory gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Lint
+        run: bun run lint
+
+      - name: Build
+        run: bun run build
+
+      # Secrets are injected by CI only. They are never printed, echoed or
+      # written to an artifact, and the suite itself asserts redaction.
+      - name: Security regression suite
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          STORE_SANDBOX_SECRET: ${{ secrets.STORE_SANDBOX_SECRET }}
+          # CI always runs as a sandbox deployment. Production store
+          # credentials must never be present in CI.
+          LYVE_STORE_ENVIRONMENT: sandbox
+        run: bun run test:security
+
+      - name: Refuse production store credentials in CI
+        run: |
+          for name in APPLE_IAP_PRIVATE_KEY APPLE_IAP_ISSUER_ID GOOGLE_PLAY_SERVICE_ACCOUNT_JSON; do
+            if [ -n "${!name:-}" ]; then
+              echo "Production store credential $name must not be available to CI"
+              exit 1
+            fi
+          done

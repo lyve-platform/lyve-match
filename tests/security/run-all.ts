@@ -13,6 +13,7 @@ const suites = [
   { label: "Phase 5 (billing, subscriptions, entitlements)", file: "tests/security/phase5-audit.ts" },
   { label: "Phase 6 (Apple IAP / Google Play store billing)", file: "tests/security/phase6-audit.ts" },
   { label: "Phase 6B (sandbox store integration, reconciliation, rate limits)", file: "tests/security/phase6b-integration.ts" },
+  { label: "Phase 6C (production-store readiness, environment isolation)", file: "tests/security/phase6c-production.ts" },
 ];
 
 
