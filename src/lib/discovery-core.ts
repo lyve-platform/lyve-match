@@ -82,6 +82,11 @@ export function bucketDistance(distanceKm: number | null): number | null {
   return Math.round(distanceKm / 10) * 10;
 }
 
+/** Defence in depth: a stored value outside 0-1 can never inflate a rank. */
+function clampUnit(value: number): number {
+  return Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
+}
+
 function recencyFactor(lastActiveAt: string | null): number {
   if (!lastActiveAt) return 0;
   const days = (Date.now() - new Date(lastActiveAt).getTime()) / 86_400_000;
@@ -96,7 +101,7 @@ function recencyFactor(lastActiveAt: string | null): number {
 export function rankingScore(row: CandidateRow, compatibility: number): number {
   return (
     RANKING_WEIGHTS.compatibility * (compatibility / 100) +
-    RANKING_WEIGHTS.profileCompleteness * Number(row.completeness ?? 0) +
+    RANKING_WEIGHTS.profileCompleteness * clampUnit(Number(row.completeness ?? 0)) +
     RANKING_WEIGHTS.recentActivity * recencyFactor(row.last_active_at)
   );
 }

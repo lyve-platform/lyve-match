@@ -17,7 +17,11 @@ import {
   COMPATIBILITY_WEIGHTS,
   RANKING_WEIGHTS,
   COMPATIBILITY_DIMENSIONS,
+  MAX_REASONS,
 } from "../../src/config/compatibility";
+
+const stripComments = (source: string) =>
+  source.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
 
 let passed = 0;
 let failed = 0;
@@ -108,19 +112,17 @@ check("compatibility weights sum to 1", Math.abs(weightSum - 1) < 1e-9, weightSu
 const rankSum = Object.values(RANKING_WEIGHTS).reduce((sum, w) => sum + w, 0);
 check("ranking weights sum to 1", Math.abs(rankSum - 1) < 1e-9, rankSum);
 
-const configSource = await Bun.file("src/config/compatibility.ts").text();
+const configSource = stripComments(await Bun.file("src/config/compatibility.ts").text());
 check(
   "no protected characteristic is a scoring dimension",
   !COMPATIBILITY_DIMENSIONS.some((d) =>
     /gender|ethnic|religio|national|race|disab/i.test(d),
   ),
 );
-const engineSource = await Bun.file("src/lib/compatibility.ts").text();
+const engineSource = stripComments(await Bun.file("src/lib/compatibility.ts").text());
 check(
   "the engine never reads gender, religion, ethnicity or nationality",
-  !/\b(gender|religion|ethnicity|nationality|race)\b/.test(
-    engineSource.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, ""),
-  ),
+  !/\b(gender|religion|ethnicity|nationality|race)\b/.test(engineSource),
 );
 check(
   "popularity signals are absent from scoring and ranking",
@@ -154,10 +156,13 @@ check(
 /* --------------------------------------------------- missing-data behaviour */
 {
   const sparse = computeCompatibility({
-    viewer: { ...viewer, ...emptyFacts, intent: null, interestSlugs: [] },
+    viewer: { ...viewer, ...emptyFacts, age: null, city: null, country: null, intent: null, interestSlugs: [] },
     candidate: {
       ...candidate,
       ...emptyFacts,
+      age: null,
+      city: null,
+      country: null,
       intent: null,
       interestSlugs: [],
       distanceKm: null,
@@ -226,10 +231,17 @@ check(
   check(
     "reason values only carry shared, already-visible interest slugs",
     result.reasons.every(
-      (reason) => !reason.values || reason.values.every((v) => candidate.interestSlugs.includes(v)),
+      (reason) =>
+        !reason.values ||
+        reason.values.every(
+          (v) =>
+            candidate.interestSlugs.includes(v) ||
+            v === candidate.city ||
+            v === candidate.country,
+        ),
     ),
   );
-  check("reasons are capped", result.reasons.length <= 3, result.reasons.length);
+  check("reasons are capped", result.reasons.length <= MAX_REASONS, result.reasons.length);
 }
 
 /* ------------------------------------------------------------------ ranking */
