@@ -175,8 +175,16 @@ async function main() {
         impersonate.error?.message,
       );
 
+      // is_blocked_pair is executable by members because RLS policies evaluate it
+      // as the caller. It is self-scoped: it only answers for pairs the caller is in.
       const helper = await a.client.rpc("is_blocked_pair", { a: a.id, b: b.id } as never);
-      check("internal helper is_blocked_pair is not callable by members", Boolean(helper.error));
+      check("is_blocked_pair answers for a pair the caller belongs to", !helper.error, helper.error?.message);
+      const foreignHelper = await a.client.rpc("is_blocked_pair", { a: b.id, b: hidden.id } as never);
+      check(
+        "is_blocked_pair cannot be used to probe other members' blocks",
+        !foreignHelper.error && foreignHelper.data === false,
+        foreignHelper.error?.message ?? foreignHelper.data,
+      );
 
       const completeness = await a.client.rpc("profile_completeness", { p_id: b.id } as never);
       check("internal helper profile_completeness is not callable by members", Boolean(completeness.error));

@@ -8,6 +8,7 @@ const suites = [
   { label: "Phase 1 (database, auth, storage, RLS)", file: "tests/security/rls-audit.ts" },
   { label: "Phase 2 (discovery, like/pass, match, block, report)", file: "tests/security/phase2-audit.ts" },
   { label: "Phase 2 (compatibility & ranking integrity)", file: "tests/security/compatibility-audit.ts" },
+  { label: "Phase 3 (messaging, conversations, realtime, reports)", file: "tests/security/phase3-audit.ts" },
 ];
 
 let totalPassed = 0;
