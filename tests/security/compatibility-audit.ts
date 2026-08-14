@@ -229,7 +229,7 @@ check(
     !/minAge|maxAge|theyWant|preferred|max_distance/i.test(reasonBlob),
   );
   check(
-    "reason values only carry shared, already-visible interest slugs",
+    "reason values only carry facts already visible on the card",
     result.reasons.every(
       (reason) =>
         !reason.values ||
@@ -237,7 +237,8 @@ check(
           (v) =>
             candidate.interestSlugs.includes(v) ||
             v === candidate.city ||
-            v === candidate.country,
+            v === candidate.country ||
+            v === candidate.intent,
         ),
     ),
   );
