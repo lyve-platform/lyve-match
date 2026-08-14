@@ -3,6 +3,7 @@ import { arDiscover } from "./ar.discover";
 import { arMessages } from "./ar.messages";
 import { arAuth } from "./ar.auth";
 import { arAdmin } from "./ar.admin";
+import { arBilling } from "./ar.billing";
 
 export const ar: Dictionary = {
   meta: {
@@ -337,4 +338,5 @@ export const ar: Dictionary = {
   ...arDiscover,
   ...arMessages,
   ...arAdmin,
+  ...arBilling,
 };
