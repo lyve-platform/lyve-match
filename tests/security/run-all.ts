@@ -11,6 +11,7 @@ const suites = [
   { label: "Phase 3 (messaging, conversations, realtime, reports)", file: "tests/security/phase3-audit.ts" },
   { label: "Phase 4 (RBAC, admin, moderation, audit, appeals)", file: "tests/security/phase4-audit.ts" },
   { label: "Phase 5 (billing, subscriptions, entitlements)", file: "tests/security/phase5-audit.ts" },
+  { label: "Phase 6 (Apple IAP / Google Play store billing)", file: "tests/security/phase6-audit.ts" },
 ];
 
 

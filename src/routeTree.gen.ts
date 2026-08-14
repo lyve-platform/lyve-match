@@ -28,7 +28,9 @@ import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
+import { Route as ApiPublicWebhooksAppleRouteImport } from './routes/api/public/webhooks/apple'
 import { Route as ApiPublicWebhooksBillingRouteImport } from './routes/api/public/webhooks/billing'
+import { Route as ApiPublicWebhooksGoogleRouteImport } from './routes/api/public/webhooks/google'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -126,12 +128,22 @@ const AuthenticatedMessagesConversationIdRoute =
     path: '/messages/$conversationId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicWebhooksAppleRoute = ApiPublicWebhooksAppleRouteImport.update({
+  id: '/api/public/webhooks/apple',
+  path: '/api/public/webhooks/apple',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhooksBillingRoute =
   ApiPublicWebhooksBillingRouteImport.update({
     id: '/api/public/webhooks/billing',
     path: '/api/public/webhooks/billing',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicWebhooksGoogleRoute = ApiPublicWebhooksGoogleRouteImport.update({
+  id: '/api/public/webhooks/google',
+  path: '/api/public/webhooks/google',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -152,7 +164,9 @@ export interface FileRoutesByFullPath {
   '/settings': typeof AuthenticatedSettingsRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
+  '/api/public/webhooks/apple': typeof ApiPublicWebhooksAppleRoute
   '/api/public/webhooks/billing': typeof ApiPublicWebhooksBillingRoute
+  '/api/public/webhooks/google': typeof ApiPublicWebhooksGoogleRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -173,7 +187,9 @@ export interface FileRoutesByTo {
   '/settings': typeof AuthenticatedSettingsRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
+  '/api/public/webhooks/apple': typeof ApiPublicWebhooksAppleRoute
   '/api/public/webhooks/billing': typeof ApiPublicWebhooksBillingRoute
+  '/api/public/webhooks/google': typeof ApiPublicWebhooksGoogleRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -196,7 +212,9 @@ export interface FileRoutesById {
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
+  '/api/public/webhooks/apple': typeof ApiPublicWebhooksAppleRoute
   '/api/public/webhooks/billing': typeof ApiPublicWebhooksBillingRoute
+  '/api/public/webhooks/google': typeof ApiPublicWebhooksGoogleRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -219,7 +237,9 @@ export interface FileRouteTypes {
     | '/settings'
     | '/messages/$conversationId'
     | '/messages/'
+    | '/api/public/webhooks/apple'
     | '/api/public/webhooks/billing'
+    | '/api/public/webhooks/google'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -240,7 +260,9 @@ export interface FileRouteTypes {
     | '/settings'
     | '/messages/$conversationId'
     | '/messages'
+    | '/api/public/webhooks/apple'
     | '/api/public/webhooks/billing'
+    | '/api/public/webhooks/google'
   id:
     | '__root__'
     | '/'
@@ -262,7 +284,9 @@ export interface FileRouteTypes {
     | '/_authenticated/settings'
     | '/_authenticated/messages/$conversationId'
     | '/_authenticated/messages/'
+    | '/api/public/webhooks/apple'
     | '/api/public/webhooks/billing'
+    | '/api/public/webhooks/google'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -274,7 +298,9 @@ export interface RootRouteChildren {
   ResetPasswordRoute: typeof ResetPasswordRoute
   SafetyRoute: typeof SafetyRoute
   TermsRoute: typeof TermsRoute
+  ApiPublicWebhooksAppleRoute: typeof ApiPublicWebhooksAppleRoute
   ApiPublicWebhooksBillingRoute: typeof ApiPublicWebhooksBillingRoute
+  ApiPublicWebhooksGoogleRoute: typeof ApiPublicWebhooksGoogleRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -412,11 +438,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMessagesConversationIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/webhooks/apple': {
+      id: '/api/public/webhooks/apple'
+      path: '/api/public/webhooks/apple'
+      fullPath: '/api/public/webhooks/apple'
+      preLoaderRoute: typeof ApiPublicWebhooksAppleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhooks/billing': {
       id: '/api/public/webhooks/billing'
       path: '/api/public/webhooks/billing'
       fullPath: '/api/public/webhooks/billing'
       preLoaderRoute: typeof ApiPublicWebhooksBillingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/webhooks/google': {
+      id: '/api/public/webhooks/google'
+      path: '/api/public/webhooks/google'
+      fullPath: '/api/public/webhooks/google'
+      preLoaderRoute: typeof ApiPublicWebhooksGoogleRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
@@ -463,7 +503,9 @@ const rootRouteChildren: RootRouteChildren = {
   ResetPasswordRoute: ResetPasswordRoute,
   SafetyRoute: SafetyRoute,
   TermsRoute: TermsRoute,
+  ApiPublicWebhooksAppleRoute: ApiPublicWebhooksAppleRoute,
   ApiPublicWebhooksBillingRoute: ApiPublicWebhooksBillingRoute,
+  ApiPublicWebhooksGoogleRoute: ApiPublicWebhooksGoogleRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
