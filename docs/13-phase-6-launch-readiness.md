@@ -179,57 +179,65 @@ Terms of Service (with subscription and auto-renewal terms), Privacy Policy, Com
 
 ## 16. Final security audit strategy
 
-1. Re-run the full existing regression suite (Phases 1–5, 378+ assertions) against a production-shaped environment.
-2. Add a Phase 6 suite: real-provider webhook signature verification, receipt/purchase-token validation forgery attempts, cross-channel entitlement collisions, price/plan tampering at checkout, tax-country spoofing, rate-limit bypass, session fixation and refresh-token replay, email-verification link reuse, admin RBAC under production roles.
-3. Automated scans: dependency/CVE scan, database linter, secret scanning in CI, headers and TLS check.
-4. Manual review: threat model refresh, RLS diff review, staff-access review, log-leak review (no PII, no tokens).
-5. External **third-party penetration test** before public launch — non-negotiable for a dating product handling intimate data.
+1. Maintain and re-run the existing security baseline — **488/488 assertions must stay green** (Phases 1–5) — against a production-shaped environment. No Phase 6 change may reduce that count.
+2. Add a Phase 6 suite: Apple JWS/App Store notification signature verification, Google RTDN + purchase-token validation, forged and replayed receipt attempts, expired/sandbox receipt rejection in production, cross-channel entitlement collisions, product-ID→plan tampering, entitlement grant attempted from the client, rate-limit bypass, session fixation and refresh-token replay, secure-store token handling, email-verification link reuse, admin RBAC under production roles.
+3. Automated scans: dependency/CVE scan, database linter, secret scanning in CI, headers and TLS check, mobile binary scan (secrets in bundle, pinning present).
+4. Manual review: threat model refresh, RLS diff review, staff-access review, log-leak review (no PII, no tokens, no receipts).
+5. External **third-party penetration test** (API + both mobile binaries) before public launch — non-negotiable for a dating product handling intimate data.
 6. Ship a `SECURITY.md` and a coordinated vulnerability-disclosure contact.
 
 ## 17. Deployment architecture
 
-- Edge-served application with server functions; managed Postgres + realtime + private object storage behind it.
-- Three environments: preview (per branch), staging (production-shaped, seeded, real store sandbox + provider test mode), production.
-- CI pipeline: typecheck → lint → unit tests → full security regression suite → build → deploy. A failing security suite blocks the deploy.
-- Database changes ship as forward-only, reviewed migrations; every migration must be safe against the previous app version (expand → migrate → contract).
-- Feature flags for every launch-risk surface (payments, new markets, new plans) so exposure is a toggle, not a redeploy.
-- Custom domain with HSTS, strict CSP, and security headers; store apps built from the same tagged release as the web deploy.
+- Edge-served API and server functions; managed Postgres + realtime + private object storage behind it. The web surface at launch is API + marketing/legal + admin only — no consumer web app.
+- Three environments: preview (per branch), staging (production-shaped, seeded, **App Store Sandbox + Play license testers**), production.
+- CI pipeline: typecheck → lint → unit tests → full security regression suite (488+) → build → deploy. A failing security suite blocks the deploy.
+- Database changes ship as forward-only, reviewed migrations, always safe against the **oldest approved store binary** (expand → migrate → contract). Mobile clients cannot be force-updated instantly, so the API stays backward-compatible for at least two releases.
+- Feature flags for every launch-risk surface (billing channel, new markets, new plans) so exposure is a toggle, not a store resubmission. Add a minimum-supported-version gate for forced upgrades.
+- Custom domain with HSTS, strict CSP and security headers for the API/admin/legal surfaces; store apps built from the same tagged release as the backend deploy.
 
 ## 18. Launch checklist and rollback plan
 
 **Go/no-go checklist**
 - [ ] Legal documents published, versioned and accepted in-app
-- [ ] Payment provider live, tax configuration verified, real end-to-end purchase completed in each launch currency
-- [ ] Store apps approved, IAP products live, restore-purchases verified on both platforms
+- [ ] Apple + Google IAP products live, server-side validation verified end-to-end in sandbox and production, real purchase completed on both platforms
+- [ ] Restore-purchases and cross-device entitlement verified on both platforms
+- [ ] App Store Server Notifications V2 and Google RTDN endpoints receiving, verifying and applying events idempotently
+- [ ] Store apps approved with 18+ rating, EN + AR metadata, demo reviewer account seeded
 - [ ] Email deliverability verified (SPF/DKIM/DMARC pass, inbox placement checked)
-- [ ] Full security regression suite green; external pen-test findings resolved or accepted
+- [ ] Security regression suite green at 488/488 plus the Phase 6 additions; external pen-test findings resolved or accepted
 - [ ] Backups verified by an actual restore rehearsal
 - [ ] Monitoring, alerting and on-call rota active with runbooks linked
 - [ ] Moderation team trained, staffed for launch timezone coverage, SLAs agreed
 - [ ] Rate limits and anti-abuse thresholds tuned against staging load
-- [ ] Support inbox, refund workflow and escalation path staffed
+- [ ] Support inbox, refund-enquiry workflow and escalation path staffed
 
-**Rollout:** internal → closed beta (invite, single market) → soft launch Wave 1 with payments behind a flag at 10% → 50% → 100% → Wave 2.
+**Rollout:** internal → TestFlight / Play internal testing → closed beta (invite, single market) → staged store rollout with billing behind a server flag at 10% → 50% → 100% → Wave 2 markets.
 
-**Rollback:** application rollback is a redeploy of the previous tagged release (minutes). Payments roll back by flag — checkout closes, existing subscriptions keep working, webhooks keep processing into the ledger so nothing is lost. Database rollback is forward-fix plus, only in a true emergency, PITR restore with a documented data-loss window. Store builds cannot be un-shipped, so mobile risk is controlled by server-side flags and phased release percentages, never by hoping a build is fine.
+**Rollback:** backend rollback is a redeploy of the previous tagged release (minutes). Billing rolls back by server flag — the paywall closes, existing subscriptions keep working, store notifications keep processing into the idempotent ledger so nothing is lost. Database rollback is forward-fix plus, only in emergency, PITR with a documented data-loss window. Store builds cannot be un-shipped: mobile risk is controlled by server-side flags, staged rollout percentages and Play's halt-rollout control — never by hoping a build is fine.
 
 ---
 
 ## Recommended sequencing for Phase 6 implementation
 
-1. Production hardening that needs no provider: auth hardening, rate limiting, email, monitoring, backups, secrets, config tables.
+1. **Provider-independent production hardening** (current step): auth and mobile session hardening, rate limiting and anti-abuse, monitoring/logging/alerting, backups and disaster recovery, email security and verification, account protection, secrets and config tables — plus the mobile billing *architecture* (adapter interfaces, product→plan mapping, notification route skeletons) with **no production Apple/Google credentials connected**.
 2. Legal and policy content, versioned acceptance, retention jobs.
-3. Web payment provider integration behind a flag, in test mode, in staging.
-4. Store billing (iOS/Android) with server-side receipt validation.
+3. Apple IAP + Google Play Billing integration with server-side validation, in sandbox/test only, behind a flag.
+4. Store submission preparation and review.
 5. Final security audit + external pen test.
-6. Phased launch.
+6. Phased store launch.
+7. **Deferred:** web checkout via Paddle or Stripe as an additional adapter, no change to the entitlement model.
+
+**Stop point:** implementation stops at the end of step 1 and waits for explicit approval before any production billing integration.
 
 ## Open decisions for you
 
-1. Merchant of record: Paddle (tax handled for you) or Stripe (more control, you own tax)?
-2. Launch scope: GCC-only Wave 1, or GCC + EU/UK together?
-3. Mobile apps at launch, or web-first with apps in Phase 7?
-4. Legal entity and tax registration status — which country, and is it already incorporated?
-5. Moderation staffing model at launch (in-house, outsourced, hybrid)?
+1. Launch scope: GCC-only Wave 1, or GCC + EU/UK together?
+2. Mobile client approach for the store builds (native vs cross-platform wrapper around the existing product surface)?
+3. Legal entity and tax registration status — which country, and is it already incorporated?
+4. Moderation staffing model at launch (in-house, outsourced, hybrid)?
+5. Timing for the deferred web phase — immediately post-launch, or after Premium is proven on mobile?
 
-**Nothing here is built yet.** Say which options you want and approve the phase, and I will implement in the sequence above, stopping for review between steps.
+(The merchant-of-record question is intentionally deferred with the web channel.)
+
+**Nothing here is built yet.** Approve the hardening step and I will implement item 1 above, keeping the security baseline at 488/488, and stop for review before any billing integration.
+
