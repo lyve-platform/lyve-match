@@ -231,7 +231,6 @@ async function main() {
     .eq("key", "localization");
   check("teardown restored the original flag", (await currentFlag()) === original);
 
-  await admin.from("admin_audit_logs").delete().eq("actor_id", owner.id).catch(() => undefined);
   for (const id of created) {
     await admin.auth.admin.deleteUser(id).catch(() => undefined);
   }
