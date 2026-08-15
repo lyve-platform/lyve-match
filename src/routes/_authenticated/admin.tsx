@@ -80,7 +80,11 @@ function AdminPage() {
             {t.admin.roles[role]}
           </Badge>
         ))}
+        <Button asChild variant="outline" size="sm" className="ms-auto rounded-full">
+          <Link to="/admin/settings">{t.adminSettings.link}</Link>
+        </Button>
       </div>
+
 
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="flex w-full flex-wrap justify-start">

@@ -148,6 +148,30 @@ export type Database = {
         }
         Relationships: []
       }
+      app_settings: {
+        Row: {
+          created_at: string
+          key: string
+          updated_at: string
+          updated_by: string | null
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          key: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          key?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: Json
+        }
+        Relationships: []
+      }
       billing_accounts: {
         Row: {
           created_at: string
@@ -1744,6 +1768,15 @@ export type Database = {
           suspended_until: string
         }[]
       }
+      admin_localization_setting: {
+        Args: never
+        Returns: {
+          arabic_enabled: boolean
+          updated_at: string
+          updated_by: string
+          updated_by_name: string
+        }[]
+      }
       admin_metrics: {
         Args: never
         Returns: {
@@ -1777,6 +1810,10 @@ export type Database = {
       }
       admin_revoke_entitlement: {
         Args: { p_entitlement: string; p_reason: string }
+        Returns: boolean
+      }
+      admin_set_arabic_enabled: {
+        Args: { p_enabled: boolean }
         Returns: boolean
       }
       admin_set_role: {
@@ -1937,6 +1974,7 @@ export type Database = {
           relationship_intent: Database["public"]["Enums"]["relationship_intent"]
         }[]
       }
+      locale_availability: { Args: never; Returns: boolean }
       mark_conversation_read: {
         Args: { p_conversation: string }
         Returns: number
