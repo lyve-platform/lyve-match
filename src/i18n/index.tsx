@@ -7,6 +7,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import { en, type Dictionary } from "./en";
 import { ar } from "./ar";
 
@@ -14,13 +15,15 @@ export const LOCALES = ["en", "ar"] as const;
 export type Locale = (typeof LOCALES)[number];
 
 /**
- * Production language strategy: English-only for the initial launch.
- * The Arabic dictionary and RTL architecture stay in the codebase; to activate
- * Arabic later, add "ar" here (then review translations and run RTL QA).
+ * Language availability is a server-controlled feature flag.
+ *
+ * English is always available. Arabic is only selectable when an administrator
+ * has enabled it in the backend (`locale_availability()`), so localStorage, a
+ * URL parameter or an Arabic browser language can never force Arabic on their
+ * own. The Arabic dictionary always stays in the codebase.
  */
-export const ENABLED_LOCALES: readonly Locale[] = ["en"];
+export const BASE_LOCALES: readonly Locale[] = ["en"];
 export const DEFAULT_LOCALE: Locale = "en";
-export const isLocaleEnabled = (value: Locale) => ENABLED_LOCALES.includes(value);
 
 const dictionaries: Record<Locale, Dictionary> = { en, ar };
 const STORAGE_KEY = "lyve.locale";
@@ -30,6 +33,10 @@ type I18nValue = {
   dir: "ltr" | "rtl";
   t: Dictionary;
   setLocale: (locale: Locale) => void;
+  /** Locales the server currently allows. Always contains "en". */
+  enabledLocales: readonly Locale[];
+  arabicEnabled: boolean;
+  refreshAvailability: () => Promise<void>;
 };
 
 const I18nContext = createContext<I18nValue | null>(null);
@@ -38,28 +45,42 @@ function isLocale(value: string | null): value is Locale {
   return value === "en" || value === "ar";
 }
 
-function isSelectable(value: string | null): value is Locale {
-  return isLocale(value) && isLocaleEnabled(value);
-}
-
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+  const [preferred, setPreferred] = useState<Locale>(DEFAULT_LOCALE);
+  const [arabicEnabled, setArabicEnabled] = useState(false);
+
+  const refreshAvailability = useCallback(async () => {
+    const { data, error } = await supabase.rpc("locale_availability");
+    setArabicEnabled(!error && data === true);
+  }, []);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (isSelectable(stored)) {
-      setLocaleState(stored);
+    void refreshAvailability();
+  }, [refreshAvailability]);
+
+  useEffect(() => {
+    let stored: string | null = null;
+    try {
+      stored = window.localStorage.getItem(STORAGE_KEY);
+    } catch {
+      /* storage unavailable */
+    }
+    if (isLocale(stored)) {
+      setPreferred(stored);
       return;
     }
-    if (
-      typeof navigator !== "undefined" &&
-      navigator.language?.startsWith("ar") &&
-      isLocaleEnabled("ar")
-    ) {
-      setLocaleState("ar");
+    if (typeof navigator !== "undefined" && navigator.language?.startsWith("ar")) {
+      setPreferred("ar");
     }
   }, []);
 
+  const enabledLocales = useMemo<readonly Locale[]>(
+    () => (arabicEnabled ? (["en", "ar"] as const) : BASE_LOCALES),
+    [arabicEnabled],
+  );
+
+  // The effective locale is always re-derived from server state.
+  const locale: Locale = enabledLocales.includes(preferred) ? preferred : DEFAULT_LOCALE;
   const dir = locale === "ar" ? "rtl" : "ltr";
 
   useEffect(() => {
@@ -67,19 +88,30 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     document.documentElement.dir = dir;
   }, [locale, dir]);
 
-  const setLocale = useCallback((next: Locale) => {
-    if (!isLocaleEnabled(next)) return;
-    setLocaleState(next);
-    try {
-      window.localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      /* storage unavailable — keep in-memory locale */
-    }
-  }, []);
+  const setLocale = useCallback(
+    (next: Locale) => {
+      if (!enabledLocales.includes(next)) return;
+      setPreferred(next);
+      try {
+        window.localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        /* storage unavailable — keep in-memory locale */
+      }
+    },
+    [enabledLocales],
+  );
 
   const value = useMemo<I18nValue>(
-    () => ({ locale, dir, t: dictionaries[locale], setLocale }),
-    [locale, dir, setLocale],
+    () => ({
+      locale,
+      dir,
+      t: dictionaries[locale],
+      setLocale,
+      enabledLocales,
+      arabicEnabled,
+      refreshAvailability,
+    }),
+    [locale, dir, setLocale, enabledLocales, arabicEnabled, refreshAvailability],
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
