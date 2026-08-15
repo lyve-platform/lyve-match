@@ -1909,6 +1909,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      inspect_purge_http_response: {
+        Args: { p_request_id: number }
+        Returns: {
+          purged: number
+          status_code: number
+        }[]
+      }
       is_blocked_pair: { Args: { a: string; b: string }; Returns: boolean }
       is_conversation_member: {
         Args: { p_conversation: string; p_profile: string }
@@ -1984,6 +1991,20 @@ export type Database = {
         }[]
       }
       require_permission: { Args: { _permission: string }; Returns: string }
+      scheduled_job_status: {
+        Args: { p_jobname: string }
+        Returns: {
+          active: boolean
+          command: string
+          jobname: string
+          schedule: string
+        }[]
+      }
+      set_account_purge_secret: {
+        Args: { p_secret: string }
+        Returns: undefined
+      }
+      set_account_purge_url: { Args: { p_url: string }; Returns: undefined }
       store_raise_alert: {
         Args: {
           p_details?: Json
@@ -1999,6 +2020,7 @@ export type Database = {
         Args: { p_bucket: string; p_limit: number; p_window_seconds: number }
         Returns: Json
       }
+      trigger_account_purge_http: { Args: never; Returns: number }
       write_audit: {
         Args: {
           _action: string

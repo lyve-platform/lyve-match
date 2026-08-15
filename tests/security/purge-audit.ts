@@ -505,6 +505,129 @@ async function main() {
     afterLimit,
   );
 
+  /* ============ H. Daily scheduler wiring ============ */
+
+  // The scheduled path shares the endpoint's limiter, so start it clean.
+  await admin.from("store_rate_limits").delete().eq("bucket", "cron:account-purge");
+
+  const job = await admin.rpc("scheduled_job_status", { p_jobname: "lyve-account-purge-daily" });
+  const jobRow = (job.data ?? [])[0] as
+    { jobname: string; schedule: string; active: boolean; command: string } | undefined;
+  check("H1 the daily purge job is scheduled", Boolean(jobRow), job.error?.message);
+  check("H2 the job is active", jobRow?.active === true, jobRow?.active);
+  check("H3 the job runs once a day", jobRow?.schedule === "15 3 * * *", jobRow?.schedule);
+  check(
+    "H4 the scheduled command embeds no secret material",
+    Boolean(jobRow) &&
+      !/bearer|secret|authorization|http/i.test(jobRow!.command.replace(/_http\(\)/gi, "")),
+    jobRow?.command,
+  );
+  check(
+    "H5 the scheduled command only calls the maintenance routine",
+    jobRow?.command.trim() === "SELECT public.trigger_account_purge_http();",
+    jobRow?.command,
+  );
+
+  const anonTrigger = await anon.rpc("trigger_account_purge_http");
+  check("H6 a visitor cannot fire the scheduled purge", Boolean(anonTrigger.error));
+  const memberTrigger = await member.client.rpc("trigger_account_purge_http");
+  check("H7 a signed-in member cannot fire the scheduled purge", Boolean(memberTrigger.error));
+  const memberSecretWrite = await member.client.rpc("set_account_purge_secret", {
+    p_secret: "attacker-controlled-secret-value",
+  });
+  check(
+    "H8 a signed-in member cannot overwrite the maintenance secret",
+    Boolean(memberSecretWrite.error),
+  );
+  const memberUrlWrite = await member.client.rpc("set_account_purge_url", {
+    p_url: "https://attacker.example/collect",
+  });
+  check("H9 a signed-in member cannot redirect the scheduled call", Boolean(memberUrlWrite.error));
+  const memberJobRead = await member.client.rpc("scheduled_job_status", {
+    p_jobname: "lyve-account-purge-daily",
+  });
+  check("H10 a signed-in member cannot read the schedule", Boolean(memberJobRead.error));
+
+  // End-to-end: the scheduler's own call must purge exactly the expired set.
+  const schedExpired = await createMember("sched-expired");
+  await seedMember(schedExpired, "SchedExpired");
+  await requestDeletion(schedExpired, { deletedAt: daysAgo(45), scheduledPurgeAt: daysAgo(15) });
+  const schedRecent = await createMember("sched-recent");
+  await seedMember(schedRecent, "SchedRecent");
+  await requestDeletion(schedRecent, { deletedAt: daysAgo(3), scheduledPurgeAt: daysAhead(27) });
+  const schedCancelled = await createMember("sched-cancelled");
+  await seedMember(schedCancelled, "SchedCancelled");
+  await requestDeletion(schedCancelled, {
+    deletedAt: daysAgo(45),
+    scheduledPurgeAt: daysAgo(15),
+    status: "cancelled",
+  });
+
+  async function fireScheduledRun() {
+    const fired = await admin.rpc("trigger_account_purge_http");
+    if (fired.error) return { status: -1, purged: -1, error: fired.error.message };
+    for (let i = 0; i < 20; i += 1) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      const res = await admin.rpc("inspect_purge_http_response", { p_request_id: fired.data });
+      const row = (res.data ?? [])[0] as { status_code: number; purged: number } | undefined;
+      if (row) return { status: row.status_code, purged: row.purged, error: "" };
+    }
+    return { status: 0, purged: -1, error: "no response recorded" };
+  }
+
+  const firstRun = await fireScheduledRun();
+  check("H11 the scheduled run receives HTTP 200", firstRun.status === 200, firstRun);
+  check("H12 the scheduled run reports a purge count only", firstRun.purged >= 1, firstRun);
+
+  const schedExpiredRow = await profileRow(schedExpired.id);
+  check(
+    "H13 an account past 30 days is purged by the scheduler",
+    schedExpiredRow?.first_name === null &&
+      schedExpiredRow?.bio === null &&
+      schedExpiredRow?.account_status === "deleted",
+    schedExpiredRow,
+  );
+  const schedExpiredReq = await deletionRow(schedExpired.id);
+  check(
+    "H14 the scheduler completes the deletion request",
+    schedExpiredReq?.status === "completed" && Boolean(schedExpiredReq?.processed_at),
+    schedExpiredReq,
+  );
+  const schedRecentRow = await profileRow(schedRecent.id);
+  check(
+    "H15 an account inside the retention window is untouched",
+    schedRecentRow?.first_name === "SchedRecent" && schedRecentRow?.account_status !== "deleted",
+    schedRecentRow,
+  );
+  check(
+    "H16 the in-window deletion request stays pending",
+    (await deletionRow(schedRecent.id))?.status === "pending",
+  );
+  const schedCancelledRow = await profileRow(schedCancelled.id);
+  check(
+    "H17 a cancelled deletion request is never purged",
+    schedCancelledRow?.first_name === "SchedCancelled",
+    schedCancelledRow,
+  );
+  check(
+    "H18 the cancelled request keeps its cancelled state",
+    (await deletionRow(schedCancelled.id))?.status === "cancelled",
+  );
+
+  const secondRun = await fireScheduledRun();
+  check("H19 a repeated scheduled run still succeeds", secondRun.status === 200, secondRun);
+  check("H20 a repeated scheduled run purges nothing new", secondRun.purged === 0, secondRun);
+  const afterSecond = await deletionRow(schedExpired.id);
+  check(
+    "H21 the completed request is not re-processed",
+    afterSecond?.processed_at === schedExpiredReq?.processed_at,
+    afterSecond,
+  );
+  check(
+    "H22 repeated scheduled runs leave the retained account intact",
+    (await profileRow(schedRecent.id))?.first_name === "SchedRecent",
+  );
+
   if (originalSecret === undefined) delete process.env["ACCOUNT_PURGE_SECRET"];
   else process.env["ACCOUNT_PURGE_SECRET"] = originalSecret;
 
