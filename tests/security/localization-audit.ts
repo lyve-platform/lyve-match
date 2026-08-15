@@ -121,7 +121,15 @@ async function main() {
       .from("admin_audit_logs")
       .update({ reason: "tampered" })
       .eq("actor_id", owner.id);
-    check("admin audit log stays immutable", tamper.error != null, tamper.error?.code);
+    const after = await admin
+      .from("admin_audit_logs")
+      .select("reason")
+      .eq("actor_id", owner.id);
+    check(
+      "admin audit log stays immutable",
+      (after.data ?? []).every((row) => row.reason == null),
+      tamper.error?.code,
+    );
   }
 
   /* ------------------------------------------- 4. unauthorised principals */
