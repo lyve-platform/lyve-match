@@ -1991,6 +1991,15 @@ export type Database = {
         }[]
       }
       require_permission: { Args: { _permission: string }; Returns: string }
+      scheduled_job_status: {
+        Args: { p_jobname: string }
+        Returns: {
+          active: boolean
+          command: string
+          jobname: string
+          schedule: string
+        }[]
+      }
       set_account_purge_secret: {
         Args: { p_secret: string }
         Returns: undefined
