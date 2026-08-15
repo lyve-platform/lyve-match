@@ -134,6 +134,9 @@ async function cleanup() {
 }
 
 async function main() {
+  // A previous crashed run must never leave this suite rate limited.
+  await admin.from("store_rate_limits").delete().eq("bucket", "cron:account-purge");
+
   const originalSecret = process.env["ACCOUNT_PURGE_SECRET"];
 
   /* ============ A. Endpoint authentication ============ */
