@@ -512,8 +512,7 @@ async function main() {
 
   const job = await admin.rpc("scheduled_job_status", { p_jobname: "lyve-account-purge-daily" });
   const jobRow = (job.data ?? [])[0] as
-    | { jobname: string; schedule: string; active: boolean; command: string }
-    | undefined;
+    { jobname: string; schedule: string; active: boolean; command: string } | undefined;
   check("H1 the daily purge job is scheduled", Boolean(jobRow), job.error?.message);
   check("H2 the job is active", jobRow?.active === true, jobRow?.active);
   check("H3 the job runs once a day", jobRow?.schedule === "15 3 * * *", jobRow?.schedule);
@@ -543,10 +542,7 @@ async function main() {
   const memberUrlWrite = await member.client.rpc("set_account_purge_url", {
     p_url: "https://attacker.example/collect",
   });
-  check(
-    "H9 a signed-in member cannot redirect the scheduled call",
-    Boolean(memberUrlWrite.error),
-  );
+  check("H9 a signed-in member cannot redirect the scheduled call", Boolean(memberUrlWrite.error));
   const memberJobRead = await member.client.rpc("scheduled_job_status", {
     p_jobname: "lyve-account-purge-daily",
   });
@@ -631,7 +627,6 @@ async function main() {
     "H22 repeated scheduled runs leave the retained account intact",
     (await profileRow(schedRecent.id))?.first_name === "SchedRecent",
   );
-
 
   if (originalSecret === undefined) delete process.env["ACCOUNT_PURGE_SECRET"];
   else process.env["ACCOUNT_PURGE_SECRET"] = originalSecret;
