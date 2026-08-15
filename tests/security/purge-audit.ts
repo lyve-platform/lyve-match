@@ -48,7 +48,11 @@ const created: string[] = [];
 
 async function createMember(tag: string): Promise<Member> {
   const email = `purge-${tag}-${stamp}@lyve.test`;
-  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
   if (error) throw error;
   created.push(data.user!.id);
   const client = createClient(url, publishableKey, { auth: { persistSession: false } });
@@ -104,10 +108,12 @@ async function requestDeletion(
 }
 
 async function purgeRequest(headers: Record<string, string>) {
-  return handleAccountPurgeRequest(new Request("https://lyve.test/api/public/cron/account-purge", {
-    method: "POST",
-    headers,
-  }));
+  return handleAccountPurgeRequest(
+    new Request("https://lyve.test/api/public/cron/account-purge", {
+      method: "POST",
+      headers,
+    }),
+  );
 }
 
 async function profileRow(id: string) {
@@ -144,7 +150,11 @@ async function main() {
   delete process.env["ACCOUNT_PURGE_SECRET"];
   check("A1 an unconfigured deployment reports no purge secret", purgeSecret() === null);
   const unconfigured = await purgeRequest({ authorization: "Bearer anything" });
-  check("A2 the purge endpoint is disabled when the secret is missing", unconfigured.status === 503, unconfigured);
+  check(
+    "A2 the purge endpoint is disabled when the secret is missing",
+    unconfigured.status === 503,
+    unconfigured,
+  );
   check("A3 the disabled endpoint performs no purge", !("purged" in unconfigured.body));
 
   process.env["ACCOUNT_PURGE_SECRET"] = "short";
@@ -165,7 +175,11 @@ async function main() {
   const sameLengthWrong = await purgeRequest({
     authorization: `Bearer ${"x".repeat(TEST_SECRET.length)}`,
   });
-  check("A10 an equal-length wrong secret is refused", sameLengthWrong.status === 401, sameLengthWrong);
+  check(
+    "A10 an equal-length wrong secret is refused",
+    sameLengthWrong.status === 401,
+    sameLengthWrong,
+  );
 
   const nearMiss = await purgeRequest({
     authorization: `Bearer ${TEST_SECRET.slice(0, -1)}X`,
@@ -176,19 +190,31 @@ async function main() {
   check("A12 a truncated secret is refused", prefix.status === 401, prefix);
 
   const wrongScheme = await purgeRequest({ authorization: TEST_SECRET });
-  check("A13 the raw secret without a bearer scheme is refused", wrongScheme.status === 401, wrongScheme);
+  check(
+    "A13 the raw secret without a bearer scheme is refused",
+    wrongScheme.status === 401,
+    wrongScheme,
+  );
 
   check("A14 comparison rejects a length mismatch", !secretMatches("abc", TEST_SECRET));
   check("A15 comparison accepts only the exact secret", secretMatches(TEST_SECRET, TEST_SECRET));
   check("A16 comparison rejects an empty presentation", !secretMatches("", TEST_SECRET));
 
   const headerVariant = await purgeRequest({ "x-cron-secret": TEST_SECRET });
-  check("A17 the scheduler may present the secret in the dedicated header", headerVariant.status === 200, headerVariant);
+  check(
+    "A17 the scheduler may present the secret in the dedicated header",
+    headerVariant.status === 200,
+    headerVariant,
+  );
 
   /* ============ B. Database-level reachability ============ */
 
   const anonPurge = await anon.rpc("purge_expired_accounts", { p_dry_run: true });
-  check("B1 a visitor cannot invoke the purge routine", Boolean(anonPurge.error), anonPurge.error?.code);
+  check(
+    "B1 a visitor cannot invoke the purge routine",
+    Boolean(anonPurge.error),
+    anonPurge.error?.code,
+  );
 
   const member = await createMember("member");
   const victim = await createMember("victim");
@@ -204,10 +230,18 @@ async function main() {
   ]);
 
   const memberPurge = await member.client.rpc("purge_expired_accounts", { p_dry_run: true });
-  check("B2 a signed-in member cannot invoke the purge routine", Boolean(memberPurge.error), memberPurge.error?.code);
+  check(
+    "B2 a signed-in member cannot invoke the purge routine",
+    Boolean(memberPurge.error),
+    memberPurge.error?.code,
+  );
 
   const memberWetPurge = await member.client.rpc("purge_expired_accounts", { p_dry_run: false });
-  check("B3 a signed-in member cannot invoke a live purge", Boolean(memberWetPurge.error), memberWetPurge.error?.code);
+  check(
+    "B3 a signed-in member cannot invoke a live purge",
+    Boolean(memberWetPurge.error),
+    memberWetPurge.error?.code,
+  );
 
   const grants = await admin.rpc("purge_expired_accounts", { p_dry_run: true });
   check("B4 the service scheduler can invoke the routine", !grants.error, grants.error?.message);
@@ -224,60 +258,114 @@ async function main() {
 
   const run = await purgeRequest({ authorization: `Bearer ${TEST_SECRET}` });
   check("C1 an authenticated scheduled purge succeeds", run.status === 200, run);
-  check("C2 the purge reports a count only, never member detail", JSON.stringify(run.body).includes("purged"));
+  check(
+    "C2 the purge reports a count only, never member detail",
+    JSON.stringify(run.body).includes("purged"),
+  );
   check(
     "C3 the purge response carries no profile identifiers",
-    !JSON.stringify(run.body).includes(victim.id) && !JSON.stringify(run.body).includes(victim.email),
+    !JSON.stringify(run.body).includes(victim.id) &&
+      !JSON.stringify(run.body).includes(victim.email),
   );
 
   const victimProfile = await profileRow(victim.id);
-  check("C4 an expired account is scrubbed of its profile text", !victimProfile?.first_name && !victimProfile?.bio, victimProfile);
+  check(
+    "C4 an expired account is scrubbed of its profile text",
+    !victimProfile?.first_name && !victimProfile?.bio,
+    victimProfile,
+  );
   check("C5 an expired account loses its location", !victimProfile?.city, victimProfile);
-  check("C6 an expired account is marked deleted", victimProfile?.account_status === "deleted", victimProfile);
+  check(
+    "C6 an expired account is marked deleted",
+    victimProfile?.account_status === "deleted",
+    victimProfile,
+  );
   const victimRequest = await deletionRow(victim.id);
-  check("C7 the deletion request is completed", victimRequest?.status === "completed", victimRequest);
+  check(
+    "C7 the deletion request is completed",
+    victimRequest?.status === "completed",
+    victimRequest,
+  );
   check("C8 the completion is timestamped", Boolean(victimRequest?.processed_at), victimRequest);
 
   const prematureProfile = await profileRow(premature.id);
-  check("C9 an account inside the 30-day window is NOT purged", prematureProfile?.first_name === "Premature", prematureProfile);
+  check(
+    "C9 an account inside the 30-day window is NOT purged",
+    prematureProfile?.first_name === "Premature",
+    prematureProfile,
+  );
   const prematureRequest = await deletionRow(premature.id);
-  check("C10 a pending in-window request stays pending", prematureRequest?.status === "pending", prematureRequest);
+  check(
+    "C10 a pending in-window request stays pending",
+    prematureRequest?.status === "pending",
+    prematureRequest,
+  );
 
   const cancelledProfile = await profileRow(cancelled.id);
-  check("C11 a cancelled deletion request is never purged", cancelledProfile?.first_name === "Cancelled", cancelledProfile);
+  check(
+    "C11 a cancelled deletion request is never purged",
+    cancelledProfile?.first_name === "Cancelled",
+    cancelledProfile,
+  );
   const cancelledRequest = await deletionRow(cancelled.id);
-  check("C12 a cancelled request is left cancelled", cancelledRequest?.status === "cancelled", cancelledRequest);
+  check(
+    "C12 a cancelled request is left cancelled",
+    cancelledRequest?.status === "cancelled",
+    cancelledRequest,
+  );
 
   const activeProfile = await profileRow(active.id);
-  check("C13 an active account with no deletion request is untouched", activeProfile?.first_name === "Active", activeProfile);
-  check("C14 an active account keeps its standing", activeProfile?.account_status === "active", activeProfile);
+  check(
+    "C13 an active account with no deletion request is untouched",
+    activeProfile?.first_name === "Active",
+    activeProfile,
+  );
+  check(
+    "C14 an active account keeps its standing",
+    activeProfile?.account_status === "active",
+    activeProfile,
+  );
 
   /* ============ D. Idempotency ============ */
 
   const rerun = await purgeRequest({ authorization: `Bearer ${TEST_SECRET}` });
   check("D1 the purge can be run repeatedly", rerun.status === 200, rerun);
-  check("D2 a repeat run purges nothing new", rerun.body.ok === true && (rerun.body as { purged: number }).purged === 0, rerun.body);
+  check(
+    "D2 a repeat run purges nothing new",
+    rerun.body.ok === true && (rerun.body as { purged: number }).purged === 0,
+    rerun.body,
+  );
   const victimAfter = await deletionRow(victim.id);
-  check("D3 an already-purged request is not re-processed", victimAfter?.status === "completed", victimAfter);
+  check(
+    "D3 an already-purged request is not re-processed",
+    victimAfter?.status === "completed",
+    victimAfter,
+  );
   check(
     "D4 the completion timestamp is not rewritten",
     victimAfter?.processed_at === victimRequest?.processed_at,
     victimAfter,
   );
   const prematureAfter = await profileRow(premature.id);
-  check("D5 repeated runs never widen the work set", prematureAfter?.first_name === "Premature", prematureAfter);
+  check(
+    "D5 repeated runs never widen the work set",
+    prematureAfter?.first_name === "Premature",
+    prematureAfter,
+  );
 
   /* ============ E. Cross-user purge attempts ============ */
 
-  const forgeOther = await member.client
-    .from("account_deletion_requests")
-    .insert({
-      profile_id: premature.id,
-      status: "pending",
-      scheduled_purge_at: daysAgo(1),
-      requested_at: daysAgo(40),
-    });
-  check("E1 a member cannot file a deletion request for another account", Boolean(forgeOther.error), forgeOther.error?.code);
+  const forgeOther = await member.client.from("account_deletion_requests").insert({
+    profile_id: premature.id,
+    status: "pending",
+    scheduled_purge_at: daysAgo(1),
+    requested_at: daysAgo(40),
+  });
+  check(
+    "E1 a member cannot file a deletion request for another account",
+    Boolean(forgeOther.error),
+    forgeOther.error?.code,
+  );
 
   const backdateOther = await member.client
     .from("account_deletion_requests")
@@ -294,7 +382,11 @@ async function main() {
     .from("account_deletion_requests")
     .select("profile_id")
     .eq("profile_id", premature.id);
-  check("E3 a member cannot read another account's deletion request", (readOther.data ?? []).length === 0, readOther.data);
+  check(
+    "E3 a member cannot read another account's deletion request",
+    (readOther.data ?? []).length === 0,
+    readOther.data,
+  );
 
   const deleteOther = await member.client
     .from("account_deletion_requests")
@@ -318,15 +410,27 @@ async function main() {
     scrubOther.data,
   );
   const untouched = await profileRow(premature.id);
-  check("E6 the targeted account survived every cross-user attempt", untouched?.first_name === "Premature", untouched);
+  check(
+    "E6 the targeted account survived every cross-user attempt",
+    untouched?.first_name === "Premature",
+    untouched,
+  );
 
   /* ============ F. Billing ledger guard trigger ============ */
 
   const anonGuard = await anon.rpc("guard_billing_event_mutation" as never);
-  check("F1 a visitor cannot execute the ledger guard function", Boolean(anonGuard.error), anonGuard.error?.code);
+  check(
+    "F1 a visitor cannot execute the ledger guard function",
+    Boolean(anonGuard.error),
+    anonGuard.error?.code,
+  );
 
   const memberGuard = await member.client.rpc("guard_billing_event_mutation" as never);
-  check("F2 a signed-in member cannot execute the ledger guard function", Boolean(memberGuard.error), memberGuard.error?.code);
+  check(
+    "F2 a signed-in member cannot execute the ledger guard function",
+    Boolean(memberGuard.error),
+    memberGuard.error?.code,
+  );
 
   const guardEvent = `purge-audit-${stamp}`;
   const insertEvent = await admin.from("billing_events").insert({
@@ -337,7 +441,11 @@ async function main() {
     signature_verified: true,
     payload_summary: {},
   });
-  check("F3 the scheduler can still write a ledger row", !insertEvent.error, insertEvent.error?.message);
+  check(
+    "F3 the scheduler can still write a ledger row",
+    !insertEvent.error,
+    insertEvent.error?.message,
+  );
 
   const mutateEvent = await admin
     .from("billing_events")
@@ -366,7 +474,11 @@ async function main() {
     .select("event_type")
     .eq("provider_event_id", guardEvent)
     .maybeSingle();
-  check("F6 the ledger row is intact and unaltered", stillThere.data?.event_type === "audit.guard", stillThere.data);
+  check(
+    "F6 the ledger row is intact and unaltered",
+    stillThere.data?.event_type === "audit.guard",
+    stillThere.data,
+  );
 
   const memberLedger = await member.client.from("billing_events").select("id").limit(1);
   check(
@@ -387,7 +499,11 @@ async function main() {
   }
   check("G1 repeated scheduled purges are rate limited", limited);
   const afterLimit = await profileRow(premature.id);
-  check("G2 rate limiting never damages account data", afterLimit?.first_name === "Premature", afterLimit);
+  check(
+    "G2 rate limiting never damages account data",
+    afterLimit?.first_name === "Premature",
+    afterLimit,
+  );
 
   if (originalSecret === undefined) delete process.env["ACCOUNT_PURGE_SECRET"];
   else process.env["ACCOUNT_PURGE_SECRET"] = originalSecret;
