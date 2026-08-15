@@ -14,6 +14,7 @@ const suites = [
   { label: "Phase 6 (Apple IAP / Google Play store billing)", file: "tests/security/phase6-audit.ts" },
   { label: "Phase 6B (sandbox store integration, reconciliation, rate limits)", file: "tests/security/phase6b-integration.ts" },
   { label: "Phase 6C (production-store readiness, environment isolation)", file: "tests/security/phase6c-production.ts" },
+  { label: "Localization (Arabic feature flag, admin settings)", file: "tests/security/localization-audit.ts" },
   { label: "Maintenance (30-day purge scheduling, ledger guard privileges)", file: "tests/security/purge-audit.ts" },
 ];
 

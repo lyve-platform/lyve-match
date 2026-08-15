@@ -225,7 +225,6 @@ async function main() {
   }
 
   /* ----------------------------------------------------------- teardown */
-  await admin.rpc("admin_set_arabic_enabled").catch(() => undefined);
   await admin
     .from("app_settings")
     .update({ value: { arabic_enabled: original }, updated_by: null })
