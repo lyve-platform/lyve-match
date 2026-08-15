@@ -130,7 +130,7 @@ async function deletionRow(id: string) {
 
 async function cleanup() {
   for (const id of created) await admin.auth.admin.deleteUser(id).catch(() => undefined);
-  await admin.from("store_rate_limits").delete().eq("bucket", "cron:account-purge").catch(() => undefined);
+  await admin.from("store_rate_limits").delete().eq("bucket", "cron:account-purge");
 }
 
 async function main() {
