@@ -1909,6 +1909,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      inspect_purge_http_response: {
+        Args: { p_request_id: number }
+        Returns: {
+          purged: number
+          status_code: number
+        }[]
+      }
       is_blocked_pair: { Args: { a: string; b: string }; Returns: boolean }
       is_conversation_member: {
         Args: { p_conversation: string; p_profile: string }
