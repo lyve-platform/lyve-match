@@ -187,18 +187,6 @@ export const en = {
       },
     ],
   },
-  cta: {
-    title: "Ready to meet someone who fits your life?",
-    body: "Create a profile, set your intent, and start meeting people on your terms.",
-    primary: "Create Your Profile",
-    secondary: "Explore LYVE",
-    emailLabel: "Email address",
-    emailPlaceholder: "you@example.com",
-    submit: "Notify me",
-    errorRequired: "Please enter your email address.",
-    errorInvalid: "Please enter a valid email address.",
-    success: "Thanks — this is a Phase 0 preview, so nothing was sent or stored.",
-  },
   footer: {
     description:
       "A global 18+ platform for dating, relationships, and marriage. Meet. Match. Belong.",

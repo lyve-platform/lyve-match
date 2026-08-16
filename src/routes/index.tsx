@@ -9,7 +9,7 @@ import { Safety } from "@/components/lyve/Safety";
 import { Premium } from "@/components/lyve/Premium";
 import { Testimonials } from "@/components/lyve/Testimonials";
 import { Faq } from "@/components/lyve/Faq";
-import { FinalCta } from "@/components/lyve/FinalCta";
+
 import { Footer } from "@/components/lyve/Footer";
 
 const title = "LYVE — Meet. Match. Belong.";
@@ -58,7 +58,7 @@ function Index() {
         <Premium />
         <Testimonials />
         <Faq />
-        <FinalCta />
+        
       </main>
       <Footer />
     </div>
