@@ -17,6 +17,7 @@ import {
 import { getMyStanding, submitAppeal } from "@/lib/appeals.functions";
 import type {
   AccountStatus,
+  AdminRole,
   AppealStatus,
   CasePriority,
   CaseStatus,
