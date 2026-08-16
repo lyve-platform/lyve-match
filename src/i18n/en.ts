@@ -149,7 +149,6 @@ export const en = {
       "Super Like",
     ],
     note: "No payment provider is connected. Pricing and availability will be announced later.",
-    cta: "Join the waitlist",
   },
   testimonials: {
     title: "Stories from the community",
