@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Logo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
+import { NotificationBell } from "./NotificationBell";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/auth/AuthProvider";
 
@@ -48,6 +49,7 @@ export function Header() {
           <LanguageSwitcher className="hidden md:inline-flex" />
 
           <ThemeToggle />
+          {isAuthenticated ? <NotificationBell /> : null}
 
           <Button asChild className="hidden shrink-0 rounded-full sm:inline-flex">
             <Link to={isAuthenticated ? "/profile" : "/auth"}>
