@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
+import { useAuth } from "@/auth/AuthProvider";
 import {
   decideAppeal,
   getAdminMetrics,
@@ -37,10 +38,12 @@ export const adminKeys = {
 
 /** The viewer's own roles. Display only — the database gates every call. */
 export function useAdminSession() {
+  const { isAuthenticated, loading } = useAuth();
   const fetchSession = useServerFn(getAdminSession);
   return useQuery({
     queryKey: adminKeys.session,
     queryFn: () => fetchSession(),
+    enabled: !loading && isAuthenticated,
     staleTime: 60_000,
     retry: false,
   });
@@ -141,10 +144,12 @@ export function useModerationActions() {
 
 /** The signed-in member's own account standing, used for banners and appeals. */
 export function useMyStanding() {
+  const { isAuthenticated, loading } = useAuth();
   const fetchStanding = useServerFn(getMyStanding);
   return useQuery({
     queryKey: adminKeys.standing,
     queryFn: () => fetchStanding(),
+    enabled: !loading && isAuthenticated,
     staleTime: 60_000,
     retry: false,
   });
