@@ -247,10 +247,12 @@ export const en = {
     backToHome: "Back to home",
     statusLabel: "Status",
     statusValue: "Draft — not final",
+    effectiveLabel: "Last updated",
     draftTitle: "This document is a draft",
     draftBody:
       "The text below is a structural placeholder created during early product design. It is not legal advice, not a binding agreement, and it has not been reviewed by a lawyer. Final wording will be published before LYVE opens to the public.",
     outlineTitle: "What this document will cover",
+    contentsTitle: "Contents",
     questionsTitle: "Questions about this page",
     questionsBody:
       "Contact details will be published together with the final version of this document.",
@@ -258,90 +260,118 @@ export const en = {
       privacy: {
         title: "Privacy Policy",
         description:
-          "Draft outline of how LYVE plans to handle personal data, choices, and controls.",
+          "How LYVE collects, uses, stores, and deletes personal data, and how to request deletion.",
+        status: "In effect",
+        effective: "16 August 2026",
         intro:
-          "This page will explain what information LYVE collects, why it is collected, how long it is kept, and the controls you have over it.",
+          "LYVE is operated by LYVE, based in the United States. This policy explains what information we collect, why we collect it, where it is processed, how long we keep it, and how you can access or delete it.",
+        notice: {
+          title: "Data is processed in the United States",
+          body: "LYVE stores and processes member data on servers located in the United States. If you use LYVE from outside the United States, you understand that your information — including profile content, photos, and messages — is transferred to and processed in the United States, which may have different data protection laws than your country. By creating an account you consent to this transfer.",
+        },
+        contact: {
+          title: "Deletion requests and privacy contact",
+          body: "You can delete your account at any time from Settings, which starts a scheduled purge of your data. To request access, correction, export, or deletion in writing, open a support ticket inside the app with the category \"Account\"; that ticket is our official channel for privacy requests and is answered by the LYVE privacy team. Include the email address on your account so we can verify the request.",
+        },
         sections: [
           {
-            title: "Information we plan to collect",
-            body: "Account details, profile content you choose to share, and technical data needed to run the service.",
+            title: "Information we collect",
+            body: "Account details (email, date of birth, first name), profile content you choose to add (photos, prompts, preferences, relationship intent), messages you send on the platform, safety signals such as reports and blocks, and technical data needed to run and secure the service.",
           },
           {
-            title: "How information will be used",
-            body: "To operate your account, suggest people, keep the platform safe, and improve the product.",
+            title: "Why we use it",
+            body: "To create and operate your account, verify that you are 18 or older, suggest compatible members, deliver messages, detect abuse and fraud, meet legal obligations, and improve the product. We do not sell personal data.",
           },
           {
-            title: "What we will never display",
-            body: "Your phone number, email address, exact address, precise location, and payment data are never shown to other members.",
+            title: "What is never shown to other members",
+            body: "Your email address, phone number, exact address, precise GPS coordinates, date of birth, and any payment data are never displayed to other members. Location is shown only as an approximate area you have chosen.",
+          },
+          {
+            title: "Where data is processed",
+            body: "Data is hosted and processed in the United States by LYVE and its infrastructure providers, who act on our instructions under contract. Cross-border access by our support and safety staff is limited to what a request or investigation requires and is logged.",
           },
           {
             title: "Your choices and controls",
-            body: "Visibility settings, data export, correction, and account deletion will be described here in detail.",
+            body: "You can edit or remove profile content, change visibility settings, unmatch, block, and report at any time, request a copy of your data, correct inaccurate information, and delete your account.",
           },
           {
             title: "Retention and deletion",
-            body: "How long different categories of data are kept, and what happens after you delete your account.",
+            body: "Active account data is kept while your account exists. When you delete your account, your profile and photos stop being visible immediately and are permanently purged on a scheduled daily job. Limited records — safety reports, moderation decisions, audit logs, and billing records — are retained for a longer period where required for platform safety, fraud prevention, and legal or tax obligations.",
+          },
+          {
+            title: "Minors",
+            body: "LYVE is strictly for adults 18 and over. We do not knowingly collect data from anyone under 18; accounts found to belong to a minor are terminated and their data deleted.",
+          },
+          {
+            title: "Security",
+            body: "Access to member data is restricted by row-level database policies, role-based staff permissions, and audit logging. Photos are stored in private storage and served through short-lived signed links.",
+          },
+          {
+            title: "Changes to this policy",
+            body: "If we make material changes we will update the date at the top of this page and notify members in the app before the change takes effect.",
           },
         ],
       },
       terms: {
         title: "Terms of Service",
         description:
-          "Draft outline of the rules for using LYVE, eligibility, and account responsibilities.",
+          "The rules for using LYVE: 18+ eligibility, member conduct, account termination, and deletion.",
+        status: "In effect",
+        effective: "16 August 2026",
         intro:
-          "This page will set out the agreement between you and LYVE: who may use the service, what is expected of members, and how accounts can end.",
+          "These terms form the agreement between you and LYVE, based in the United States. By creating an account you accept them. If you do not accept them, do not use LYVE.",
+        notice: {
+          title: "LYVE is strictly 18+",
+          body: "You must be at least 18 years old to create or use a LYVE account. You confirm your date of birth at sign-up, and providing a false date of birth is a breach of these terms. Any account we determine belongs to a person under 18 is terminated immediately and its data deleted, without notice and without refund.",
+        },
+        contact: {
+          title: "Contact, appeals, and account deletion",
+          body: "Support, legal notices, appeals against moderation decisions, and account deletion requests all go through the in-app support ticket system, which is our official contact channel. You can also delete your account yourself at any time from Settings; deletion removes your profile from LYVE immediately and purges your data on our scheduled daily job.",
+        },
         sections: [
           {
             title: "Eligibility",
-            body: "LYVE is for adults aged 18 and over. Accounts belonging to minors are removed.",
+            body: "LYVE is available to adults aged 18 and over who are legally able to enter a contract and who have not previously been removed from the platform. One account per person.",
           },
           {
             title: "Your account",
-            body: "Accuracy of the information you provide, keeping access secure, and one account per person.",
+            body: "You are responsible for the accuracy of the information you provide, for keeping your credentials secure, and for all activity on your account. Impersonation and shared or resold accounts are prohibited.",
           },
           {
             title: "Acceptable use",
-            body: "Behaviour that is not allowed, including harassment, impersonation, solicitation, and fraud.",
+            body: "No harassment, hate speech, threats, sexual content involving minors, nudity sent without consent, impersonation, spam, solicitation, fundraising, commercial promotion, scams, or requests for money. No scraping, automated access, or attempts to bypass safety systems.",
           },
           {
             title: "Content you share",
-            body: "What you remain responsible for, and the limited permissions LYVE needs to display it.",
+            body: "You keep ownership of the content you post and remain responsible for it. You grant LYVE a limited, non-exclusive licence to host, display, and process that content solely to operate the service. You must have the right to share every photo you upload.",
           },
           {
-            title: "Suspension and ending an account",
-            body: "When access may be limited, how appeals work, and how you can close your account.",
+            title: "Safety, moderation, and appeals",
+            body: "We may warn, limit features, suspend, or terminate an account that breaches these terms or endangers members. Where a decision is not the result of a legal requirement or severe harm, you may appeal it through the in-app support ticket system.",
+          },
+          {
+            title: "Ending your account",
+            body: "You may delete your account at any time from Settings. We may terminate accounts for breach of these terms, for a legal requirement, or if we discontinue the service. Provisions on liability, disputes, and retained records survive termination.",
+          },
+          {
+            title: "Paid features",
+            body: "Premium features are not currently sold. If and when paid subscriptions launch, they will be billed through the Apple App Store or Google Play, and their pricing, renewal, cancellation, and refund terms will be published and shown to you before purchase.",
+          },
+          {
+            title: "Disclaimers and limits",
+            body: "LYVE does not run background checks on members and cannot guarantee any member's identity, conduct, or intentions. You are responsible for your own safety when interacting with or meeting other members. The service is provided \"as is\" to the maximum extent permitted by law.",
+          },
+          {
+            title: "Governing law",
+            body: "These terms are governed by the laws of the United States and the state in which LYVE is established, without regard to conflict-of-law rules.",
+          },
+          {
+            title: "Changes to these terms",
+            body: "We may update these terms; the date at the top of this page shows the last change. Material changes are announced in the app before they take effect, and continued use after that date means you accept them.",
           },
         ],
       },
-      guidelines: {
-        title: "Community Guidelines",
-        description:
-          "Draft outline of the behaviour LYVE expects and what is not tolerated.",
-        intro:
-          "These guidelines will describe the tone of the community: respectful, honest, and free from pressure.",
-        sections: [
-          {
-            title: "Be genuine",
-            body: "Use your own photos, your real age, and describe yourself honestly.",
-          },
-          {
-            title: "Be respectful",
-            body: "No harassment, hate speech, threats, or unsolicited explicit content.",
-          },
-          {
-            title: "Respect intent",
-            body: "Every member chooses what they are looking for. Do not pressure anyone to change it.",
-          },
-          {
-            title: "No commercial or financial activity",
-            body: "No selling, promotion, fundraising, or requests for money of any kind.",
-          },
-          {
-            title: "How enforcement will work",
-            body: "Warnings, feature limits, and removal, with a route to appeal a decision.",
-          },
-        ],
-      },
+
       safety: {
         title: "Safety Centre",
         description:
