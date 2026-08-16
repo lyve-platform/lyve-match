@@ -22,7 +22,7 @@ export const arAuth: typeof enAuth = {
       password: "كلمة المرور",
       confirmPassword: "تأكيد كلمة المرور",
       newPassword: "كلمة المرور الجديدة",
-      firstName: "الاسم الأول",
+      firstName: "الاسم المستعار",
       dateOfBirth: "تاريخ الميلاد",
       day: "اليوم",
       month: "الشهر",
@@ -94,7 +94,7 @@ export const arAuth: typeof enAuth = {
     },
     steps: {
       date_of_birth: { label: "تاريخ الميلاد", title: "متى وُلدت؟", body: "LYVE مخصصة للبالغين ١٨+ حصرًا." },
-      name: { label: "الاسم", title: "بماذا نناديك؟", body: "يظهر اسمك الأول في ملفك الشخصي." },
+      name: { label: "الاسم المستعار", title: "بماذا نناديك؟", body: "يظهر اسمك المستعار في ملفك الشخصي." },
       gender: { label: "الجنس", title: "كيف تعرّف عن نفسك؟", body: "أنت من يحدد ما يظهر." },
       interested_in: { label: "المهتم بالتعرف على", title: "بمن ترغب في التعرف؟", body: "اختر كل ما ينطبق." },
       intent: { label: "نية العلاقة", title: "عمّاذا تبحث؟", body: "أنت من يحدد نيتك، ولا نفترضها نيابةً عنك." },
