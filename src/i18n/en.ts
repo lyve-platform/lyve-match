@@ -181,10 +181,6 @@ export const en = {
         q: "Does LYVE cost money?",
         a: "LYVE will have a free tier. Premium features are still in design and no payment system is connected yet.",
       },
-      {
-        q: "Which languages does LYVE support?",
-        a: "English and Arabic at launch, with full right-to-left support. More languages will follow.",
-      },
     ],
   },
   footer: {
