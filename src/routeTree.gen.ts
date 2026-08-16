@@ -27,6 +27,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminStoreReadinessRouteImport } from './routes/_authenticated/admin.store-readiness'
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
@@ -126,6 +127,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
+} as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
     id: '/settings',
@@ -200,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
   '/api/public/cron/store-reconcile': typeof ApiPublicCronStoreReconcileRoute
@@ -216,7 +223,6 @@ export interface FileRoutesByTo {
   '/safety': typeof SafetyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
-  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/appeal': typeof AuthenticatedAppealRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/likes': typeof AuthenticatedLikesRoute
@@ -228,6 +234,7 @@ export interface FileRoutesByTo {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
   '/api/public/cron/store-reconcile': typeof ApiPublicCronStoreReconcileRoute
@@ -258,6 +265,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
   '/api/public/cron/store-reconcile': typeof ApiPublicCronStoreReconcileRoute
@@ -288,6 +296,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/store-readiness'
     | '/messages/$conversationId'
+    | '/admin/'
     | '/messages/'
     | '/api/public/cron/account-purge'
     | '/api/public/cron/store-reconcile'
@@ -304,7 +313,6 @@ export interface FileRouteTypes {
     | '/safety'
     | '/support'
     | '/terms'
-    | '/admin'
     | '/appeal'
     | '/discover'
     | '/likes'
@@ -316,6 +324,7 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/store-readiness'
     | '/messages/$conversationId'
+    | '/admin'
     | '/messages'
     | '/api/public/cron/account-purge'
     | '/api/public/cron/store-reconcile'
@@ -345,6 +354,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/store-readiness'
     | '/_authenticated/messages/$conversationId'
+    | '/_authenticated/admin/'
     | '/_authenticated/messages/'
     | '/api/public/cron/account-purge'
     | '/api/public/cron/store-reconcile'
@@ -498,6 +508,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/settings': {
       id: '/_authenticated/admin/settings'
       path: '/settings'
@@ -567,11 +584,13 @@ declare module '@tanstack/react-router' {
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminStoreReadinessRoute: typeof AuthenticatedAdminStoreReadinessRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminStoreReadinessRoute: AuthenticatedAdminStoreReadinessRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
