@@ -16,6 +16,33 @@ import { AuthProvider } from "../auth/AuthProvider";
 import { Toaster } from "@/components/ui/sonner";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 
+const moduleLoadRecoveryScript = `
+(() => {
+  const recoveryKey = "lyve:module-load-recovery";
+  const recoveryWindowMs = 15000;
+
+  const recover = () => {
+    const previousAttempt = Number(sessionStorage.getItem(recoveryKey) || 0);
+    const now = Date.now();
+    if (now - previousAttempt < recoveryWindowMs) return;
+    sessionStorage.setItem(recoveryKey, String(now));
+    window.location.reload();
+  };
+
+  window.addEventListener("vite:preloadError", (event) => {
+    event.preventDefault();
+    recover();
+  });
+
+  window.addEventListener("error", (event) => {
+    const target = event.target;
+    if (target instanceof HTMLScriptElement && target.type === "module") recover();
+  }, true);
+
+  window.setTimeout(() => sessionStorage.removeItem(recoveryKey), recoveryWindowMs);
+})();
+`;
+
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
@@ -129,6 +156,7 @@ function RootShell({ children }: { children: ReactNode }) {
         <HeadContent />
       </head>
       <body>
+        <script dangerouslySetInnerHTML={{ __html: moduleLoadRecoveryScript }} />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         {children}
         <Scripts />
