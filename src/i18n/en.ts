@@ -222,9 +222,19 @@ export const en = {
       safetyCentre: "Safety Centre",
     },
     comingSoon: "Coming soon",
+    companyInfo: {
+      nameLabel: "Company",
+      nameValue: "LYVE",
+      locationLabel: "Based in",
+      locationValue: "United States",
+      supportLabel: "Support",
+      supportValue:
+        "Official support runs through in-app tickets — open one from your account for questions, complaints, or reports.",
+    },
     rights: "All rights reserved.",
     ageNotice: "18+ only",
   },
+
   theme: {
     label: "Appearance",
     light: "Light",
