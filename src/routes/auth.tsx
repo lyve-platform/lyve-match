@@ -250,6 +250,19 @@ function AuthPage() {
             value={password}
             onChange={setPassword}
           />
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="remember-me"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked === true)}
+              />
+              <Label htmlFor="remember-me" className="text-sm font-normal">
+                {t.auth.actions.rememberMe}
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground">{t.auth.hints.rememberMe}</p>
+          </div>
           <Button type="submit" className="min-h-11 w-full rounded-full" disabled={busy}>
             {busy ? <Loader2 aria-hidden="true" className="animate-spin" /> : null}
             {t.auth.actions.signIn}
