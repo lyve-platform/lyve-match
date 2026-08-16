@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage } from "@/components/lyve/LegalPage";
 
-const title = "Terms of Service (Draft) — LYVE";
+const title = "Terms of Service — LYVE";
 const description =
-  "Draft outline of the rules for using LYVE, eligibility, and account responsibilities. Not a final legal document.";
+  "LYVE terms of service: 18+ eligibility, member conduct, content rules, account termination, and how to delete your account.";
 
 export const Route = createFileRoute("/terms")({
   head: () => ({
@@ -21,7 +21,6 @@ export const Route = createFileRoute("/terms")({
       { property: "og:image:alt", content: "LYVE — Meet. Match. Belong." },
       { name: "twitter:image", content: "https://lyve-connect-build.lovable.app/og-image.jpg" },
       { name: "twitter:image:alt", content: "LYVE — Meet. Match. Belong." },
-      { name: "robots", content: "noindex" },
     ],
   }),
   component: () => <LegalPage page="terms" />,
