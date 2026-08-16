@@ -27,6 +27,13 @@ export const enAuth = {
       month: "Month",
       year: "Year",
     },
+    nickname: {
+      checking: "Checking availability…",
+      available: "This nickname is available.",
+      taken: "This nickname is already taken. Please choose another one.",
+      invalid: "Enter a nickname between 1 and 60 characters.",
+      error: "We could not check this nickname right now. Try again.",
+    },
     hints: {
       rememberMe:
         "We keep your email on this device only. Your password is saved by your browser's password manager, never by LYVE.",

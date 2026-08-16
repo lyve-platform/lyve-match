@@ -13,6 +13,8 @@ import { useI18n } from "@/i18n";
 import { useAuth } from "@/auth/AuthProvider";
 import { checkDateOfBirth, toIsoDate, type DateParts } from "@/lib/age";
 import { emailSchema, passwordSchema, firstNameSchema, isValid } from "@/lib/validation";
+import { useNicknameAvailability } from "@/hooks/useNicknameAvailability";
+import { NicknameHint } from "@/components/lyve/NicknameHint";
 import { toErrorKey, type AppErrorKey } from "@/lib/auth-errors";
 
 const title = "Sign in to LYVE — Meet. Match. Belong.";
@@ -56,6 +58,7 @@ function AuthPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [firstName, setFirstName] = useState("");
+  const nicknameStatus = useNicknameAvailability(firstName);
   const [dob, setDob] = useState<DateParts>({ day: "", month: "", year: "" });
   const [errorKey, setErrorKey] = useState<AppErrorKey | null>(null);
   const [underage, setUnderage] = useState(false);
@@ -106,6 +109,7 @@ function AuthPage() {
     resetFeedback();
 
     if (!isValid(firstNameSchema, firstName)) return setErrorKey("missingFields");
+    if (nicknameStatus === "taken" || nicknameStatus === "checking") return;
     if (!isValid(emailSchema, email)) return setErrorKey("invalidEmail");
     if (!isValid(passwordSchema, password)) return setErrorKey("weakPassword");
     if (password !== confirmPassword) return setErrorKey("passwordMismatch");
@@ -300,8 +304,10 @@ function AuthPage() {
               maxLength={60}
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
+              aria-invalid={nicknameStatus === "taken"}
               required
             />
+            <NicknameHint status={nicknameStatus} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="signup-email">{t.auth.fields.email}</Label>

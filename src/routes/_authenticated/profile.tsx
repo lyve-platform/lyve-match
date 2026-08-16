@@ -11,6 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/auth/AuthProvider";
+import { useNicknameAvailability } from "@/hooks/useNicknameAvailability";
+import { NicknameHint } from "@/components/lyve/NicknameHint";
 import { useAccount, useInterests } from "@/hooks/useAccount";
 import {
   accountQueryKey,
@@ -110,6 +112,11 @@ function ProfilePage() {
     });
   }, [account]);
 
+  const nicknameStatus = useNicknameAvailability(
+    form?.first_name ?? "",
+    account?.profile.first_name ?? null,
+  );
+
   if (isLoading || !account || !form || !user) {
     return (
       <AccountShell title={t.profilePage.title} subtitle={t.profilePage.subtitle}>
@@ -128,6 +135,7 @@ function ProfilePage() {
 
   async function handleSave() {
     if (!user || !form) return;
+    if (nicknameStatus === "taken" || nicknameStatus === "checking") return;
     setBusy(true);
     setErrorKey(null);
     try {
@@ -188,7 +196,9 @@ function ProfilePage() {
               maxLength={60}
               value={form.first_name}
               onChange={(event) => update({ first_name: event.target.value })}
+              aria-invalid={nicknameStatus === "taken"}
             />
+            <NicknameHint status={nicknameStatus} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="profile-age">{t.profileFields.age}</Label>

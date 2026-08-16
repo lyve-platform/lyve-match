@@ -12,6 +12,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/auth/AuthProvider";
+import { useNicknameAvailability } from "@/hooks/useNicknameAvailability";
+import { NicknameHint } from "@/components/lyve/NicknameHint";
 import { useAccount, useInterests } from "@/hooks/useAccount";
 import {
   accountQueryKey,
@@ -84,6 +86,15 @@ function OnboardingPage() {
     };
   }, [account]);
 
+  const nicknameDraft =
+    typeof draft?.["firstName"] === "string"
+      ? (draft["firstName"] as string)
+      : account?.profile.first_name ?? "";
+  const nicknameStatus = useNicknameAvailability(
+    nicknameDraft,
+    account?.profile.first_name ?? null,
+  );
+
   if (isLoading || !account || !state || !user) {
     return (
       <AccountShell title={t.onboarding.title} subtitle={t.onboarding.subtitle}>
@@ -116,6 +127,7 @@ function OnboardingPage() {
           break;
         }
         case "name":
+          if (nicknameStatus === "taken") throw new Error("nickname taken");
           await updateProfile(user.id, { first_name: (value("firstName") as string).trim() || null });
           break;
         case "gender":
@@ -248,7 +260,9 @@ function OnboardingPage() {
               maxLength={60}
               value={value("firstName") as string}
               onChange={(event) => set("firstName", event.target.value)}
+              aria-invalid={nicknameStatus === "taken"}
             />
+            <NicknameHint status={nicknameStatus} />
           </div>
         ) : null}
 
