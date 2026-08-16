@@ -28,9 +28,17 @@ export const enSupport = {
     statuses: {
       open: "Open",
       in_progress: "In progress",
+      pending_user: "Awaiting your reply",
       resolved: "Resolved",
       closed: "Closed",
     },
+    thread: "Conversation",
+    staffReply: "LYVE support",
+    yourReply: "You",
+    replyPlaceholder: "Add a reply to this ticket…",
+    replySend: "Send reply",
+    replyClosed: "This ticket is closed. Open a new ticket if you still need help.",
+    replyError: "We couldn't send that reply.",
     privacyNote: "Never include passwords, card numbers, or personal contact details in a ticket.",
   },
 };

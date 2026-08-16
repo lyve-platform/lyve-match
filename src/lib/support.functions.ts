@@ -65,3 +65,53 @@ export const listMySupportTickets = createServerFn({ method: "POST" })
       createdAt: String(row.created_at),
     }));
   });
+
+export type SupportReply = {
+  id: string;
+  isStaff: boolean;
+  body: string;
+  createdAt: string;
+};
+
+export const listMyTicketReplies = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { ticketId: string }) => {
+    const ticketId = String(input?.ticketId ?? "");
+    if (!/^[0-9a-f-]{36}$/i.test(ticketId)) throw new Error("INVALID_TICKET");
+    return { ticketId };
+  })
+  .handler(async ({ data, context }): Promise<SupportReply[]> => {
+    const { data: rows, error } = await context.supabase
+      .from("support_ticket_replies")
+      .select("id, is_staff, body, created_at")
+      .eq("ticket_id", data.ticketId)
+      .order("created_at", { ascending: true })
+      .limit(100);
+    if (error) throw error;
+    return (rows ?? []).map((row) => ({
+      id: String(row.id),
+      isStaff: Boolean(row.is_staff),
+      body: String(row.body),
+      createdAt: String(row.created_at),
+    }));
+  });
+
+export const replyToMyTicket = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { ticketId: string; body: string }) => {
+    const ticketId = String(input?.ticketId ?? "");
+    if (!/^[0-9a-f-]{36}$/i.test(ticketId)) throw new Error("INVALID_TICKET");
+    const body = String(input?.body ?? "").trim().slice(0, 4000);
+    if (body.length < 2) throw new Error("INVALID_BODY");
+    return { ticketId, body };
+  })
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { error } = await context.supabase.from("support_ticket_replies").insert({
+      ticket_id: data.ticketId,
+      author_id: context.userId,
+      is_staff: false,
+      body: data.body,
+    });
+    if (error) throw error;
+    return { ok: true };
+  });

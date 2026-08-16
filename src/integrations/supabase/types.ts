@@ -1587,6 +1587,48 @@ export type Database = {
           },
         ]
       }
+      support_ticket_replies: {
+        Row: {
+          author_id: string | null
+          body: string
+          created_at: string
+          id: string
+          is_staff: boolean
+          ticket_id: string
+        }
+        Insert: {
+          author_id?: string | null
+          body: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          ticket_id: string
+        }
+        Update: {
+          author_id?: string | null
+          body?: string
+          created_at?: string
+          id?: string
+          is_staff?: boolean
+          ticket_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_ticket_replies_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "support_ticket_replies_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
           body: string
@@ -1802,6 +1844,22 @@ export type Database = {
           user_id: string
         }[]
       }
+      admin_list_support_tickets: {
+        Args: { p_limit?: number; p_offset?: number; p_status?: string }
+        Returns: {
+          body: string
+          category: string
+          created_at: string
+          first_name: string
+          id: string
+          last_reply_at: string
+          profile_id: string
+          reply_count: number
+          status: string
+          subject: string
+          updated_at: string
+        }[]
+      }
       admin_list_users: {
         Args: {
           p_limit?: number
@@ -1866,6 +1924,10 @@ export type Database = {
         }
         Returns: Database["public"]["Enums"]["account_status"]
       }
+      admin_reply_support_ticket: {
+        Args: { p_body?: string; p_status?: string; p_ticket: string }
+        Returns: undefined
+      }
       admin_revoke_entitlement: {
         Args: { p_entitlement: string; p_reason: string }
         Returns: boolean
@@ -1885,6 +1947,17 @@ export type Database = {
           p_target: string
         }
         Returns: boolean
+      }
+      admin_support_ticket_replies: {
+        Args: { p_ticket: string }
+        Returns: {
+          author_id: string
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          is_staff: boolean
+        }[]
       }
       admin_update_case: {
         Args: {
