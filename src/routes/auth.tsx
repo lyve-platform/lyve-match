@@ -58,6 +58,15 @@ function AuthPage() {
   const [underage, setUnderage] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [busy, setBusy] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(REMEMBERED_EMAIL_KEY);
+    if (saved) {
+      setEmail(saved);
+      setRememberMe(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!sessionLoading && isAuthenticated) {
