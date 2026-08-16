@@ -23,7 +23,9 @@ export const SAFETY_CATEGORIES = [
   "suspicious_link",
   "sexual_exploitation",
   "impersonation",
+  "contact_sharing",
 ] as const;
+
 
 export type SafetyCategory = (typeof SAFETY_CATEGORIES)[number];
 
