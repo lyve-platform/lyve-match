@@ -49,11 +49,16 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
           <header className="mt-6">
             <p className="inline-flex items-center gap-2 rounded-full border border-border bg-muted px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               <FileText aria-hidden="true" className="size-3.5" />
-              {t.legal.statusLabel}: {t.legal.statusValue}
+              {t.legal.statusLabel}: {content.status ?? t.legal.statusValue}
             </p>
             <h1 className="mt-4 text-3xl font-semibold text-balance md:text-4xl">
               {content.title}
             </h1>
+            {content.effective ? (
+              <p className="mt-2 text-sm text-muted-foreground">
+                {t.legal.effectiveLabel}: {content.effective}
+              </p>
+            ) : null}
             <p className="mt-4 text-pretty text-base text-muted-foreground">
               {content.intro}
             </p>
@@ -63,15 +68,13 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
             role="note"
             className="surface-panel mt-8 border-s-4 border-s-primary p-5"
           >
-            <h2 className="text-base font-semibold text-foreground">
-              {t.legal.draftTitle}
-            </h2>
-            <p className="mt-2 text-sm text-muted-foreground">{t.legal.draftBody}</p>
+            <h2 className="text-base font-semibold text-foreground">{noticeTitle}</h2>
+            <p className="mt-2 text-sm text-muted-foreground">{noticeBody}</p>
           </div>
 
           <section aria-labelledby="outline-heading" className="mt-12">
             <h2 id="outline-heading" className="text-xl font-semibold">
-              {t.legal.outlineTitle}
+              {content.notice ? t.legal.contentsTitle : t.legal.outlineTitle}
             </h2>
             <ol className="mt-6 space-y-4">
               {content.sections.map((section, index) => (
@@ -90,10 +93,17 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
 
           <section aria-labelledby="questions-heading" className="mt-12">
             <h2 id="questions-heading" className="text-xl font-semibold">
-              {t.legal.questionsTitle}
+              {questionsTitle}
             </h2>
-            <p className="mt-3 text-sm text-muted-foreground">{t.legal.questionsBody}</p>
+            <p className="mt-3 text-sm text-muted-foreground">{questionsBody}</p>
+            <Link
+              to="/support"
+              className="mt-4 inline-flex text-sm font-medium text-primary underline-offset-4 hover:underline"
+            >
+              {t.support.link}
+            </Link>
           </section>
+
         </div>
       </main>
       <Footer />
