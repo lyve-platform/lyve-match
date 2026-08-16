@@ -169,10 +169,10 @@ export const enAdmin = {
     failed: "We couldn't send your request. Please try again.",
   },
   adminSettings: {
-    title: "Settings",
+    title: "Platform settings",
     subtitle: "Platform configuration controlled by LYVE staff.",
     back: "Back to Trust & Safety",
-    link: "Settings",
+    link: "Platform settings",
     localization: "Localization",
     arabicLabel: "Arabic language",
     arabicHelp: "When disabled, Arabic is hidden from the language selector and cannot be forced by any client.",
