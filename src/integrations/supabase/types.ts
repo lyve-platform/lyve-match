@@ -1587,6 +1587,47 @@ export type Database = {
           },
         ]
       }
+      support_tickets: {
+        Row: {
+          body: string
+          category: string
+          created_at: string
+          id: string
+          profile_id: string
+          status: string
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          category?: string
+          created_at?: string
+          id?: string
+          profile_id: string
+          status?: string
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          category?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+          status?: string
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "support_tickets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -1741,6 +1782,15 @@ export type Database = {
           revoked_at: string
           source: Database["public"]["Enums"]["entitlement_source"]
           starts_at: string
+        }[]
+      }
+      admin_list_staff: {
+        Args: never
+        Returns: {
+          created_at: string
+          granted_by: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
         }[]
       }
       admin_list_users: {

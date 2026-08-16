@@ -16,6 +16,7 @@ import { Route as CommunityGuidelinesRouteImport } from './routes/community-guid
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SafetyRouteImport } from './routes/safety'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAppealRouteImport } from './routes/_authenticated/appeal'
@@ -68,6 +69,11 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const SafetyRoute = SafetyRouteImport.update({
   id: '/safety',
   path: '/safety',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
@@ -180,6 +186,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/safety': typeof SafetyRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/appeal': typeof AuthenticatedAppealRoute
@@ -207,6 +214,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/safety': typeof SafetyRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/appeal': typeof AuthenticatedAppealRoute
@@ -236,6 +244,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/safety': typeof SafetyRoute
+  '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/appeal': typeof AuthenticatedAppealRoute
@@ -265,6 +274,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/safety'
+    | '/support'
     | '/terms'
     | '/admin'
     | '/appeal'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/safety'
+    | '/support'
     | '/terms'
     | '/admin'
     | '/appeal'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/reset-password'
     | '/safety'
+    | '/support'
     | '/terms'
     | '/_authenticated/admin'
     | '/_authenticated/appeal'
@@ -349,6 +361,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SafetyRoute: typeof SafetyRoute
+  SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
   ApiPublicCronAccountPurgeRoute: typeof ApiPublicCronAccountPurgeRoute
   ApiPublicCronStoreReconcileRoute: typeof ApiPublicCronStoreReconcileRoute
@@ -406,6 +419,13 @@ declare module '@tanstack/react-router' {
       path: '/safety'
       fullPath: '/safety'
       preLoaderRoute: typeof SafetyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/terms': {
@@ -597,6 +617,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SafetyRoute: SafetyRoute,
+  SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
   ApiPublicCronAccountPurgeRoute: ApiPublicCronAccountPurgeRoute,
   ApiPublicCronStoreReconcileRoute: ApiPublicCronStoreReconcileRoute,

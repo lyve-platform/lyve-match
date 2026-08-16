@@ -1,0 +1,36 @@
+export const enSupport = {
+  support: {
+    link: "Open a support ticket",
+    title: "Support",
+    subtitle: "Open a ticket and the LYVE Trust & Safety team will follow up inside the app.",
+    signedOutTitle: "Sign in to open a ticket",
+    signedOutBody:
+      "Support runs through in-app tickets so we can verify your account before we answer.",
+    signIn: "Sign in",
+    category: "What is this about?",
+    categories: {
+      account: "My account",
+      safety: "Safety or a report",
+      billing: "Payments and Premium",
+      technical: "Something is broken",
+      other: "Something else",
+    },
+    subject: "Subject",
+    subjectPlaceholder: "Short summary",
+    message: "Details",
+    messagePlaceholder: "Tell us what happened. Never share passwords or payment details.",
+    submit: "Send ticket",
+    sending: "Sending…",
+    success: "Ticket received. You'll see updates here.",
+    error: "We couldn't send that. Please try again.",
+    myTickets: "Your tickets",
+    empty: "You haven't opened a ticket yet.",
+    statuses: {
+      open: "Open",
+      in_progress: "In progress",
+      resolved: "Resolved",
+      closed: "Closed",
+    },
+    privacyNote: "Never include passwords, card numbers, or personal contact details in a ticket.",
+  },
+};

@@ -101,6 +101,14 @@ export function Footer() {
                   {t.footer.companyInfo.supportLabel}
                 </dt>
                 <dd>{t.footer.companyInfo.supportValue}</dd>
+                <dd className="mt-2">
+                  <Link
+                    to="/support"
+                    className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    {t.support.link}
+                  </Link>
+                </dd>
               </div>
             </dl>
           </section>
