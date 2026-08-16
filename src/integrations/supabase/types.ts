@@ -1619,7 +1619,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      account_can_act: { Args: { _profile: string }; Returns: boolean }
       admin_billing_overview: {
         Args: { p_profile: string }
         Returns: {
@@ -1892,11 +1891,6 @@ export type Database = {
         }
         Returns: number
       }
-      can_read_conversation: {
-        Args: { p_conversation: string }
-        Returns: boolean
-      }
-      can_send_message: { Args: { p_conversation: string }; Returns: boolean }
       category_priority: {
         Args: { _category: Database["public"]["Enums"]["report_category"] }
         Returns: Database["public"]["Enums"]["moderation_priority"]
@@ -1927,23 +1921,12 @@ export type Database = {
           they_want_my_intent: boolean
         }[]
       }
-      effective_account_status: {
-        Args: { _profile: string }
-        Returns: Database["public"]["Enums"]["account_status"]
-      }
       has_entitlement: {
         Args: { _key: string; _user: string }
         Returns: boolean
       }
       has_permission: {
         Args: { _permission: string; _user_id: string }
-        Returns: boolean
-      }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
         Returns: boolean
       }
       inspect_purge_http_response: {
@@ -1953,12 +1936,6 @@ export type Database = {
           status_code: number
         }[]
       }
-      is_blocked_pair: { Args: { a: string; b: string }; Returns: boolean }
-      is_conversation_member: {
-        Args: { p_conversation: string; p_profile: string }
-        Returns: boolean
-      }
-      is_staff: { Args: { _user_id: string }; Returns: boolean }
       likes_received: {
         Args: never
         Returns: {
@@ -2028,7 +2005,6 @@ export type Database = {
           purged_profile_id: string
         }[]
       }
-      require_permission: { Args: { _permission: string }; Returns: string }
       scheduled_job_status: {
         Args: { p_jobname: string }
         Returns: {
