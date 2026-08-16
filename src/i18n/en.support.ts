@@ -42,6 +42,9 @@ export const enSupport = {
     privacyNote: "Never include passwords, card numbers, or personal contact details in a ticket.",
   },
   notifications: {
+    latestReply: "Latest reply",
+    unread: "unread",
+    viewTicket: "Open ticket",
     title: "Notifications",
     empty: "No notifications yet.",
     reply: "New reply from LYVE support",

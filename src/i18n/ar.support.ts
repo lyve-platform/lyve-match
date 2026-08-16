@@ -41,6 +41,9 @@ export const arSupport = {
     privacyNote: "لا تُدرج كلمات المرور أو أرقام البطاقات أو بيانات التواصل الشخصية في التذكرة.",
   },
   notifications: {
+    latestReply: "أحدث رد",
+    unread: "غير مقروء",
+    viewTicket: "فتح التذكرة",
     title: "الإشعارات",
     empty: "لا توجد إشعارات بعد.",
     reply: "رد جديد من دعم LYVE",
