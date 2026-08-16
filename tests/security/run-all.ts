@@ -46,6 +46,9 @@ for (const suite of suites) {
   summary.push(`${suite.label}: ${p}/${p + f} passed`);
 }
 
+// Guarantee no fixture member (or fixture staff role) survives the run.
+console.log(`\nPost-run sweep: ${await sweepTestAccounts()} fixture account(s) removed`);
+
 console.log("\n================ SECURITY SUITE SUMMARY ================");
 for (const line of summary) console.log(line);
 console.log(`TOTAL: ${totalPassed}/${totalPassed + totalFailed} passed, ${totalFailed} failed`);
