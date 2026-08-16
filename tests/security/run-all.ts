@@ -18,6 +18,13 @@ const suites = [
   { label: "Maintenance (30-day purge scheduling, ledger guard privileges)", file: "tests/security/purge-audit.ts" },
 ];
 
+import { sweepTestAccounts } from "./sweep-test-accounts";
+
+// Clear fixtures left behind by any previously aborted run before starting.
+console.log(`Pre-run sweep: ${await sweepTestAccounts()} stale fixture account(s) removed`);
+
+
+
 
 
 let totalPassed = 0;
