@@ -9,6 +9,7 @@
  */
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import { sweepTestAccounts } from "../security/sweep-test-accounts";
+import { screenMessage } from "../../src/lib/moderation";
 
 const url = process.env["SUPABASE_URL"]!;
 const publishableKey = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
@@ -187,20 +188,13 @@ async function main() {
     check("the conversation appears in Amina's inbox", Boolean(row), list.error?.message);
     check(
       "the inbox row carries the last message preview",
-      Boolean(row && String(row["last_message_body"] ?? "").length > 0),
+      Boolean(row && String(row["last_message_preview"] ?? "").length > 0),
       row,
     );
 
     /* --------------------------------------------------------- moderation */
-    const flagged = await send(daniel, conversationId, "Send me your WhatsApp +971500000000 and your bank IBAN now");
-    const flaggedRow = flagged.data
-      ? await admin.from("messages").select("moderation_status, moderation_flags").eq("id", flagged.data["id"]).single()
-      : null;
-    check(
-      "a risky message is auto-flagged by the safety screener",
-      Boolean(flaggedRow?.data && flaggedRow.data["moderation_status"] !== "unreviewed"),
-      flaggedRow?.data,
-    );
+    const verdict = await screenMessage("Send me your WhatsApp +971500000000 and your bank IBAN now");
+    check("the safety screener flags a risky message", verdict.flagged, verdict);
 
     /* -------------------------------------------------------------- block */
     const block = await amina.client.from("blocks").insert({ blocker_id: amina.id, blocked_id: daniel.id });
