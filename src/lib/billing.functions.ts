@@ -53,6 +53,8 @@ export const getBillingSnapshot = createServerFn({ method: "POST" })
   .handler(async ({ context }): Promise<BillingSnapshot> => {
     const providerId = configuredProviderId();
     const provider = resolveProvider(providerId);
+    const { data: paymentsOn } = await context.supabase.rpc("payments_enabled");
+    const activated = paymentsOn === true;
 
     const [{ subscription }, entitlements, account] = await Promise.all([
       loadOwnSubscription(context.supabase, context.userId),
@@ -63,8 +65,8 @@ export const getBillingSnapshot = createServerFn({ method: "POST" })
     return {
       provider: providerId,
       stage: BILLING_STAGE,
-      checkoutOffered: isCheckoutOffered(providerId) && provider.supportsCheckout,
-      checkoutIsLive: isLiveCheckout(providerId) && provider.isLive,
+      checkoutOffered: activated && isCheckoutOffered(providerId) && provider.supportsCheckout,
+      checkoutIsLive: activated && isLiveCheckout(providerId) && provider.isLive,
       portalSupported: provider.supportsPortal,
       currency: account.currency,
       locale: account.locale,
@@ -91,6 +93,12 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<CheckoutOutcome> => {
     const provider = resolveProvider();
     const plan = planByCode(data.planCode)!;
+
+    // Admin kill-switch: payments must be activated in the staff console first.
+    const { data: paymentsOn } = await context.supabase.rpc("payments_enabled");
+    if (paymentsOn !== true) {
+      return { mode: "none", code: "CHECKOUT_NOT_CONNECTED", url: null, sessionId: null };
+    }
 
     if (!provider.supportsCheckout) {
       return { mode: "none", code: "CHECKOUT_NOT_CONNECTED", url: null, sessionId: null };
@@ -195,6 +203,8 @@ export const restoreSubscription = createServerFn({ method: "POST" })
   .handler(async ({ context }): Promise<BillingSnapshot> => {
     const providerId = configuredProviderId();
     const provider = resolveProvider(providerId);
+    const { data: paymentsOn } = await context.supabase.rpc("payments_enabled");
+    const activated = paymentsOn === true;
     const [{ subscription }, entitlements, account] = await Promise.all([
       loadOwnSubscription(context.supabase, context.userId),
       loadOwnEntitlements(context.supabase, context.userId),
@@ -203,8 +213,8 @@ export const restoreSubscription = createServerFn({ method: "POST" })
     return {
       provider: providerId,
       stage: BILLING_STAGE,
-      checkoutOffered: isCheckoutOffered(providerId) && provider.supportsCheckout,
-      checkoutIsLive: isLiveCheckout(providerId) && provider.isLive,
+      checkoutOffered: activated && isCheckoutOffered(providerId) && provider.supportsCheckout,
+      checkoutIsLive: activated && isLiveCheckout(providerId) && provider.isLive,
       portalSupported: provider.supportsPortal,
       currency: account.currency,
       locale: account.locale,

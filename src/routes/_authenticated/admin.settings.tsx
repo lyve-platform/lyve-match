@@ -2,6 +2,7 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { useI18n } from "@/i18n";
 import { useAdminSession } from "@/hooks/useAdmin";
 import { useLocalizationSetting, useSetArabicEnabled } from "@/hooks/useLocalizationAdmin";
+import { usePaymentsSetting, useSetPaymentsEnabled } from "@/hooks/usePaymentsAdmin";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -34,8 +35,12 @@ function AdminSettingsPage() {
   const permissions = session.data?.permissions ?? [];
   const canEdit = permissions.includes("settings.localization");
 
+  const canEditPayments = permissions.includes("settings.billing");
+
   const setting = useLocalizationSetting(isStaff);
   const toggle = useSetArabicEnabled();
+  const payments = usePaymentsSetting(isStaff);
+  const togglePayments = useSetPaymentsEnabled();
 
   if (session.isPending) {
     return (
@@ -57,6 +62,7 @@ function AdminSettingsPage() {
 
   const enabled = setting.data?.arabicEnabled === true;
   const updatedAt = setting.data?.updatedAt;
+  const paymentsOn = payments.data?.paymentsEnabled === true;
 
   return (
     <AccountShell title={t.adminSettings.title} subtitle={t.adminSettings.subtitle}>
@@ -125,6 +131,74 @@ function AdminSettingsPage() {
                 <p className="text-sm text-destructive">{t.adminSettings.failed}</p>
               ) : null}
               {toggle.isSuccess ? (
+                <p className="text-sm text-muted-foreground">{t.adminSettings.saved}</p>
+              ) : null}
+            </>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>{t.adminSettings.payments}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          {payments.isPending ? (
+            <p className="text-sm text-muted-foreground">{t.adminSettings.loading}</p>
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-4">
+                <div className="space-y-1">
+                  <Label htmlFor="payments-toggle" className="text-base">
+                    {t.adminSettings.paymentsLabel}
+                  </Label>
+                  <p className="max-w-prose text-sm text-muted-foreground">
+                    {t.adminSettings.paymentsHelp}
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant={paymentsOn ? "default" : "secondary"}>
+                    {paymentsOn ? t.adminSettings.paymentsActive : t.adminSettings.paymentsInactive}
+                  </Badge>
+                  <Switch
+                    id="payments-toggle"
+                    checked={paymentsOn}
+                    disabled={!canEditPayments || togglePayments.isPending}
+                    onCheckedChange={(next) => togglePayments.mutate(next)}
+                  />
+                </div>
+              </div>
+
+              <dl className="grid gap-2 text-sm sm:grid-cols-2">
+                <div>
+                  <dt className="text-muted-foreground">{t.adminSettings.status}</dt>
+                  <dd>{paymentsOn ? t.adminSettings.paymentsActive : t.adminSettings.paymentsInactive}</dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">{t.adminSettings.lastChanged}</dt>
+                  <dd>
+                    {payments.data?.updatedAt && payments.data?.updatedBy
+                      ? new Date(payments.data.updatedAt).toLocaleString()
+                      : t.adminSettings.never}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted-foreground">{t.adminSettings.changedBy}</dt>
+                  <dd>
+                    {payments.data?.updatedBy
+                      ? (payments.data.updatedByName ?? payments.data.updatedBy)
+                      : t.adminSettings.system}
+                  </dd>
+                </div>
+              </dl>
+
+              {!canEditPayments ? (
+                <p className="text-sm text-muted-foreground">{t.adminSettings.paymentsDenied}</p>
+              ) : null}
+              {togglePayments.isError ? (
+                <p className="text-sm text-destructive">{t.adminSettings.failed}</p>
+              ) : null}
+              {togglePayments.isSuccess ? (
                 <p className="text-sm text-muted-foreground">{t.adminSettings.saved}</p>
               ) : null}
             </>

@@ -188,6 +188,12 @@ export const enAdmin = {
     saved: "Setting updated.",
     failed: "We couldn't update this setting.",
     loading: "Loading…",
+    payments: "Payments",
+    paymentsLabel: "Activate payments",
+    paymentsHelp: "When off, no checkout can be started and no store receipt is accepted, on any client. Turn on only after the store rails are verified.",
+    paymentsActive: "Payments active",
+    paymentsInactive: "Payments off",
+    paymentsDenied: "Only a Super Admin can activate payments.",
   },
   storeReadiness: {
     title: "Store readiness",

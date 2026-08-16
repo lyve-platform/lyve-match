@@ -1680,6 +1680,15 @@ export type Database = {
           trial_ends_at: string
         }[]
       }
+      admin_billing_setting: {
+        Args: never
+        Returns: {
+          payments_enabled: boolean
+          updated_at: string
+          updated_by: string
+          updated_by_name: string
+        }[]
+      }
       admin_case_reports: {
         Args: { p_case: string }
         Returns: {
@@ -1862,6 +1871,10 @@ export type Database = {
         Returns: boolean
       }
       admin_set_arabic_enabled: {
+        Args: { p_enabled: boolean }
+        Returns: boolean
+      }
+      admin_set_payments_enabled: {
         Args: { p_enabled: boolean }
         Returns: boolean
       }
@@ -2048,6 +2061,7 @@ export type Database = {
           relationship_intent: Database["public"]["Enums"]["relationship_intent"]
         }[]
       }
+      payments_enabled: { Args: never; Returns: boolean }
       profile_completeness: { Args: { p_id: string }; Returns: number }
       purge_expired_accounts: {
         Args: { p_dry_run?: boolean }

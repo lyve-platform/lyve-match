@@ -21,6 +21,10 @@ export const linkStorePurchase = createServerFn({ method: "POST" })
   .handler(async ({ data, context }): Promise<{ result: StoreLinkResult }> => {
     if (!isStoreId(data.store)) return { result: "VERIFICATION_FAILED" };
 
+    // Admin kill-switch: no store receipt is processed while payments are off.
+    const { data: paymentsOn } = await context.supabase.rpc("payments_enabled");
+    if (paymentsOn !== true) return { result: "VERIFICATION_FAILED" };
+
     // Linking is the only member-reachable path into store verification, so it
     // is throttled per account: receipt guessing is not a viable strategy.
     const { consumeRate, raiseStoreAlert, RATE_LIMITS } = await import("@/lib/billing/store-ops.server");

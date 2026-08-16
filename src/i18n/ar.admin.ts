@@ -188,6 +188,12 @@ export const arAdmin = {
     saved: "تم تحديث الإعداد.",
     failed: "تعذّر تحديث الإعداد.",
     loading: "جارٍ التحميل…",
+    payments: "المدفوعات",
+    paymentsLabel: "تفعيل الدفع",
+    paymentsHelp: "عند الإيقاف لا يمكن بدء أي عملية دفع ولا قبول أي إيصال شراء من المتاجر على أي جهاز. فعّله فقط بعد التحقق من جاهزية المتاجر.",
+    paymentsActive: "الدفع مُفعّل",
+    paymentsInactive: "الدفع مُعطّل",
+    paymentsDenied: "تفعيل الدفع متاح للسوبر أدمن فقط.",
   },
   storeReadiness: {
     title: "جاهزية المتجر",
