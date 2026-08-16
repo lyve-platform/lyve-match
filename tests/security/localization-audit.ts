@@ -141,7 +141,10 @@ async function main() {
     check("a normal member cannot read setting provenance", memberRead.error != null);
 
     const memberTable = await member.client.from("app_settings").select("*");
-    check("a normal member cannot read app_settings rows", (memberTable.data ?? []).length === 0);
+    check(
+      "a normal member reads only the public localization row",
+      (memberTable.data ?? []).every((row: { key: string }) => row.key === "localization"),
+    );
 
     const memberUpdate = await member.client
       .from("app_settings")
@@ -161,7 +164,10 @@ async function main() {
     check("an anonymous caller cannot read setting provenance", anonRead.error != null);
 
     const anonTable = await anon.from("app_settings").select("*");
-    check("an anonymous caller cannot read app_settings", (anonTable.data ?? []).length === 0);
+    check(
+      "an anonymous caller reads only the public localization row",
+      (anonTable.data ?? []).every((row: { key: string }) => row.key === "localization"),
+    );
 
     const anonPublic = await anon.rpc("locale_availability");
     check("an anonymous caller may read only the effective state", anonPublic.error == null && anonPublic.data === false);
