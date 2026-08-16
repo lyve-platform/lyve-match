@@ -36,6 +36,7 @@ export const enAuth = {
       required: "Required",
     },
     actions: {
+      rememberMe: "Remember my email",
       signIn: "Sign in",
       signUp: "Create account",
       forgotPassword: "Forgot your password?",

@@ -38,6 +38,7 @@ export const arAuth: typeof enAuth = {
       required: "مطلوب",
     },
     actions: {
+      rememberMe: "تذكّر بريدي الإلكتروني",
       signIn: "تسجيل الدخول",
       signUp: "إنشاء حساب",
       forgotPassword: "هل نسيت كلمة المرور؟",
