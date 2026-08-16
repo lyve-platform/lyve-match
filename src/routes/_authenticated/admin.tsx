@@ -11,6 +11,7 @@ import {
   UsersPanel,
 } from "@/components/lyve/AdminPanels";
 import { AdminBillingPanel } from "@/components/lyve/AdminBillingPanel";
+import { AdminStaffPanel } from "@/components/lyve/AdminStaffPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -68,6 +69,7 @@ function AdminPage() {
   const canSeeAppeals = permissions.includes("appeals.view");
   const canSeeAudit = permissions.includes("audit.view");
   const canSeeMetrics = permissions.includes("metrics.view");
+  const canManageRoles = permissions.includes("roles.manage");
   const canSeeBilling =
     permissions.includes("billing.view") || permissions.includes("billing.view.limited");
 
@@ -97,6 +99,7 @@ function AdminPage() {
           {canSeeAppeals ? <TabsTrigger value="appeals">{t.admin.tabs.appeals}</TabsTrigger> : null}
           {canSeeBilling ? <TabsTrigger value="billing">{t.adminBilling.tab}</TabsTrigger> : null}
           {canSeeAudit ? <TabsTrigger value="audit">{t.admin.tabs.audit}</TabsTrigger> : null}
+          {canManageRoles ? <TabsTrigger value="staff">{t.admin.tabs.staff}</TabsTrigger> : null}
         </TabsList>
 
         <TabsContent value="overview" className="mt-6">
@@ -116,6 +119,9 @@ function AdminPage() {
         </TabsContent>
         <TabsContent value="audit" className="mt-6">
           <AuditPanel enabled={canSeeAudit && tab === "audit"} />
+        </TabsContent>
+        <TabsContent value="staff" className="mt-6">
+          <AdminStaffPanel enabled={canManageRoles && tab === "staff"} />
         </TabsContent>
       </Tabs>
     </AccountShell>
