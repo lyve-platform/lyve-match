@@ -27,6 +27,7 @@ import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
+import { Route as AuthenticatedAdminStoreReadinessRouteImport } from './routes/_authenticated/admin.store-readiness'
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
 import { Route as ApiPublicCronAccountPurgeRouteImport } from './routes/api/public/cron/account-purge'
@@ -125,6 +126,12 @@ const AuthenticatedAdminSettingsRoute =
     path: '/settings',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminStoreReadinessRoute =
+  AuthenticatedAdminStoreReadinessRouteImport.update({
+    id: '/store-readiness',
+    path: '/store-readiness',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedMessagesIndexRoute =
   AuthenticatedMessagesIndexRouteImport.update({
     id: '/messages/',
@@ -184,6 +191,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
@@ -210,6 +218,7 @@ export interface FileRoutesByTo {
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
@@ -238,6 +247,7 @@ export interface FileRoutesById {
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
+  '/_authenticated/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
@@ -266,6 +276,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/admin/settings'
+    | '/admin/store-readiness'
     | '/messages/$conversationId'
     | '/messages/'
     | '/api/public/cron/account-purge'
@@ -292,6 +303,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/settings'
     | '/admin/settings'
+    | '/admin/store-readiness'
     | '/messages/$conversationId'
     | '/messages'
     | '/api/public/cron/account-purge'
@@ -319,6 +331,7 @@ export interface FileRouteTypes {
     | '/_authenticated/profile'
     | '/_authenticated/settings'
     | '/_authenticated/admin/settings'
+    | '/_authenticated/admin/store-readiness'
     | '/_authenticated/messages/$conversationId'
     | '/_authenticated/messages/'
     | '/api/public/cron/account-purge'
@@ -472,6 +485,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/store-readiness': {
+      id: '/_authenticated/admin/store-readiness'
+      path: '/store-readiness'
+      fullPath: '/admin/store-readiness'
+      preLoaderRoute: typeof AuthenticatedAdminStoreReadinessRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/messages/': {
       id: '/_authenticated/messages/'
       path: '/messages'
@@ -526,10 +546,12 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminStoreReadinessRoute: typeof AuthenticatedAdminStoreReadinessRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+  AuthenticatedAdminStoreReadinessRoute: AuthenticatedAdminStoreReadinessRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
