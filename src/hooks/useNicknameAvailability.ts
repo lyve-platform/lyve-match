@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { checkNicknameAvailable } from "@/lib/nickname.functions";
 import { firstNameSchema, isValid } from "@/lib/validation";
 
 export type NicknameStatus = "idle" | "invalid" | "checking" | "available" | "taken" | "error";
