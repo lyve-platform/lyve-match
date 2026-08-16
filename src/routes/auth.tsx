@@ -8,6 +8,7 @@ import { DateOfBirthField } from "@/components/auth/DateOfBirthField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useI18n } from "@/i18n";
 import { useAuth } from "@/auth/AuthProvider";
 import { checkDateOfBirth, toIsoDate, type DateParts } from "@/lib/age";
@@ -40,6 +41,8 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const REMEMBERED_EMAIL_KEY = "lyve.remembered-email";
+
 type Mode = "signin" | "signup" | "forgot";
 type Notice = "checkEmail" | "resetSent" | "verificationResent" | null;
 
@@ -58,6 +61,15 @@ function AuthPage() {
   const [underage, setUnderage] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [busy, setBusy] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(REMEMBERED_EMAIL_KEY);
+    if (saved) {
+      setEmail(saved);
+      setRememberMe(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!sessionLoading && isAuthenticated) {
@@ -81,6 +93,11 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setBusy(false);
     if (error) return setErrorKey(toErrorKey(error));
+    if (rememberMe) {
+      window.localStorage.setItem(REMEMBERED_EMAIL_KEY, email.trim());
+    } else {
+      window.localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+    }
     navigate({ to: "/profile", replace: true });
   }
 
@@ -234,6 +251,19 @@ function AuthPage() {
             value={password}
             onChange={setPassword}
           />
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <Checkbox
+                id="remember-me"
+                checked={rememberMe}
+                onCheckedChange={(checked) => setRememberMe(checked === true)}
+              />
+              <Label htmlFor="remember-me" className="text-sm font-normal">
+                {t.auth.actions.rememberMe}
+              </Label>
+            </div>
+            <p className="text-xs text-muted-foreground">{t.auth.hints.rememberMe}</p>
+          </div>
           <Button type="submit" className="min-h-11 w-full rounded-full" disabled={busy}>
             {busy ? <Loader2 aria-hidden="true" className="animate-spin" /> : null}
             {t.auth.actions.signIn}

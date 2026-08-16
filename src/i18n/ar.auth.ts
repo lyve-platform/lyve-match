@@ -30,12 +30,15 @@ export const arAuth: typeof enAuth = {
       year: "السنة",
     },
     hints: {
+      rememberMe:
+        "نحفظ بريدك على هذا الجهاز فقط. أمّا كلمة المرور فيحفظها مدير كلمات المرور في متصفحك، ولا تحفظها LYVE.",
       password: "٨ أحرف على الأقل، مع حرف ورقم.",
       dateOfBirth: "نستخدمه فقط للتأكد من أنك ١٨ عامًا أو أكثر ولعرض عمرك.",
       optional: "اختياري",
       required: "مطلوب",
     },
     actions: {
+      rememberMe: "تذكّر بريدي الإلكتروني",
       signIn: "تسجيل الدخول",
       signUp: "إنشاء حساب",
       forgotPassword: "هل نسيت كلمة المرور؟",

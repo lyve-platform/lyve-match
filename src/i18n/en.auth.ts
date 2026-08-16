@@ -28,12 +28,15 @@ export const enAuth = {
       year: "Year",
     },
     hints: {
+      rememberMe:
+        "We keep your email on this device only. Your password is saved by your browser's password manager, never by LYVE.",
       password: "At least 8 characters, including a letter and a number.",
       dateOfBirth: "We use this only to confirm you are 18 or older and to show your age.",
       optional: "Optional",
       required: "Required",
     },
     actions: {
+      rememberMe: "Remember my email",
       signIn: "Sign in",
       signUp: "Create account",
       forgotPassword: "Forgot your password?",
