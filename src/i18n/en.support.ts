@@ -41,4 +41,10 @@ export const enSupport = {
     replyError: "We couldn't send that reply.",
     privacyNote: "Never include passwords, card numbers, or personal contact details in a ticket.",
   },
+  notifications: {
+    title: "Notifications",
+    empty: "No notifications yet.",
+    reply: "New reply from LYVE support",
+    status: "Support ticket status updated",
+  },
 };
