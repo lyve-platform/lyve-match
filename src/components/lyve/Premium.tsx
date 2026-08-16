@@ -1,6 +1,5 @@
 import { Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { Section } from "./Section";
 
