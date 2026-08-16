@@ -27,17 +27,8 @@ export function Footer() {
         { label: t.footer.links.safetyCentre, to: "/safety" },
       ],
     },
-
-    {
-      title: t.footer.legal,
-      links: [
-        { label: t.footer.links.privacy, to: "/privacy" },
-        { label: t.footer.links.terms, to: "/terms" },
-        { label: t.footer.links.guidelines, to: "/community-guidelines" },
-        { label: t.footer.links.safetyCentre, to: "/safety" },
-      ],
-    },
   ];
+
 
   return (
     <footer className="border-t border-border bg-surface px-4 py-12 sm:px-6">
