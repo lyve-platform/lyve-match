@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { LegalPage } from "@/components/lyve/LegalPage";
 
-const title = "Privacy Policy (Draft) — LYVE";
+const title = "Privacy Policy — LYVE";
 const description =
-  "Draft outline of how LYVE plans to handle personal data, member choices, and privacy controls. Not a final legal document.";
+  "How LYVE collects, uses, and deletes personal data, why it is processed in the United States, and how to request deletion.";
 
 export const Route = createFileRoute("/privacy")({
   head: () => ({
@@ -21,7 +21,6 @@ export const Route = createFileRoute("/privacy")({
       { property: "og:image:alt", content: "LYVE — Meet. Match. Belong." },
       { name: "twitter:image", content: "https://lyve-connect-build.lovable.app/og-image.jpg" },
       { name: "twitter:image:alt", content: "LYVE — Meet. Match. Belong." },
-      { name: "robots", content: "noindex" },
     ],
   }),
   component: () => <LegalPage page="privacy" />,
