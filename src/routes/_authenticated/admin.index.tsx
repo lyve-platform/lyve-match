@@ -12,6 +12,7 @@ import {
 } from "@/components/lyve/AdminPanels";
 import { AdminBillingPanel } from "@/components/lyve/AdminBillingPanel";
 import { AdminStaffPanel } from "@/components/lyve/AdminStaffPanel";
+import { AdminSupportPanel } from "@/components/lyve/AdminSupportPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -70,6 +71,7 @@ function AdminPage() {
   const canSeeAudit = permissions.includes("audit.view");
   const canSeeMetrics = permissions.includes("metrics.view");
   const canManageRoles = permissions.includes("roles.manage");
+  const canSeeSupport = permissions.includes("support.tickets.view");
   const canSeeBilling =
     permissions.includes("billing.view") || permissions.includes("billing.view.limited");
 
@@ -98,6 +100,9 @@ function AdminPage() {
           {canSeeUsers ? <TabsTrigger value="users">{t.admin.tabs.users}</TabsTrigger> : null}
           {canSeeAppeals ? <TabsTrigger value="appeals">{t.admin.tabs.appeals}</TabsTrigger> : null}
           {canSeeBilling ? <TabsTrigger value="billing">{t.adminBilling.tab}</TabsTrigger> : null}
+          {canSeeSupport ? (
+            <TabsTrigger value="support">{t.adminSupport.title}</TabsTrigger>
+          ) : null}
           {canSeeAudit ? <TabsTrigger value="audit">{t.admin.tabs.audit}</TabsTrigger> : null}
           {canManageRoles ? <TabsTrigger value="staff">{t.admin.tabs.staff}</TabsTrigger> : null}
         </TabsList>
@@ -116,6 +121,12 @@ function AdminPage() {
         </TabsContent>
         <TabsContent value="billing" className="mt-6">
           <AdminBillingPanel enabled={canSeeBilling && tab === "billing"} permissions={permissions} />
+        </TabsContent>
+        <TabsContent value="support" className="mt-6">
+          <AdminSupportPanel
+            enabled={canSeeSupport && tab === "support"}
+            permissions={permissions}
+          />
         </TabsContent>
         <TabsContent value="audit" className="mt-6">
           <AuditPanel enabled={canSeeAudit && tab === "audit"} />

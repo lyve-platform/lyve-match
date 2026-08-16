@@ -15,6 +15,8 @@ import {
   SUPPORT_CATEGORIES,
   createSupportTicket,
   listMySupportTickets,
+  listMyTicketReplies,
+  replyToMyTicket,
   type SupportCategory,
 } from "@/lib/support.functions";
 
@@ -179,6 +181,7 @@ function TicketForm() {
                 <p className="mt-2 whitespace-pre-wrap text-sm text-muted-foreground">
                   {ticket.body}
                 </p>
+                <TicketThread ticketId={ticket.id} status={ticket.status} />
               </li>
             ))}
           </ul>
@@ -187,5 +190,82 @@ function TicketForm() {
         )}
       </section>
     </>
+  );
+}
+
+/** Member-visible conversation for one of their own tickets. */
+function TicketThread({ ticketId, status }: { ticketId: string; status: string }) {
+  const { t } = useI18n();
+  const queryClient = useQueryClient();
+  const fetchReplies = useServerFn(listMyTicketReplies);
+  const sendReply = useServerFn(replyToMyTicket);
+  const [body, setBody] = useState("");
+
+  const replies = useQuery({
+    queryKey: ["support", "thread", ticketId],
+    queryFn: () => fetchReplies({ data: { ticketId } }),
+    retry: false,
+  });
+
+  const mutation = useMutation({
+    mutationFn: (value: string) => sendReply({ data: { ticketId, body: value } }),
+    onSuccess: () => {
+      setBody("");
+      void queryClient.invalidateQueries({ queryKey: ["support", "thread", ticketId] });
+      void queryClient.invalidateQueries({ queryKey: ["support", "tickets"] });
+    },
+  });
+
+  const isClosed = status === "closed" || status === "resolved";
+
+  return (
+    <div className="mt-4 space-y-3 border-t border-border pt-4">
+      {replies.data && replies.data.length > 0 ? (
+        <ul className="space-y-2">
+          {replies.data.map((row) => (
+            <li
+              key={row.id}
+              className={`rounded-lg p-3 text-sm ${
+                row.isStaff ? "bg-primary/10 text-foreground" : "bg-muted text-foreground"
+              }`}
+            >
+              <div className="mb-1 text-xs text-muted-foreground">
+                {row.isStaff ? t.support.staffReply : t.support.yourReply} ·{" "}
+                {new Date(row.createdAt).toLocaleString()}
+              </div>
+              <p className="whitespace-pre-wrap">{row.body}</p>
+            </li>
+          ))}
+        </ul>
+      ) : null}
+
+      {isClosed ? (
+        <p className="text-xs text-muted-foreground">{t.support.replyClosed}</p>
+      ) : (
+        <div className="space-y-2">
+          <Textarea
+            rows={3}
+            maxLength={4000}
+            value={body}
+            placeholder={t.support.replyPlaceholder}
+            onChange={(event) => setBody(event.target.value)}
+          />
+          <div className="flex items-center gap-3">
+            <Button
+              type="button"
+              size="sm"
+              className="rounded-full"
+              disabled={body.trim().length < 2 || mutation.isPending}
+              onClick={() => mutation.mutate(body.trim())}
+            >
+              {t.support.replySend}
+            </Button>
+            {mutation.isError ? (
+              <span className="text-sm text-destructive">{t.support.replyError}</span>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

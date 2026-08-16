@@ -27,9 +27,17 @@ export const arSupport = {
     statuses: {
       open: "مفتوحة",
       in_progress: "قيد المعالجة",
+      pending_user: "بانتظار ردّك",
       resolved: "تم الحل",
       closed: "مغلقة",
     },
+    thread: "المحادثة",
+    staffReply: "دعم LYVE",
+    yourReply: "أنت",
+    replyPlaceholder: "أضف ردًا على هذه التذكرة…",
+    replySend: "إرسال الرد",
+    replyClosed: "هذه التذكرة مغلقة. افتح تذكرة جديدة إن كنت ما زلت بحاجة إلى مساعدة.",
+    replyError: "تعذّر إرسال الرد.",
     privacyNote: "لا تُدرج كلمات المرور أو أرقام البطاقات أو بيانات التواصل الشخصية في التذكرة.",
   },
 };
