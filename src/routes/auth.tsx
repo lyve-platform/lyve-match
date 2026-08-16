@@ -92,6 +92,11 @@ function AuthPage() {
     const { error } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
     setBusy(false);
     if (error) return setErrorKey(toErrorKey(error));
+    if (rememberMe) {
+      window.localStorage.setItem(REMEMBERED_EMAIL_KEY, email.trim());
+    } else {
+      window.localStorage.removeItem(REMEMBERED_EMAIL_KEY);
+    }
     navigate({ to: "/profile", replace: true });
   }
 
