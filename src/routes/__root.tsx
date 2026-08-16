@@ -87,6 +87,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { property: "og:title", content: "LYVE — Meet. Match. Belong." },
       { property: "og:description", content: "A global 18+ platform for dating, serious relationships, and marriage." },
       { property: "og:type", content: "website" },
+      { property: "og:site_name", content: "LYVE" },
+      { property: "og:locale", content: "en_US" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
       { name: "msapplication-TileColor", content: "#E85560" },
