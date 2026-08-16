@@ -117,7 +117,40 @@ const RULES: Rule[] = [
     pattern:
       /\b(this is my (?:real|other) account|i am actually|verify (?:your|my) (?:identity|account) (?:here|now)|official (?:support|admin) team)\b/i,
   },
+  {
+    // Off-platform contact hand-off: phone numbers written in digits or in
+    // common obfuscated forms (spaces, dots, dashes, "zero", arabic-indic).
+    rule: "contact.phone_number",
+    category: "contact_sharing",
+    severity: "medium",
+    pattern:
+      /(?:\+|00)\s?\d[\d\s().-]{7,}\d|\b\d[\d\s().-]{8,}\d\b|[\u0660-\u0669][\u0660-\u0669\s().-]{7,}[\u0660-\u0669]/,
+  },
+  {
+    // Named messaging apps / handles used to move the conversation off LYVE.
+    rule: "contact.messaging_handle",
+    category: "contact_sharing",
+    severity: "medium",
+    pattern:
+      /\b(whats\s?app|wats?ap|واتس\s?اب|واتساب|telegram|تيليجرام|تلجرام|t\.me\/|signal\s?(?:app|number)|snap(?:chat)?\s*(?:id|me)?|insta(?:gram)?\s*(?:id|handle|@)|imo|viber|wechat|kik|discord\s*(?:id|tag)?)\b/i,
+  },
+  {
+    // Email addresses shared in chat.
+    rule: "contact.email_address",
+    category: "contact_sharing",
+    severity: "medium",
+    pattern: /\b[\w.+-]+\s*(?:@|\(at\)|\[at\]|\sat\s)\s*[\w-]+\s*(?:\.|\(dot\)|\sdot\s)\s*[a-z]{2,}\b/i,
+  },
+  {
+    // Explicit requests to continue elsewhere, even without a number.
+    rule: "contact.offsite_request",
+    category: "contact_sharing",
+    severity: "low",
+    pattern:
+      /\b(give me your (?:number|phone|whatsapp)|send (?:me )?your (?:number|phone|contact)|text me on|call me on|add me on|let'?s (?:talk|chat) (?:on|outside)|my number is)\b|\b(رقمك|رقمي هو|كلمني على|أضفني على)\b/i,
+  },
 ];
+
 
 const RANK: Record<RiskLevel, number> = { none: 0, low: 1, medium: 2, high: 3 };
 
