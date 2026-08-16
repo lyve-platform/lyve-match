@@ -81,6 +81,9 @@ function AdminPage() {
           </Badge>
         ))}
         <Button asChild variant="outline" size="sm" className="ms-auto rounded-full">
+          <Link to="/admin/store-readiness">{t.storeReadiness.link}</Link>
+        </Button>
+        <Button asChild variant="outline" size="sm" className="rounded-full">
           <Link to="/admin/settings">{t.adminSettings.link}</Link>
         </Button>
       </div>
