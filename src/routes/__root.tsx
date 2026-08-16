@@ -34,10 +34,26 @@ const moduleLoadRecoveryScript = `
     recover();
   });
 
+  const isModuleLoadFailure = (value) => {
+    const message = String((value && value.message) || value || "");
+    return (
+      message.includes("Importing a module script failed") ||
+      message.includes("Failed to fetch dynamically imported module") ||
+      message.includes("error loading dynamically imported module") ||
+      message.includes("Unable to preload CSS")
+    );
+  };
+
   window.addEventListener("error", (event) => {
     const target = event.target;
     if (target instanceof HTMLScriptElement && target.type === "module") recover();
+    else if (isModuleLoadFailure(event.error || event.message)) recover();
   }, true);
+
+  window.addEventListener("unhandledrejection", (event) => {
+    if (isModuleLoadFailure(event.reason)) recover();
+  });
+
 
   window.setTimeout(() => sessionStorage.removeItem(recoveryKey), recoveryWindowMs);
 })();
