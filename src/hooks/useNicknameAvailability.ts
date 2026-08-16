@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { checkNicknameAvailable } from "@/lib/nickname.functions";
 import { firstNameSchema, isValid } from "@/lib/validation";
 
 export type NicknameStatus = "idle" | "invalid" | "checking" | "available" | "taken" | "error";
@@ -21,10 +21,13 @@ export function useNicknameAvailability(nickname: string, initial?: string | nul
     let cancelled = false;
     setStatus("checking");
     const timer = window.setTimeout(async () => {
-      const { data, error } = await supabase.rpc("nickname_available", { _nickname: value });
-      if (cancelled) return;
-      if (error) return setStatus("error");
-      setStatus(data ? "available" : "taken");
+      try {
+        const result = await checkNicknameAvailable({ data: { nickname: value } });
+        if (cancelled) return;
+        setStatus(result.available ? "available" : "taken");
+      } catch {
+        if (!cancelled) setStatus("error");
+      }
     }, 400);
 
     return () => {
