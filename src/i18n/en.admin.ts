@@ -259,6 +259,8 @@ export const enAdmin = {
     markOpen: "Reopen",
     markResolved: "Mark resolved",
     markClosed: "Close ticket",
+    deleteTicket: "Delete ticket",
+    deleteConfirm: "Delete this ticket permanently? Replies will be removed too.",
     readOnly: "You have read-only access to support tickets.",
     failed: "That action didn't go through.",
     statuses: {
