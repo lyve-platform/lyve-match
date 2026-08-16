@@ -1,4 +1,5 @@
 import { ArrowRight, ShieldCheck, Sparkles } from "lucide-react";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";
@@ -35,10 +36,10 @@ export function Hero() {
 
           <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:justify-center lg:justify-start">
             <Button asChild size="lg" className="rounded-full px-7">
-              <a href="#final-cta">
+              <Link to="/auth">
                 {t.hero.primaryCta}
                 <ArrowRight aria-hidden="true" className="rtl:rotate-180" />
-              </a>
+              </Link>
             </Button>
             <Button asChild size="lg" variant="outline" className="rounded-full px-7">
               <a href="#how-it-works">{t.hero.secondaryCta}</a>
