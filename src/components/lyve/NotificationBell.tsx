@@ -77,20 +77,54 @@ export function NotificationBell() {
           variant="ghost"
           size="icon"
           className="relative rounded-full"
-          aria-label={t.notifications.title}
+          aria-label={
+            unread > 0
+              ? `${t.notifications.title} — ${unread} ${t.notifications.unread}`
+              : t.notifications.title
+          }
         >
           <Bell className="h-5 w-5" aria-hidden="true" />
           {unread > 0 ? (
-            <span className="absolute end-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground">
+            <span
+              aria-hidden="true"
+              className="absolute end-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-semibold text-primary-foreground"
+            >
               {unread > 9 ? "9+" : unread}
             </span>
           ) : null}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-80 p-2">
-        <p className="px-2 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-          {t.notifications.title}
+        <p className="flex items-center justify-between gap-2 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          <span>{t.notifications.title}</span>
+          {unread > 0 ? (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold normal-case tracking-normal text-primary">
+              {unread} {t.notifications.unread}
+            </span>
+          ) : null}
         </p>
+        {latestReply ? (
+          <Link
+            to="/support"
+            onClick={() => setOpen(false)}
+            className="mt-1 block rounded-lg border border-border bg-muted/40 px-3 py-2 hover:bg-muted"
+          >
+            <span className="block text-[11px] font-semibold uppercase tracking-wide text-primary">
+              {t.notifications.latestReply}
+            </span>
+            <span className="mt-0.5 block truncate text-sm font-medium text-foreground">
+              {latestReply.title}
+            </span>
+            {latestReply.detail ? (
+              <span className="mt-1 line-clamp-3 block text-xs text-muted-foreground">
+                {latestReply.detail}
+              </span>
+            ) : null}
+            <span className="mt-1 block text-[11px] text-muted-foreground">
+              {new Date(latestReply.createdAt).toLocaleString()} · {t.notifications.viewTicket}
+            </span>
+          </Link>
+        ) : null}
         {items.length === 0 ? (
           <p className="px-2 py-3 text-sm text-muted-foreground">{t.notifications.empty}</p>
         ) : (
