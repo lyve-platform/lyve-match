@@ -200,9 +200,19 @@ export const ar: Dictionary = {
       safetyCentre: "مركز الأمان",
     },
     comingSoon: "قريبًا",
+    companyInfo: {
+      nameLabel: "الشركة",
+      nameValue: "LYVE",
+      locationLabel: "المقر",
+      locationValue: "الولايات المتحدة",
+      supportLabel: "الدعم",
+      supportValue:
+        "الدعم الرسمي يتم عبر إنشاء تذكرة داخل التطبيق — افتح تذكرة من حسابك لأي استفسار أو شكوى أو بلاغ.",
+    },
     rights: "جميع الحقوق محفوظة.",
     ageNotice: "للبالغين ١٨+ فقط",
   },
+
   theme: {
     label: "المظهر",
     light: "فاتح",
