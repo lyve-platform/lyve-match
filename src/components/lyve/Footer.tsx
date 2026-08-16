@@ -19,14 +19,15 @@ export function Footer() {
       ],
     },
     {
-      title: t.footer.company,
+      title: t.footer.legal,
       links: [
-        { label: t.footer.links.about },
-        { label: t.footer.links.careers },
-        { label: t.footer.links.press },
-        { label: t.footer.links.contact },
+        { label: t.footer.links.privacy, to: "/privacy" },
+        { label: t.footer.links.terms, to: "/terms" },
+        { label: t.footer.links.guidelines, to: "/community-guidelines" },
+        { label: t.footer.links.safetyCentre, to: "/safety" },
       ],
     },
+
     {
       title: t.footer.legal,
       links: [
