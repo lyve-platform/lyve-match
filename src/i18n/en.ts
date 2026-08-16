@@ -371,6 +371,35 @@ export const en = {
           },
         ],
       },
+      guidelines: {
+        title: "Community Guidelines",
+        description:
+          "Draft outline of the behaviour LYVE expects and what is not tolerated.",
+        intro:
+          "These guidelines will describe the tone of the community: respectful, honest, and free from pressure.",
+        sections: [
+          {
+            title: "Be genuine",
+            body: "Use your own photos, your real age, and describe yourself honestly.",
+          },
+          {
+            title: "Be respectful",
+            body: "No harassment, hate speech, threats, or unsolicited explicit content.",
+          },
+          {
+            title: "Respect intent",
+            body: "Every member chooses what they are looking for. Do not pressure anyone to change it.",
+          },
+          {
+            title: "No commercial or financial activity",
+            body: "No selling, promotion, fundraising, or requests for money of any kind.",
+          },
+          {
+            title: "How enforcement will work",
+            body: "Warnings, feature limits, and removal, with a route to appeal a decision.",
+          },
+        ],
+      },
 
       safety: {
         title: "Safety Centre",
