@@ -78,12 +78,39 @@ export function Footer() {
               </ul>
             </nav>
           ))}
+
+          <section aria-label={t.footer.company}>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-foreground">
+              {t.footer.company}
+            </h3>
+            <dl className="mt-4 space-y-3 text-sm text-muted-foreground">
+              <div>
+                <dt className="text-xs uppercase tracking-wide opacity-70">
+                  {t.footer.companyInfo.nameLabel}
+                </dt>
+                <dd>{t.footer.companyInfo.nameValue}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide opacity-70">
+                  {t.footer.companyInfo.locationLabel}
+                </dt>
+                <dd>{t.footer.companyInfo.locationValue}</dd>
+              </div>
+              <div>
+                <dt className="text-xs uppercase tracking-wide opacity-70">
+                  {t.footer.companyInfo.supportLabel}
+                </dt>
+                <dd>{t.footer.companyInfo.supportValue}</dd>
+              </div>
+            </dl>
+          </section>
         </div>
 
         <div className="mt-10 flex flex-col gap-2 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <p>© {new Date().getFullYear()} LYVE. {t.footer.rights}</p>
           <p>{t.footer.ageNotice}</p>
         </div>
+
       </div>
     </footer>
   );
