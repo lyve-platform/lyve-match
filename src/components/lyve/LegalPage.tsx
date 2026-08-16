@@ -9,6 +9,11 @@ type LegalContent = {
   description: string;
   intro: string;
   sections: ReadonlyArray<{ title: string; body: string }>;
+  /** Present on finalised documents; absent documents fall back to the draft banner. */
+  status?: string;
+  effective?: string;
+  notice?: { title: string; body: string };
+  contact?: { title: string; body: string };
 };
 
 export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> }) {
@@ -16,6 +21,11 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
   const pages = usePages();
   const content: LegalContent = pages[page];
   const BackIcon = dir === "rtl" ? ArrowRight : ArrowLeft;
+  const noticeTitle = content.notice?.title ?? t.legal.draftTitle;
+  const noticeBody = content.notice?.body ?? t.legal.draftBody;
+  const questionsTitle = content.contact?.title ?? t.legal.questionsTitle;
+  const questionsBody = content.contact?.body ?? t.legal.questionsBody;
+
 
   return (
     <div className="min-h-screen bg-background">
