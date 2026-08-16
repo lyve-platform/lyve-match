@@ -9,6 +9,8 @@ import {
   listAppeals,
   listAuditLog,
   listModerationCases,
+  listStaffRoles,
+  setStaffRole,
   moderateAccount,
   updateModerationCase,
 } from "@/lib/admin.functions";
@@ -154,6 +156,29 @@ export function useSubmitAppeal() {
     mutationFn: (body: string) => submit({ data: { body } }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: adminKeys.standing });
+    },
+  });
+}
+
+/** Staff role directory. Gated in the database by the `roles.manage` permission. */
+export function useStaffRoles(enabled: boolean) {
+  const fetchStaff = useServerFn(listStaffRoles);
+  return useQuery({
+    queryKey: ["admin", "staff"],
+    queryFn: () => fetchStaff(),
+    enabled,
+    retry: false,
+  });
+}
+
+export function useSetStaffRole() {
+  const queryClient = useQueryClient();
+  const set = useServerFn(setStaffRole);
+  return useMutation({
+    mutationFn: (input: { targetId: string; role: AdminRole; grant: boolean }) =>
+      set({ data: input }),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ["admin"] });
     },
   });
 }

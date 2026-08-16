@@ -327,3 +327,23 @@ export const setStaffRole = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+export type StaffRoleRow = {
+  userId: string;
+  role: AdminRole;
+  grantedBy: string | null;
+  createdAt: string;
+};
+
+export const listStaffRoles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }): Promise<StaffRoleRow[]> => {
+    const { data, error } = await context.supabase.rpc("admin_list_staff");
+    if (error) throw error;
+    return ((data ?? []) as Array<Record<string, unknown>>).map((row) => ({
+      userId: String(row["user_id"]),
+      role: row["role"] as AdminRole,
+      grantedBy: (row["granted_by"] as string | null) ?? null,
+      createdAt: String(row["created_at"]),
+    }));
+  });
