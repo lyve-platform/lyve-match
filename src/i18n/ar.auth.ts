@@ -2,6 +2,7 @@ import type { enAuth } from "./en.auth";
 
 export const arAuth: typeof enAuth = {
   authNav: {
+    messages: "الرسائل",
     account: "الحساب",
     profile: "الملف الشخصي",
     settings: "الإعدادات",

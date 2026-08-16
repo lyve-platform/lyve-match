@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Menu, X } from "lucide-react";
+import { Menu, MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "./Logo";
 import { LanguageSwitcher } from "./LanguageSwitcher";
@@ -49,6 +49,18 @@ export function Header() {
           <LanguageSwitcher className="hidden md:inline-flex" />
 
           <ThemeToggle />
+          {isAuthenticated ? (
+            <Button
+              asChild
+              variant="outline"
+              size="icon"
+              className="min-h-11 min-w-11 shrink-0 rounded-full"
+            >
+              <Link to="/messages" aria-label={t.authNav.messages}>
+                <MessageCircle aria-hidden="true" />
+              </Link>
+            </Button>
+          ) : null}
           {isAuthenticated ? <NotificationBell /> : null}
 
           <Button asChild className="hidden shrink-0 rounded-full sm:inline-flex">

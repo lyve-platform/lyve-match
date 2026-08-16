@@ -1,5 +1,6 @@
 export const enAuth = {
   authNav: {
+    messages: "Messages",
     account: "Account",
     profile: "Profile",
     settings: "Settings",
