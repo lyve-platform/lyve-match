@@ -1,9 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { Bell } from "lucide-react";
 import { useI18n } from "@/i18n";
+import { useAuth } from "@/auth/AuthProvider";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +17,7 @@ import { listMyNotifications, markNotificationsRead } from "@/lib/notifications.
 /** Unread in-app notifications (support replies and ticket status changes). */
 export function NotificationBell() {
   const { t } = useI18n();
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const load = useServerFn(listMyNotifications);
   const markRead = useServerFn(markNotificationsRead);
@@ -32,8 +35,33 @@ export function NotificationBell() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["notifications"] }),
   });
 
+  // Live updates: a staff reply or ticket status change lands instantly.
+  useEffect(() => {
+    if (!user?.id) return;
+    const channel = supabase
+      .channel(`notifications:${user.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "notifications",
+          filter: `profile_id=eq.${user.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ["notifications"] });
+          queryClient.invalidateQueries({ queryKey: ["support-tickets"] });
+        },
+      )
+      .subscribe();
+    return () => {
+      void supabase.removeChannel(channel);
+    };
+  }, [user?.id, queryClient]);
+
   const items = notifications.data ?? [];
   const unread = items.filter((item) => !item.readAt).length;
+  const latestReply = items.find((item) => item.kind === "support_reply");
 
   return (
     <DropdownMenu
