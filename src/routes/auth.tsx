@@ -40,6 +40,8 @@ export const Route = createFileRoute("/auth")({
   component: AuthPage,
 });
 
+const REMEMBERED_EMAIL_KEY = "lyve.remembered-email";
+
 type Mode = "signin" | "signup" | "forgot";
 type Notice = "checkEmail" | "resetSent" | "verificationResent" | null;
 
