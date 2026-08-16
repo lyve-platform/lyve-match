@@ -20,7 +20,9 @@ export const MODERATION_CATEGORIES = [
   "malicious_link",
   "sexual_exploitation",
   "impersonation",
+  "contact_sharing",
 ] as const;
+
 
 export type ModerationCategory = (typeof MODERATION_CATEGORIES)[number];
 
