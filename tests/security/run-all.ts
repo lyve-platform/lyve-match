@@ -18,6 +18,13 @@ const suites = [
   { label: "Maintenance (30-day purge scheduling, ledger guard privileges)", file: "tests/security/purge-audit.ts" },
 ];
 
+import { sweepTestAccounts } from "./sweep-test-accounts";
+
+// Clear fixtures left behind by any previously aborted run before starting.
+console.log(`Pre-run sweep: ${await sweepTestAccounts()} stale fixture account(s) removed`);
+
+
+
 
 
 let totalPassed = 0;
@@ -38,6 +45,9 @@ for (const suite of suites) {
   totalFailed += f;
   summary.push(`${suite.label}: ${p}/${p + f} passed`);
 }
+
+// Guarantee no fixture member (or fixture staff role) survives the run.
+console.log(`\nPost-run sweep: ${await sweepTestAccounts()} fixture account(s) removed`);
 
 console.log("\n================ SECURITY SUITE SUMMARY ================");
 for (const line of summary) console.log(line);
