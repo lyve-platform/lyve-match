@@ -20,7 +20,7 @@ export const enAuth = {
       password: "Password",
       confirmPassword: "Confirm password",
       newPassword: "New password",
-      firstName: "First name",
+      firstName: "Nickname",
       dateOfBirth: "Date of birth",
       day: "Day",
       month: "Month",
@@ -93,7 +93,7 @@ export const enAuth = {
     },
     steps: {
       date_of_birth: { label: "Date of birth", title: "When were you born?", body: "LYVE is strictly 18+." },
-      name: { label: "Name", title: "What should we call you?", body: "Your first name is shown on your profile." },
+      name: { label: "Nickname", title: "What should we call you?", body: "Your nickname is shown on your profile." },
       gender: { label: "Gender", title: "How do you identify?", body: "You choose what is shown." },
       interested_in: { label: "Interested in", title: "Who would you like to meet?", body: "Select all that apply." },
       intent: { label: "Relationship intent", title: "What are you looking for?", body: "You choose your intent — we never assume it." },

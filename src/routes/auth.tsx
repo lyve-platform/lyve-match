@@ -266,7 +266,7 @@ function AuthPage() {
             <Label htmlFor="signup-name">{t.auth.fields.firstName}</Label>
             <Input
               id="signup-name"
-              autoComplete="given-name"
+              autoComplete="nickname"
               maxLength={60}
               value={firstName}
               onChange={(event) => setFirstName(event.target.value)}
