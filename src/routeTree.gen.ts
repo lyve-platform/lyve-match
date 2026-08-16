@@ -18,6 +18,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAppealRouteImport } from './routes/_authenticated/appeal'
 import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
 import { Route as AuthenticatedLikesRouteImport } from './routes/_authenticated/likes'
@@ -81,6 +82,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAppealRoute = AuthenticatedAppealRouteImport.update({
   id: '/appeal',
   path: '/appeal',
@@ -122,21 +128,21 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
-  id: '/admin/',
-  path: '/admin/',
-  getParentRoute: () => AuthenticatedRouteRoute,
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
 const AuthenticatedAdminSettingsRoute =
   AuthenticatedAdminSettingsRouteImport.update({
-    id: '/admin/settings',
-    path: '/admin/settings',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminStoreReadinessRoute =
   AuthenticatedAdminStoreReadinessRouteImport.update({
-    id: '/admin/store-readiness',
-    path: '/admin/store-readiness',
-    getParentRoute: () => AuthenticatedRouteRoute,
+    id: '/store-readiness',
+    path: '/store-readiness',
+    getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedMessagesIndexRoute =
   AuthenticatedMessagesIndexRouteImport.update({
@@ -188,6 +194,7 @@ export interface FileRoutesByFullPath {
   '/safety': typeof SafetyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/appeal': typeof AuthenticatedAppealRoute
   '/discover': typeof AuthenticatedDiscoverRoute
   '/likes': typeof AuthenticatedLikesRoute
@@ -246,6 +253,7 @@ export interface FileRoutesById {
   '/safety': typeof SafetyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/appeal': typeof AuthenticatedAppealRoute
   '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
   '/_authenticated/likes': typeof AuthenticatedLikesRoute
@@ -276,6 +284,7 @@ export interface FileRouteTypes {
     | '/safety'
     | '/support'
     | '/terms'
+    | '/admin'
     | '/appeal'
     | '/discover'
     | '/likes'
@@ -333,6 +342,7 @@ export interface FileRouteTypes {
     | '/safety'
     | '/support'
     | '/terms'
+    | '/_authenticated/admin'
     | '/_authenticated/appeal'
     | '/_authenticated/discover'
     | '/_authenticated/likes'
@@ -435,6 +445,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin': {
+      id: '/_authenticated/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AuthenticatedAdminRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/appeal': {
       id: '/_authenticated/appeal'
       path: '/appeal'
@@ -493,24 +510,24 @@ declare module '@tanstack/react-router' {
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
-      path: '/admin'
+      path: '/'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/settings': {
       id: '/_authenticated/admin/settings'
-      path: '/admin/settings'
+      path: '/settings'
       fullPath: '/admin/settings'
       preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/admin/store-readiness': {
       id: '/_authenticated/admin/store-readiness'
-      path: '/admin/store-readiness'
+      path: '/store-readiness'
       fullPath: '/admin/store-readiness'
       preLoaderRoute: typeof AuthenticatedAdminStoreReadinessRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
+      parentRoute: typeof AuthenticatedAdminRoute
     }
     '/_authenticated/messages/': {
       id: '/_authenticated/messages/'
@@ -564,7 +581,23 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
+  AuthenticatedAdminStoreReadinessRoute: typeof AuthenticatedAdminStoreReadinessRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
+  AuthenticatedAdminStoreReadinessRoute: AuthenticatedAdminStoreReadinessRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
   AuthenticatedAppealRoute: typeof AuthenticatedAppealRoute
   AuthenticatedDiscoverRoute: typeof AuthenticatedDiscoverRoute
   AuthenticatedLikesRoute: typeof AuthenticatedLikesRoute
@@ -573,14 +606,12 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
-  AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
-  AuthenticatedAdminStoreReadinessRoute: typeof AuthenticatedAdminStoreReadinessRoute
   AuthenticatedMessagesConversationIdRoute: typeof AuthenticatedMessagesConversationIdRoute
-  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
   AuthenticatedAppealRoute: AuthenticatedAppealRoute,
   AuthenticatedDiscoverRoute: AuthenticatedDiscoverRoute,
   AuthenticatedLikesRoute: AuthenticatedLikesRoute,
@@ -589,11 +620,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
-  AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
-  AuthenticatedAdminStoreReadinessRoute: AuthenticatedAdminStoreReadinessRoute,
   AuthenticatedMessagesConversationIdRoute:
     AuthenticatedMessagesConversationIdRoute,
-  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
 }
 
