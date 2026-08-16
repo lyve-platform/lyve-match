@@ -1809,6 +1809,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      admin_delete_support_ticket: {
+        Args: { p_ticket: string }
+        Returns: undefined
+      }
       admin_grant_entitlement: {
         Args: {
           p_days: number
