@@ -29,9 +29,6 @@ export function Premium() {
         </ul>
         <div className="border-t border-border px-6 py-6 text-center md:px-8">
           <p className="text-sm text-muted-foreground">{t.premium.note}</p>
-          <Button asChild variant="outline" className="mt-4 rounded-full">
-            <a href="#final-cta">{t.premium.cta}</a>
-          </Button>
         </div>
       </div>
     </Section>
