@@ -111,3 +111,14 @@ export const adminReplySupportTicket = createServerFn({ method: "POST" })
     if (error) throw error;
     return { ok: true };
   });
+
+export const adminDeleteSupportTicket = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((input: { ticketId: string }) => ({ ticketId: uuid(input?.ticketId) }))
+  .handler(async ({ data, context }): Promise<{ ok: true }> => {
+    const { error } = await context.supabase.rpc("admin_delete_support_ticket", {
+      p_ticket: data.ticketId,
+    });
+    if (error) throw error;
+    return { ok: true };
+  });

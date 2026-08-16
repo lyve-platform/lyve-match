@@ -259,6 +259,8 @@ export const arAdmin = {
     markOpen: "إعادة الفتح",
     markResolved: "تعليم كمحلولة",
     markClosed: "إغلاق التذكرة",
+    deleteTicket: "حذف التذكرة",
+    deleteConfirm: "حذف هذه التذكرة نهائيًا؟ سيتم حذف الردود أيضًا.",
     readOnly: "لديك صلاحية اطلاع فقط على تذاكر الدعم.",
     failed: "تعذّر تنفيذ الإجراء.",
     statuses: {

@@ -10,6 +10,7 @@ import {
   adminListSupportTickets,
   adminListTicketReplies,
   adminReplySupportTicket,
+  adminDeleteSupportTicket,
   type AdminSupportTicket,
   type SupportTicketStatus,
 } from "@/lib/support-admin.functions";
@@ -92,10 +93,14 @@ function TicketRow({
   const queryClient = useQueryClient();
   const fetchReplies = useServerFn(adminListTicketReplies);
   const reply = useServerFn(adminReplySupportTicket);
+  const removeTicket = useServerFn(adminDeleteSupportTicket);
   const [body, setBody] = useState("");
 
   const canReply = permissions.includes("support.tickets.reply");
   const canClose = permissions.includes("support.tickets.close");
+  const canDelete =
+    permissions.includes("support.tickets.delete") &&
+    (ticket.status === "resolved" || ticket.status === "closed");
 
   const replies = useQuery({
     queryKey: ["admin", "support-thread", ticket.id],
@@ -116,6 +121,13 @@ function TicketRow({
     onSuccess: () => {
       setBody("");
       void queryClient.invalidateQueries({ queryKey: ["admin", "support-thread", ticket.id] });
+      void queryClient.invalidateQueries({ queryKey: ["admin", "support-tickets"] });
+    },
+  });
+
+  const deletion = useMutation({
+    mutationFn: () => removeTicket({ data: { ticketId: ticket.id } }),
+    onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["admin", "support-tickets"] });
     },
   });
@@ -215,7 +227,21 @@ function TicketRow({
                     </Button>
                   </>
                 ) : null}
-                {mutation.isError ? (
+                {canDelete ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    className="rounded-full"
+                    disabled={deletion.isPending}
+                    onClick={() => {
+                      if (window.confirm(t.adminSupport.deleteConfirm)) deletion.mutate();
+                    }}
+                  >
+                    {t.adminSupport.deleteTicket}
+                  </Button>
+                ) : null}
+                {mutation.isError || deletion.isError ? (
                   <span className="text-sm text-destructive">{t.adminSupport.failed}</span>
                 ) : null}
               </div>
