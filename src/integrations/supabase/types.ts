@@ -2182,6 +2182,7 @@ export type Database = {
           relationship_intent: Database["public"]["Enums"]["relationship_intent"]
         }[]
       }
+      nickname_available: { Args: { _nickname: string }; Returns: boolean }
       payments_enabled: { Args: never; Returns: boolean }
       profile_completeness: { Args: { p_id: string }; Returns: number }
       purge_expired_accounts: {
