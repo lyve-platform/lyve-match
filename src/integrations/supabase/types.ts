@@ -849,6 +849,54 @@ export type Database = {
           },
         ]
       }
+      notifications: {
+        Row: {
+          created_at: string
+          detail: string | null
+          id: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          profile_id: string
+          read_at: string | null
+          ticket_id: string | null
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          kind: Database["public"]["Enums"]["notification_kind"]
+          profile_id: string
+          read_at?: string | null
+          ticket_id?: string | null
+          title: string
+        }
+        Update: {
+          created_at?: string
+          detail?: string | null
+          id?: string
+          kind?: Database["public"]["Enums"]["notification_kind"]
+          profile_id?: string
+          read_at?: string | null
+          ticket_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_ticket_id_fkey"
+            columns: ["ticket_id"]
+            isOneToOne: false
+            referencedRelation: "support_tickets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       onboarding_progress: {
         Row: {
           completed_steps: string[]
@@ -2256,6 +2304,7 @@ export type Database = {
         | "message_report"
         | "safety_signal"
         | "manual"
+      notification_kind: "support_reply" | "support_status"
       profile_visibility: "everyone" | "matches_only" | "hidden"
       relationship_intent:
         | "dating"
@@ -2492,6 +2541,7 @@ export const Constants = {
         "safety_signal",
         "manual",
       ],
+      notification_kind: ["support_reply", "support_status"],
       profile_visibility: ["everyone", "matches_only", "hidden"],
       relationship_intent: [
         "dating",
