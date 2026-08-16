@@ -1743,6 +1743,15 @@ export type Database = {
           starts_at: string
         }[]
       }
+      admin_list_staff: {
+        Args: never
+        Returns: {
+          created_at: string
+          granted_by: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }[]
+      }
       admin_list_users: {
         Args: {
           p_limit?: number
