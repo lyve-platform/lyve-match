@@ -31,6 +31,7 @@ import {
   verifyStoreNotification,
   verifyStorePurchase,
 } from "../../src/lib/billing/store-verify.server";
+import { appleRail } from "../../src/lib/billing/store-env.server";
 import { statusGrantsAccess } from "../../src/lib/billing-core";
 import { PREMIUM_ENTITLEMENTS } from "../../src/config/billing";
 
@@ -62,6 +63,7 @@ function check(name: string, ok: boolean, evidence: unknown = "") {
 const stamp = Date.now();
 const password = `Ph6-audit-${stamp}`;
 const secret = storeSecret();
+const appleIsHmac = appleRail() === "hmac";
 
 type Member = { id: string; email: string; client: SupabaseClient };
 const created: string[] = [];
@@ -255,10 +257,17 @@ async function main() {
   /* ================= 2. Apple purchase authenticity ================= */
   const appleRef = `apple-orig-${stamp}`;
   const validApple = appleReceipt(appleRef);
-  const appleOk = await verifyStorePurchase("apple", validApple);
-  check("valid Apple sandbox purchase verifies", appleOk.ok === true);
-  check("verified Apple purchase carries the store purchase reference", appleOk.ok && appleOk.purchase.purchaseRef === appleRef);
-  check("verified Apple purchase resolves plan server-side", appleOk.ok && appleOk.purchase.planCode === "premium_monthly");
+
+  if (appleIsHmac) {
+    const appleOk = await verifyStorePurchase("apple", validApple);
+    check("valid Apple sandbox purchase verifies", appleOk.ok === true);
+    check("verified Apple purchase carries the store purchase reference", appleOk.ok && appleOk.purchase.purchaseRef === appleRef);
+    check("verified Apple purchase resolves plan server-side", appleOk.ok && appleOk.purchase.planCode === "premium_monthly");
+  } else {
+    check("Apple store rail is API when credentials are present", appleRail() === "api");
+    const hmacRejected = await verifyStorePurchase("apple", validApple);
+    check("Apple HMAC receipt is rejected under API rail", hmacRejected.ok === false);
+  }
 
   const tampered = `${validApple.split(".")[0]}.${"0".repeat(64)}`;
   check("forged Apple signature rejected", (await verifyStorePurchase("apple", tampered)).ok === false);
@@ -269,10 +278,18 @@ async function main() {
   check("non-string Apple receipt rejected", (await verifyStorePurchase("apple", { purchase_ref: appleRef })).ok === false);
 
   const unknownProduct = await verifyStorePurchase("apple", appleReceipt(`${appleRef}-x`, { product_id: "com.attacker.free" }));
-  check("Apple receipt for an unknown product rejected", !unknownProduct.ok && unknownProduct.reason === "UNKNOWN_PRODUCT");
+  if (appleIsHmac) {
+    check("Apple receipt for an unknown product rejected", !unknownProduct.ok && unknownProduct.reason === "UNKNOWN_PRODUCT");
+  } else {
+    check("Apple HMAC receipt with unknown product is rejected under API rail", !unknownProduct.ok);
+  }
 
   const prodClaim = await verifyStorePurchase("apple", appleReceipt(`${appleRef}-p`, { environment: "production" }));
-  check("sandbox receipt claiming production is rejected", !prodClaim.ok && prodClaim.reason === "WRONG_ENVIRONMENT");
+  if (appleIsHmac) {
+    check("sandbox receipt claiming production is rejected", !prodClaim.ok && prodClaim.reason === "WRONG_ENVIRONMENT");
+  } else {
+    check("Apple HMAC receipt claiming production is rejected under API rail", !prodClaim.ok);
+  }
 
   const storeSwap = await verifyStorePurchase("google", appleReceipt(`${appleRef}-s`));
   check("Apple receipt cannot be presented as a Google purchase", storeSwap.ok === false);
@@ -290,20 +307,28 @@ async function main() {
 
   /* ================= 4. Notification authenticity =================== */
   const notifBody = appleNotification({ id: `assn-${stamp}-a`, type: "SUBSCRIBED", purchaseRef: appleRef });
-  check("signed ASSN V2 notification verifies", (await verifyStoreNotification("apple", notifBody, signedHeaders(notifBody))).ok === true);
-
-  const noSig = await verifyStoreNotification("apple", notifBody, new Headers({ [STORE_TIMESTAMP_HEADER]: String(Math.floor(Date.now() / 1000)) }));
-  check("ASSN without signature rejected", !noSig.ok && noSig.reason === "MISSING_SIGNATURE");
-
-  const badSig = await verifyStoreNotification("apple", notifBody, new Headers({ [STORE_TIMESTAMP_HEADER]: String(Math.floor(Date.now() / 1000)), [STORE_SIGNATURE_HEADER]: "sha256=00" }));
-  check("ASSN with forged signature rejected", !badSig.ok && badSig.reason === "INVALID_SIGNATURE");
-
-  const noTs = await verifyStoreNotification("apple", notifBody, new Headers({ [STORE_SIGNATURE_HEADER]: "sha256=00" }));
-  check("ASSN without timestamp rejected", !noTs.ok && noTs.reason === "MISSING_TIMESTAMP");
-
   const staleTs = Math.floor(Date.now() / 1000) - (STORE_TIMESTAMP_TOLERANCE_SECONDS + 60);
-  const stale = await verifyStoreNotification("apple", notifBody, signedHeaders(notifBody, staleTs));
-  check("replayed (stale-timestamp) ASSN rejected", !stale.ok && stale.reason === "STALE_TIMESTAMP");
+
+  if (appleIsHmac) {
+    check("signed ASSN V2 notification verifies", (await verifyStoreNotification("apple", notifBody, signedHeaders(notifBody))).ok === true);
+
+    const noSig = await verifyStoreNotification("apple", notifBody, new Headers({ [STORE_TIMESTAMP_HEADER]: String(Math.floor(Date.now() / 1000)) }));
+    check("ASSN without signature rejected", !noSig.ok && noSig.reason === "MISSING_SIGNATURE");
+
+    const badSig = await verifyStoreNotification("apple", notifBody, new Headers({ [STORE_TIMESTAMP_HEADER]: String(Math.floor(Date.now() / 1000)), [STORE_SIGNATURE_HEADER]: "sha256=00" }));
+    check("ASSN with forged signature rejected", !badSig.ok && badSig.reason === "INVALID_SIGNATURE");
+
+    const noTs = await verifyStoreNotification("apple", notifBody, new Headers({ [STORE_SIGNATURE_HEADER]: "sha256=00" }));
+    check("ASSN without timestamp rejected", !noTs.ok && noTs.reason === "MISSING_TIMESTAMP");
+
+    const stale = await verifyStoreNotification("apple", notifBody, signedHeaders(notifBody, staleTs));
+    check("replayed (stale-timestamp) ASSN rejected", !stale.ok && stale.reason === "STALE_TIMESTAMP");
+  } else {
+    const hmacNotif = await verifyStoreNotification("apple", notifBody, signedHeaders(notifBody));
+    check("Apple HMAC-signed ASSN is rejected under JWS API rail", hmacNotif.ok === false);
+    const noJws = await verifyStoreNotification("apple", notifBody, new Headers());
+    check("Apple ASSN without JWS signedPayload is rejected under API rail", !noJws.ok && noJws.reason === "MISSING_SIGNATURE");
+  }
 
   const bodySwap = appleNotification({ id: `assn-${stamp}-b`, type: "REFUND", purchaseRef: appleRef });
   const swapHeaders = signedHeaders(notifBody);
