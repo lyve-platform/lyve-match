@@ -257,10 +257,17 @@ async function main() {
   /* ================= 2. Apple purchase authenticity ================= */
   const appleRef = `apple-orig-${stamp}`;
   const validApple = appleReceipt(appleRef);
-  const appleOk = await verifyStorePurchase("apple", validApple);
-  check("valid Apple sandbox purchase verifies", appleOk.ok === true);
-  check("verified Apple purchase carries the store purchase reference", appleOk.ok && appleOk.purchase.purchaseRef === appleRef);
-  check("verified Apple purchase resolves plan server-side", appleOk.ok && appleOk.purchase.planCode === "premium_monthly");
+
+  if (appleIsHmac) {
+    const appleOk = await verifyStorePurchase("apple", validApple);
+    check("valid Apple sandbox purchase verifies", appleOk.ok === true);
+    check("verified Apple purchase carries the store purchase reference", appleOk.ok && appleOk.purchase.purchaseRef === appleRef);
+    check("verified Apple purchase resolves plan server-side", appleOk.ok && appleOk.purchase.planCode === "premium_monthly");
+  } else {
+    check("Apple store rail is API when credentials are present", appleRail() === "api");
+    const hmacRejected = await verifyStorePurchase("apple", validApple);
+    check("Apple HMAC receipt is rejected under API rail", hmacRejected.ok === false);
+  }
 
   const tampered = `${validApple.split(".")[0]}.${"0".repeat(64)}`;
   check("forged Apple signature rejected", (await verifyStorePurchase("apple", tampered)).ok === false);
@@ -271,10 +278,18 @@ async function main() {
   check("non-string Apple receipt rejected", (await verifyStorePurchase("apple", { purchase_ref: appleRef })).ok === false);
 
   const unknownProduct = await verifyStorePurchase("apple", appleReceipt(`${appleRef}-x`, { product_id: "com.attacker.free" }));
-  check("Apple receipt for an unknown product rejected", !unknownProduct.ok && unknownProduct.reason === "UNKNOWN_PRODUCT");
+  if (appleIsHmac) {
+    check("Apple receipt for an unknown product rejected", !unknownProduct.ok && unknownProduct.reason === "UNKNOWN_PRODUCT");
+  } else {
+    check("Apple HMAC receipt with unknown product is rejected under API rail", !unknownProduct.ok);
+  }
 
   const prodClaim = await verifyStorePurchase("apple", appleReceipt(`${appleRef}-p`, { environment: "production" }));
-  check("sandbox receipt claiming production is rejected", !prodClaim.ok && prodClaim.reason === "WRONG_ENVIRONMENT");
+  if (appleIsHmac) {
+    check("sandbox receipt claiming production is rejected", !prodClaim.ok && prodClaim.reason === "WRONG_ENVIRONMENT");
+  } else {
+    check("Apple HMAC receipt claiming production is rejected under API rail", !prodClaim.ok);
+  }
 
   const storeSwap = await verifyStorePurchase("google", appleReceipt(`${appleRef}-s`));
   check("Apple receipt cannot be presented as a Google purchase", storeSwap.ok === false);
