@@ -61,7 +61,7 @@ Total regression suite: **743/743 passing**.
 
 ## 6. Remaining before production
 
-1. Apple sandbox credentials (`APPLE_IAP_SANDBOX_ISSUER_ID`, `_KEY_ID`, `_PRIVATE_KEY`, `_BUNDLE_ID`) and Google sandbox credentials (`GOOGLE_PLAY_SANDBOX_SERVICE_ACCOUNT_JSON`, `_PACKAGE_NAME`, `GOOGLE_RTDN_SANDBOX_AUDIENCE`, `_SERVICE_ACCOUNT_EMAIL`) — these are store-issued and must be supplied before a live sandbox purchase can be exercised end to end.
+1. Apple sandbox credentials (`APPLE_IAP_SANDBOX_ISSUER_ID`, `_KEY_ID`, `_PRIVATE_KEY`, `_BUNDLE_ID` = `app.lyve.ios.test`) and Google sandbox credentials (`GOOGLE_PLAY_SANDBOX_SERVICE_ACCOUNT_JSON`, `_PACKAGE_NAME`, `GOOGLE_RTDN_SANDBOX_AUDIENCE`, `_SERVICE_ACCOUNT_EMAIL`) — these are store-issued and must be supplied before a live sandbox purchase can be exercised end to end.
 2. `STORE_RECONCILE_SECRET` plus the hourly scheduler.
 3. Alert transport (paging/email) attached to breached alerts; the durable record already exists.
 4. Production credentials and `LYVE_STORE_ENVIRONMENT=production` — explicitly out of scope until approved.
