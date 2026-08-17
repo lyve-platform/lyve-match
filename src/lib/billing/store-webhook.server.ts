@@ -57,7 +57,10 @@ export async function handleStoreNotification(
 
   const verification = await verifyStoreNotification(store, rawBody, headers);
   if (!verification.ok) {
+    // Authentic store connectivity probe — acknowledge, apply nothing.
+    if (verification.reason === "TEST_NOTIFICATION") return respond(200, "TEST_OK");
     if (verification.reason === "NOT_CONFIGURED") return respond(503, "STORE_NOT_CONNECTED");
+
     if (verification.reason === "MISCONFIGURED") {
       await raiseStoreAlert("store_misconfiguration", `webhook:${store}`, { store, reason: "credentials_misplaced" });
       return respond(503, "STORE_NOT_CONNECTED");

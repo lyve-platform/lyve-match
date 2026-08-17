@@ -64,7 +64,8 @@ export type StoreVerifyFailure =
   | "UNSUPPORTED_EVENT"
   | "UNKNOWN_PRODUCT"
   | "MISCONFIGURED"
-  | "UPSTREAM_UNAVAILABLE";
+  | "UPSTREAM_UNAVAILABLE"
+  | "TEST_NOTIFICATION";
 
 export type StoreMode = "disabled" | "sandbox" | "production";
 
@@ -431,9 +432,16 @@ export async function verifyAppleNotification(rawBody: string): Promise<StoreEve
   const outer = await verifyAppleJws<Record<string, unknown>>(signedPayload, roots);
   if (!outer.ok) return { ok: false, reason: "INVALID_SIGNATURE" };
 
+  // Apple's connectivity probe: authentic, but carries no transaction. It must
+  // be acknowledged with 2xx or App Store Connect marks the URL unreachable.
+  if (outer.payload["notificationType"] === "TEST") {
+    return { ok: false, reason: "TEST_NOTIFICATION" };
+  }
+
   const data = (outer.payload["data"] ?? {}) as Record<string, unknown>;
   const signedTransaction = data["signedTransactionInfo"];
   if (typeof signedTransaction !== "string") return { ok: false, reason: "MALFORMED_PAYLOAD" };
+
 
   const transaction = await verifyAppleJws<Record<string, unknown>>(signedTransaction, roots);
   if (!transaction.ok) return { ok: false, reason: "INVALID_SIGNATURE" };
