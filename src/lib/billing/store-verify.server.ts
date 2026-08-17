@@ -64,7 +64,8 @@ export type StoreVerifyFailure =
   | "UNSUPPORTED_EVENT"
   | "UNKNOWN_PRODUCT"
   | "MISCONFIGURED"
-  | "UPSTREAM_UNAVAILABLE";
+  | "UPSTREAM_UNAVAILABLE"
+  | "TEST_NOTIFICATION";
 
 export type StoreMode = "disabled" | "sandbox" | "production";
 
