@@ -63,6 +63,7 @@ function check(name: string, ok: boolean, evidence: unknown = "") {
 const stamp = Date.now();
 const password = `Ph6-audit-${stamp}`;
 const secret = storeSecret();
+const appleIsHmac = appleRail() === "hmac";
 
 type Member = { id: string; email: string; client: SupabaseClient };
 const created: string[] = [];
