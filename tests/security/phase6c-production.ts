@@ -120,7 +120,7 @@ const APPLE_PROD_CREDS = {
   APPLE_IAP_ISSUER_ID: "11111111-2222-3333-4444-555555555555",
   APPLE_IAP_KEY_ID: "PRODKEY123",
   APPLE_IAP_PRIVATE_KEY: fixtures.leafPrivateKeyPem,
-  APPLE_IAP_BUNDLE_ID: "com.lyve.app",
+  APPLE_IAP_BUNDLE_ID: "app.lyve.ios",
 };
 
 const SERVICE_ACCOUNT_JSON = JSON.stringify({
@@ -142,7 +142,7 @@ const APPLE_SANDBOX_CREDS = {
   APPLE_IAP_SANDBOX_ISSUER_ID: "sandbox-issuer",
   APPLE_IAP_SANDBOX_KEY_ID: "SANDKEY123",
   APPLE_IAP_SANDBOX_PRIVATE_KEY: fixtures.leafPrivateKeyPem,
-  APPLE_IAP_SANDBOX_BUNDLE_ID: "com.lyve.app.test",
+  APPLE_IAP_SANDBOX_BUNDLE_ID: "app.lyve.ios.test",
 };
 
 /* ------------------------------------------------------------------ */
@@ -179,7 +179,7 @@ async function signJws(payload: Record<string, unknown>): Promise<string> {
 }
 
 const NOW = Date.now();
-const APPLE_PRODUCT = "com.lyve.premium.monthly";
+const APPLE_PRODUCT = "app.lyve.ios.premium.monthly";
 const GOOGLE_PRODUCT = "lyve_premium_monthly";
 
 /**
@@ -192,7 +192,7 @@ const applePseudoProd: AppleConfig = {
   issuerId: APPLE_PROD_CREDS.APPLE_IAP_ISSUER_ID,
   keyId: APPLE_PROD_CREDS.APPLE_IAP_KEY_ID,
   privateKeyPem: fixtures.leafPrivateKeyPem,
-  bundleId: "com.lyve.app",
+  bundleId: "app.lyve.ios",
   apiBase: "https://api.storekit.itunes.apple.com",
   trustedRootFingerprints: [fixtures.rootFingerprint],
 };
@@ -222,7 +222,7 @@ async function appleResponse(
     originalTransactionId: opts.ref ?? "2000000900000001",
     productId: opts.productId ?? APPLE_PRODUCT,
     environment: opts.environment ?? "Production",
-    bundleId: opts.bundleId ?? "com.lyve.app",
+    bundleId: opts.bundleId ?? "app.lyve.ios",
     purchaseDate: NOW - 86_400_000,
     expiresDate: opts.expiresDate === null ? undefined : (opts.expiresDate ?? NOW + 29 * 86_400_000),
     ...(opts.revocationDate ? { revocationDate: opts.revocationDate } : {}),
