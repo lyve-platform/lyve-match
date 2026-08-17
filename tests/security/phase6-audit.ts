@@ -307,6 +307,7 @@ async function main() {
 
   /* ================= 4. Notification authenticity =================== */
   const notifBody = appleNotification({ id: `assn-${stamp}-a`, type: "SUBSCRIBED", purchaseRef: appleRef });
+  const staleTs = Math.floor(Date.now() / 1000) - (STORE_TIMESTAMP_TOLERANCE_SECONDS + 60);
 
   if (appleIsHmac) {
     check("signed ASSN V2 notification verifies", (await verifyStoreNotification("apple", notifBody, signedHeaders(notifBody))).ok === true);
@@ -320,7 +321,6 @@ async function main() {
     const noTs = await verifyStoreNotification("apple", notifBody, new Headers({ [STORE_SIGNATURE_HEADER]: "sha256=00" }));
     check("ASSN without timestamp rejected", !noTs.ok && noTs.reason === "MISSING_TIMESTAMP");
 
-    const staleTs = Math.floor(Date.now() / 1000) - (STORE_TIMESTAMP_TOLERANCE_SECONDS + 60);
     const stale = await verifyStoreNotification("apple", notifBody, signedHeaders(notifBody, staleTs));
     check("replayed (stale-timestamp) ASSN rejected", !stale.ok && stale.reason === "STALE_TIMESTAMP");
   } else {
