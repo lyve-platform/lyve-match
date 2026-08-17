@@ -13,6 +13,7 @@
     "test:security": "bun run tests/security/run-all.ts"
   },
   "dependencies": {
+    "@capacitor/core": "^8.5.0",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -68,6 +69,8 @@
     "zod": "^3.24.2"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/ios": "^8.5.0",
     "@eslint/js": "^9.32.0",
     "@lovable.dev/vite-tanstack-config": "^2.13.1",
     "@types/node": "^22.16.5",
