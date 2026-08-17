@@ -95,7 +95,7 @@ async function seedMember(member: Member, name: string) {
   });
 }
 
-const APPLE_PRODUCT = "com.lyve.premium.monthly";
+const APPLE_PRODUCT = "app.lyve.ios.premium.monthly";
 const GOOGLE_PRODUCT = "lyve_premium_monthly";
 
 function appleReceipt(purchaseRef: string, overrides: Record<string, unknown> = {}) {
