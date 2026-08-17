@@ -80,7 +80,7 @@ function check(name: string, ok: boolean, evidence: unknown = "") {
 /* ------------------------------------------------------------------ */
 
 const TEST_ROOTS = [fixtures.rootFingerprint];
-const BUNDLE_ID = "com.lyve.app.test";
+const BUNDLE_ID = "app.lyve.ios.test";
 
 const leafKey = await crypto.subtle.importKey(
   "pkcs8",
@@ -115,7 +115,7 @@ const ROGUE_CHAIN = [fixtures.rogueLeafB64, fixtures.rogueRootB64];
 const NOW = Date.now();
 const transactionPayload = (overrides: Record<string, unknown> = {}) => ({
   originalTransactionId: "2000000999000111",
-  productId: "com.lyve.premium.monthly",
+  productId: "app.lyve.ios.premium.monthly",
   environment: "Sandbox",
   bundleId: BUNDLE_ID,
   purchaseDate: NOW - 86_400_000,
@@ -156,7 +156,7 @@ const transactionPayload = (overrides: Record<string, unknown> = {}) => ({
   );
 
   const parts = token.split(".");
-  const tampered = `${parts[0]}.${b64u(JSON.stringify(transactionPayload({ productId: "com.lyve.premium.annual" })))}.${parts[2]}`;
+  const tampered = `${parts[0]}.${b64u(JSON.stringify(transactionPayload({ productId: "app.lyve.ios.premium.annual" })))}.${parts[2]}`;
   const tamperedResult = await verifyAppleJws(tampered, { trustedRootFingerprints: TEST_ROOTS });
   check(
     "A5 payload tampering invalidates the signature",
@@ -341,7 +341,7 @@ async function appleResponseBody(
   );
 
   const unknown = await parseAppleSubscriptionResponse(
-    await appleResponseBody(1, { productId: "com.lyve.premium.forever" }),
+    await appleResponseBody(1, { productId: "app.lyve.ios.premium.forever" }),
     APPLE_CONFIG,
   );
   check("C7 unknown product is refused", !unknown.ok && unknown.reason === "UNKNOWN_PRODUCT", unknown);
@@ -649,7 +649,7 @@ function pushHeaders(token: string): Headers {
   const snapshot = {
     store: "apple" as const,
     purchaseRef: "2000000999000111",
-    productId: "com.lyve.premium.monthly",
+    productId: "app.lyve.ios.premium.monthly",
     environment: "sandbox" as const,
     periodStart: new Date(NOW).toISOString(),
     periodEnd: new Date(NOW + 1000).toISOString(),

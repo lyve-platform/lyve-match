@@ -35,8 +35,8 @@ export type StoreProduct = {
 };
 
 export const STORE_PRODUCTS: StoreProduct[] = [
-  { store: "apple", productId: "com.lyve.premium.monthly", planCode: "premium_monthly", interval: "month" },
-  { store: "apple", productId: "com.lyve.premium.annual", planCode: "premium_annual", interval: "year" },
+  { store: "apple", productId: "app.lyve.ios.premium.monthly", planCode: "premium_monthly", interval: "month" },
+  { store: "apple", productId: "app.lyve.ios.premium.annual", planCode: "premium_annual", interval: "year" },
   { store: "google", productId: "lyve_premium_monthly", planCode: "premium_monthly", interval: "month" },
   { store: "google", productId: "lyve_premium_annual", planCode: "premium_annual", interval: "year" },
 ];
