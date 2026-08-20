@@ -16,6 +16,7 @@ import { emailSchema, passwordSchema, firstNameSchema, isValid } from "@/lib/val
 import { useNicknameAvailability } from "@/hooks/useNicknameAvailability";
 import { NicknameHint } from "@/components/lyve/NicknameHint";
 import { toErrorKey, type AppErrorKey } from "@/lib/auth-errors";
+import { SocialSignIn } from "@/components/auth/SocialSignIn";
 
 const title = "Sign in to LYVE — Meet. Match. Belong.";
 const description =
@@ -61,6 +62,7 @@ function AuthPage() {
   const nicknameStatus = useNicknameAvailability(firstName);
   const [dob, setDob] = useState<DateParts>({ day: "", month: "", year: "" });
   const [errorKey, setErrorKey] = useState<AppErrorKey | null>(null);
+  const [socialError, setSocialError] = useState<string | null>(null);
   const [underage, setUnderage] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [busy, setBusy] = useState(false);
