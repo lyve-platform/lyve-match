@@ -42,6 +42,13 @@ export const enAuth = {
       optional: "Optional",
       required: "Required",
     },
+    social: {
+      google: "Continue with Google",
+      apple: "Continue with Apple",
+      divider: "or",
+      fastHint: "Set up in under two minutes — no long forms.",
+      error: "We could not complete that sign-in. Please try again.",
+    },
     actions: {
       rememberMe: "Remember my email",
       signIn: "Sign in",
