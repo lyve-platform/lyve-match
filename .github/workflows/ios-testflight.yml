@@ -119,13 +119,15 @@ jobs:
             echo "::error::No provisioning profile found in ~/Library/MobileDevice/Provisioning Profiles"
             exit 1
           fi
-          uuid=$(grep -a -A1 "UUID" "$profile_path" | grep -oE "[A-F0-9-]{36}" | head -1)
-          name=$(grep -a -A1 "Name" "$profile_path" | grep -oE "[A-Za-z0-9 ]+" | head -1)
+          security cms -D -i "$profile_path" -o "$RUNNER_TEMP/profile.plist"
+          uuid=$(plutil -extract UUID raw "$RUNNER_TEMP/profile.plist")
+          name=$(plutil -extract Name raw "$RUNNER_TEMP/profile.plist")
           echo "Profile: $profile_path"
           echo "UUID: $uuid"
           echo "Name: $name"
           echo "uuid=$uuid" >> "$GITHUB_OUTPUT"
           echo "name=$name" >> "$GITHUB_OUTPUT"
+
 
       - name: Archive
         run: |
