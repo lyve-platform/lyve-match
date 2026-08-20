@@ -1,0 +1,55 @@
+name: Enforce Branch Protection
+
+# One-time workflow to enable branch protection on the default branch and
+# require the iOS TestFlight Build status check before merging.
+# Run it manually from GitHub Actions after this file is present in the repo.
+on:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branch to protect (default: main)"
+        required: true
+        default: "main"
+
+permissions:
+  administration: write
+  contents: read
+
+jobs:
+  enforce:
+    name: Configure branch protection
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set required status checks and protection rules
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          BRANCH="${{ github.event.inputs.branch }}"
+          echo "Enabling branch protection for: $BRANCH"
+
+          gh api "repos/${{ github.repository }}/branches/${BRANCH}/protection" \
+            --method PUT \
+            --input - <<'EOF'
+          {
+            "required_status_checks": {
+              "strict": true,
+              "checks": [
+                { "context": "iOS TestFlight Build", "app_id": null }
+              ]
+            },
+            "enforce_admins": true,
+            "required_pull_request_reviews": {
+              "required_approving_review_count": 1,
+              "dismiss_stale_reviews": true,
+              "require_code_owner_reviews": false
+            },
+            "restrictions": null,
+            "allow_force_pushes": false,
+            "allow_deletions": false,
+            "required_conversation_resolution": true,
+            "lock_branch": false
+          }
+          EOF
+
+          echo "Branch protection enabled for $BRANCH"
+          echo "Required status check: iOS TestFlight Build"
