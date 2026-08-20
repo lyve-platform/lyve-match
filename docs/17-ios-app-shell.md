@@ -98,3 +98,27 @@ Register it with a matching `LyveIAP.m` `CAP_PLUGIN` macro exporting
 - Production App Store Server Notifications V2 URL in App Store Connect.
 - Paid Apps agreement, tax and banking complete.
 - Explicit Go/No-Go approval to flip the store environment to `production`.
+
+## Production activation (Phase 6D → live)
+
+Setting prices in App Store Connect does NOT open Premium in the app. Three
+switches are separate and all fail closed:
+
+1. **Native purchase path** — `ios/App/App/LyveIAP.swift` + `LyveIAP.m` are now in
+   the repo. Add both files to the Xcode target (`bunx cap sync ios`), and add the
+   **In-App Purchase** capability. `/premium` shows StoreKit's localized prices and
+   buys through StoreKit whenever the plugin is present; the web build is unchanged.
+2. **Prices** — never hard-coded. `src/config/billing.ts` keeps `amountMinor: null`
+   (web fallback text) while the iOS shell renders `Product.displayPrice` from the
+   member's own storefront.
+3. **Server trust** — production Apple credentials must exist and the deployment
+   must declare `LYVE_STORE_ENVIRONMENT=production`:
+   `APPLE_IAP_ISSUER_ID`, `APPLE_IAP_KEY_ID`, `APPLE_IAP_PRIVATE_KEY`,
+   `APPLE_IAP_BUNDLE_ID`. Sandbox credentials must be REMOVED at the same time —
+   `hasMisplacedAppleCredentials()` refuses to run with both sets present.
+4. **Admin kill-switch** — `payments_enabled` must be turned on in Admin → Settings.
+   Until then `linkStorePurchase` rejects every receipt.
+
+Order of operations: add files in Xcode → ship a TestFlight build → verify a
+sandbox purchase end-to-end → add production credentials → flip
+`LYVE_STORE_ENVIRONMENT` → enable payments in Admin.
