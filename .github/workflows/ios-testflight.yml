@@ -111,6 +111,22 @@ jobs:
           cd ios/App
           xcrun agvtool new-version -all "$BUILD_NUMBER"
 
+      - name: Resolve provisioning profile UUID
+        id: profile
+        run: |
+          profile_path=$(find "$HOME/Library/MobileDevice/Provisioning Profiles" -name "*.mobileprovision" -print -quit)
+          if [ -z "$profile_path" ]; then
+            echo "::error::No provisioning profile found in ~/Library/MobileDevice/Provisioning Profiles"
+            exit 1
+          fi
+          uuid=$(grep -a -A1 "UUID" "$profile_path" | grep -oE "[A-F0-9-]{36}" | head -1)
+          name=$(grep -a -A1 "Name" "$profile_path" | grep -oE "[A-Za-z0-9 ]+" | head -1)
+          echo "Profile: $profile_path"
+          echo "UUID: $uuid"
+          echo "Name: $name"
+          echo "uuid=$uuid" >> "$GITHUB_OUTPUT"
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
       - name: Archive
         run: |
           xcodebuild -project "$PROJECT" \
@@ -120,7 +136,10 @@ jobs:
             -archivePath "$RUNNER_TEMP/LYVE.xcarchive" \
             DEVELOPMENT_TEAM="${{ secrets.APPLE_TEAM_ID }}" \
             CODE_SIGN_STYLE=Manual \
-            archive
+            CODE_SIGN_IDENTITY="iPhone Distribution" \
+            PROVISIONING_PROFILE="${{ steps.profile.outputs.uuid }}" \
+            archive | tee "$RUNNER_TEMP/xcodebuild-archive.log"
+
 
       - name: Export IPA
         run: |
