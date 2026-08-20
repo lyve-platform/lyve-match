@@ -80,7 +80,17 @@ export const arBilling = {
       PREMIUM_REQUIRED: "هذه ميزة في بريميوم.",
       GENERIC: "حدث خطأ ما. حاول مرة أخرى.",
     },
+    storeErrors: {
+      LINKED: "تم تفعيل بريميوم في حسابك.",
+      ALREADY_OWNED: "هذا الشراء مرتبط بحسابك بالفعل.",
+      OWNED_BY_OTHER_ACCOUNT: "هذا الشراء مرتبط بحساب LYVE آخر.",
+      VERIFICATION_FAILED: "تعذّر التحقق من عملية الشراء لدى App Store.",
+      UNKNOWN_PRODUCT: "منتج الاشتراك غير معروف.",
+      STORE_NOT_CONNECTED: "الشراء داخل التطبيق غير مفعّل بعد.",
+      RATE_LIMITED: "محاولات كثيرة. حاول بعد بضع دقائق.",
+    } as Record<string, string>,
   },
+
   premiumLock: {
     badge: "بريميوم",
     likesTitle: "{count} شخصًا أُعجبوا بك",
