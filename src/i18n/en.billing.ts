@@ -83,7 +83,17 @@ export const enBilling = {
       PREMIUM_REQUIRED: "This is a Premium feature.",
       GENERIC: "Something went wrong. Please try again.",
     },
+    storeErrors: {
+      LINKED: "Premium is active on your account.",
+      ALREADY_OWNED: "This purchase is already linked to your account.",
+      OWNED_BY_OTHER_ACCOUNT: "This purchase is already linked to a different LYVE account.",
+      VERIFICATION_FAILED: "The App Store purchase could not be verified.",
+      UNKNOWN_PRODUCT: "That subscription product is not recognised.",
+      STORE_NOT_CONNECTED: "In-app purchases are not enabled yet.",
+      RATE_LIMITED: "Too many attempts. Please try again in a few minutes.",
+    } as Record<string, string>,
   },
+
   premiumLock: {
     badge: "Premium",
     likesTitle: "{count} people liked you",

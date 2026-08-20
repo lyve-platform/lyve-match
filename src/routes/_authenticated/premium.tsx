@@ -8,15 +8,26 @@
  * so rather than inventing a number.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Check, Crown, Loader2, Minus } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { useBilling, useBillingActions } from "@/hooks/useBilling";
 import { BILLING_PLANS, FEATURE_MATRIX, priceFor } from "@/config/billing";
+import {
+  fetchProducts,
+  iapAvailable,
+  productIdForPlan,
+  purchaseAndLink,
+  type IapProduct,
+} from "@/lib/native/iap";
+import { linkStorePurchase } from "@/lib/billing-store.functions";
 import type { BillingSnapshot } from "@/lib/billing-core";
+
 
 const title = "LYVE Premium — plans and subscription";
 const description =
@@ -51,7 +62,24 @@ function PremiumPage() {
   const { t, locale } = useI18n();
   const { data, isLoading } = useBilling();
   const actions = useBillingActions();
+  const link = useServerFn(linkStorePurchase);
   const copy = t.premiumPage;
+
+  // StoreKit purchases only exist inside the iOS shell; the web build is untouched.
+  const [storeReady, setStoreReady] = useState(false);
+  const [storePrices, setStorePrices] = useState<Record<string, IapProduct>>({});
+  const [buying, setBuying] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!iapAvailable()) return;
+    setStoreReady(true);
+    const ids = BILLING_PLANS.map((plan) => productIdForPlan(plan.code)).filter(
+      (id): id is NonNullable<ReturnType<typeof productIdForPlan>> => id !== undefined,
+    );
+    void fetchProducts(ids).then((products) => {
+      setStorePrices(Object.fromEntries(products.map((product) => [product.productId, product])));
+    });
+  }, []);
 
   if (isLoading || !data) {
     return (
@@ -63,7 +91,36 @@ function PremiumPage() {
     );
   }
 
+  /** In-app purchase: StoreKit charges, the server verifies, LYVE never grants locally. */
+  async function subscribeInApp(planCode: string) {
+    const productId = productIdForPlan(planCode);
+    if (!productId) return;
+    setBuying(planCode);
+    try {
+      const { outcome, result } = await purchaseAndLink(productId, link);
+      if (outcome.kind === "cancelled") return;
+      if (outcome.kind !== "receipt" || !result) {
+        toast.error(copy.errors.GENERIC);
+        return;
+      }
+      if (result === "LINKED" || result === "ALREADY_OWNED") {
+        toast.success(copy.actions.restored);
+        await actions.restore.mutateAsync();
+        return;
+      }
+      toast.error(copy.storeErrors[result] ?? copy.errors.GENERIC);
+    } catch {
+      toast.error(copy.errors.GENERIC);
+    } finally {
+      setBuying(null);
+    }
+  }
+
   async function subscribe(planCode: string) {
+    if (storeReady) {
+      await subscribeInApp(planCode);
+      return;
+    }
     const result = await actions.checkout.mutateAsync(planCode);
     const created = result.code === "CHECKOUT_CREATED" || result.code === "TEST_CHECKOUT_CREATED";
     if (!created) {
@@ -73,6 +130,7 @@ function PremiumPage() {
     if (result.url) window.location.assign(result.url);
     else toast.success(copy.checkoutOpened);
   }
+
 
   async function run(action: "cancel" | "resume" | "manage" | "restore") {
     try {
@@ -105,6 +163,9 @@ function PremiumPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {BILLING_PLANS.map((plan) => {
             const price = priceFor(plan, data.currency);
+            const productId = productIdForPlan(plan.code);
+            const storePrice = productId ? storePrices[productId] : undefined;
+            const pending = buying === plan.code || (!storeReady && actions.checkout.isPending);
             return (
               <article key={plan.code} className="surface-panel space-y-3 p-6">
                 <div className="flex items-center justify-between gap-3">
@@ -118,28 +179,31 @@ function PremiumPage() {
                   ) : null}
                 </div>
                 <p className="text-2xl font-semibold">
-                  {formatPrice(
-                    price?.amountMinor ?? null,
-                    price?.currency ?? data.currency,
-                    locale,
-                    copy.priceUnavailable,
-                  )}
+                  {storePrice
+                    ? storePrice.displayPrice
+                    : formatPrice(
+                        price?.amountMinor ?? null,
+                        price?.currency ?? data.currency,
+                        locale,
+                        copy.priceUnavailable,
+                      )}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {plan.interval === "month" ? copy.perMonth : copy.perYear}
                 </p>
                 <Button
                   className="min-h-11 w-full rounded-full"
-                  disabled={!data.checkoutOffered || actions.checkout.isPending}
+                  disabled={(!storeReady && !data.checkoutOffered) || pending}
                   onClick={() => void subscribe(plan.code)}
                 >
-                  {actions.checkout.isPending ? (
+                  {pending ? (
                     <Loader2 aria-hidden="true" className="animate-spin" />
                   ) : (
                     <Crown aria-hidden="true" />
                   )}
                   {copy.actions.subscribe}
                 </Button>
+
               </article>
             );
           })}
