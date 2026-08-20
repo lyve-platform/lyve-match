@@ -26,7 +26,6 @@ export const SAFETY_CATEGORIES = [
   "contact_sharing",
 ] as const;
 
-
 export type SafetyCategory = (typeof SAFETY_CATEGORIES)[number];
 
 /** Ordered from least to most severe; the assessment takes the maximum. */
@@ -139,7 +138,8 @@ const RULES: Rule[] = [
     rule: "contact.email_address",
     category: "contact_sharing",
     severity: "medium",
-    pattern: /\b[\w.+-]+\s*(?:@|\(at\)|\[at\]|\sat\s)\s*[\w-]+\s*(?:\.|\(dot\)|\sdot\s)\s*[a-z]{2,}\b/i,
+    pattern:
+      /\b[\w.+-]+\s*(?:@|\(at\)|\[at\]|\sat\s)\s*[\w-]+\s*(?:\.|\(dot\)|\sdot\s)\s*[a-z]{2,}\b/i,
   },
   {
     // Explicit requests to continue elsewhere, even without a number.
@@ -150,7 +150,6 @@ const RULES: Rule[] = [
       /\b(give me your (?:number|phone|whatsapp)|send (?:me )?your (?:number|phone|contact)|text me on|call me on|add me on|let'?s (?:talk|chat) (?:on|outside)|my number is)\b|\b(رقمك|رقمي هو|كلمني على|أضفني على)\b/i,
   },
 ];
-
 
 const RANK: Record<RiskLevel, number> = { none: 0, low: 1, medium: 2, high: 3 };
 

@@ -36,10 +36,9 @@ export const adminBillingOverview = createServerFn({ method: "POST" })
     profileId: input?.profileId ? uuid(input.profileId, "INVALID_PROFILE") : null,
   }))
   .handler(async ({ data, context }): Promise<AdminBillingRow[]> => {
-    const { data: rows, error } = await context.supabase.rpc(
-      "admin_billing_overview",
-      { p_profile: data.profileId } as never,
-    );
+    const { data: rows, error } = await context.supabase.rpc("admin_billing_overview", {
+      p_profile: data.profileId,
+    } as never);
     if (error) throw new Error("FORBIDDEN");
 
     type Row = {

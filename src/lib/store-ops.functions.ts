@@ -41,10 +41,13 @@ async function requirePermission(
   userId: string,
   permission: string,
 ): Promise<void> {
-  const { data } = await supabase.rpc("has_permission" as never, {
-    _permission: permission,
-    _user_id: userId,
-  } as never);
+  const { data } = await supabase.rpc(
+    "has_permission" as never,
+    {
+      _permission: permission,
+      _user_id: userId,
+    } as never,
+  );
   if (data !== true) throw new Error("FORBIDDEN");
 }
 
@@ -53,7 +56,8 @@ export const storeOpsHealth = createServerFn({ method: "POST" })
   .handler(async ({ context }): Promise<StoreOpsHealth> => {
     await requirePermission(context.supabase as never, context.userId, "billing.view");
 
-    const { appleRail, googleRail, configuredStoreEnvironment } = await import("@/lib/billing/store-env.server");
+    const { appleRail, googleRail, configuredStoreEnvironment } =
+      await import("@/lib/billing/store-env.server");
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
     const [{ data: alerts }, { data: runs }] = await Promise.all([

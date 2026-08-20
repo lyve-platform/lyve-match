@@ -49,7 +49,8 @@ export const getMyStanding = createServerFn({ method: "POST" })
     return {
       status,
       suspendedUntil: profile?.suspended_until ?? null,
-      canAppeal: (status === "restricted" || status === "suspended" || status === "banned") && !pending,
+      canAppeal:
+        (status === "restricted" || status === "suspended" || status === "banned") && !pending,
       appeal: appeal
         ? {
             status: appeal.status as AppealStatus,

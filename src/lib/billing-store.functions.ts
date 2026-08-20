@@ -27,7 +27,8 @@ export const linkStorePurchase = createServerFn({ method: "POST" })
 
     // Linking is the only member-reachable path into store verification, so it
     // is throttled per account: receipt guessing is not a viable strategy.
-    const { consumeRate, raiseStoreAlert, RATE_LIMITS } = await import("@/lib/billing/store-ops.server");
+    const { consumeRate, raiseStoreAlert, RATE_LIMITS } =
+      await import("@/lib/billing/store-ops.server");
     const rate = await consumeRate(`link:${context.userId}`, RATE_LIMITS.link);
     if (!rate.allowed) {
       await raiseStoreAlert("store_rate_limited", `link:${context.userId}`, {

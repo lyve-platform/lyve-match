@@ -140,8 +140,7 @@ export type VerifiedPurchase = {
 };
 
 export type PurchaseVerification =
-  | { ok: true; purchase: VerifiedPurchase }
-  | { ok: false; reason: StoreVerifyFailure };
+  { ok: true; purchase: VerifiedPurchase } | { ok: false; reason: StoreVerifyFailure };
 
 /**
  * Verifies a purchase presented by the app.
@@ -156,7 +155,8 @@ export async function verifyStorePurchase(
 ): Promise<PurchaseVerification> {
   if (!isStoreId(store)) return { ok: false, reason: "MALFORMED_PAYLOAD" };
 
-  const misplaced = store === "apple" ? hasMisplacedAppleCredentials() : hasMisplacedGoogleCredentials();
+  const misplaced =
+    store === "apple" ? hasMisplacedAppleCredentials() : hasMisplacedGoogleCredentials();
   if (misplaced) return { ok: false, reason: "MISCONFIGURED" };
 
   const rail = store === "apple" ? appleRail() : googleRail();
@@ -180,7 +180,10 @@ export async function verifyStorePurchase(
 
   let claims: Record<string, unknown>;
   try {
-    claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Record<string, unknown>;
+    claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as Record<
+      string,
+      unknown
+    >;
   } catch {
     return { ok: false, reason: "MALFORMED_PAYLOAD" };
   }
@@ -219,15 +222,15 @@ export async function verifyStorePurchase(
 /* ------------------------------------------------------------------ */
 
 export type StoreEventVerification =
-  | { ok: true; event: VerifiedStoreEvent }
-  | { ok: false; reason: StoreVerifyFailure };
+  { ok: true; event: VerifiedStoreEvent } | { ok: false; reason: StoreVerifyFailure };
 
 export async function verifyStoreNotification(
   store: StoreId,
   rawBody: string,
   headers: Headers,
 ): Promise<StoreEventVerification> {
-  const misplaced = store === "apple" ? hasMisplacedAppleCredentials() : hasMisplacedGoogleCredentials();
+  const misplaced =
+    store === "apple" ? hasMisplacedAppleCredentials() : hasMisplacedGoogleCredentials();
   if (misplaced) return { ok: false, reason: "MISCONFIGURED" };
 
   const rail = store === "apple" ? appleRail() : googleRail();
@@ -246,7 +249,8 @@ export async function verifyStoreNotification(
 
   const timestampHeader = headers.get(STORE_TIMESTAMP_HEADER);
   const timestamp = Number(timestampHeader);
-  if (!timestampHeader || !Number.isFinite(timestamp)) return { ok: false, reason: "MISSING_TIMESTAMP" };
+  if (!timestampHeader || !Number.isFinite(timestamp))
+    return { ok: false, reason: "MISSING_TIMESTAMP" };
 
   const skew = Math.abs(Math.floor(Date.now() / 1000) - timestamp);
   if (skew > STORE_TIMESTAMP_TOLERANCE_SECONDS) return { ok: false, reason: "STALE_TIMESTAMP" };
@@ -442,7 +446,6 @@ export async function verifyAppleNotification(rawBody: string): Promise<StoreEve
   const signedTransaction = data["signedTransactionInfo"];
   if (typeof signedTransaction !== "string") return { ok: false, reason: "MALFORMED_PAYLOAD" };
 
-
   const transaction = await verifyAppleJws<Record<string, unknown>>(signedTransaction, roots);
   if (!transaction.ok) return { ok: false, reason: "INVALID_SIGNATURE" };
   const info = transaction.payload;
@@ -456,7 +459,9 @@ export async function verifyAppleNotification(rawBody: string): Promise<StoreEve
       originalTransactionId: info["originalTransactionId"],
       productId: info["productId"],
       environment:
-        typeof data["environment"] === "string" ? String(data["environment"]).toLowerCase() : info["environment"],
+        typeof data["environment"] === "string"
+          ? String(data["environment"]).toLowerCase()
+          : info["environment"],
       purchaseDate: millisToIso(info["purchaseDate"]),
       expiresDate: millisToIso(info["expiresDate"]),
     },
@@ -479,7 +484,8 @@ export async function verifyGoogleNotification(
 ): Promise<StoreEventVerification> {
   const authenticated = await authenticatePubSubPush(headers);
   if (!authenticated.ok) {
-    if (authenticated.reason === "PUSH_NOT_CONFIGURED") return { ok: false, reason: "NOT_CONFIGURED" };
+    if (authenticated.reason === "PUSH_NOT_CONFIGURED")
+      return { ok: false, reason: "NOT_CONFIGURED" };
     if (authenticated.reason === "MISSING_TOKEN") return { ok: false, reason: "MISSING_SIGNATURE" };
     return { ok: false, reason: "INVALID_SIGNATURE" };
   }
@@ -509,7 +515,9 @@ export async function verifyGoogleNotification(
       periodStart: state.snapshot.periodStart,
       periodEnd: state.snapshot.periodEnd,
       // Revocation from the API always wins over an optimistic push.
-      lifecycle: state.snapshot.lifecycle.revoke ? state.snapshot.lifecycle : normalized.event.lifecycle,
+      lifecycle: state.snapshot.lifecycle.revoke
+        ? state.snapshot.lifecycle
+        : normalized.event.lifecycle,
     },
   };
 }

@@ -35,10 +35,30 @@ export type StoreProduct = {
 };
 
 export const STORE_PRODUCTS: StoreProduct[] = [
-  { store: "apple", productId: "app.lyve.ios.premium.monthly", planCode: "premium_monthly", interval: "month" },
-  { store: "apple", productId: "app.lyve.ios.premium.annual", planCode: "premium_annual", interval: "year" },
-  { store: "google", productId: "lyve_premium_monthly", planCode: "premium_monthly", interval: "month" },
-  { store: "google", productId: "lyve_premium_annual", planCode: "premium_annual", interval: "year" },
+  {
+    store: "apple",
+    productId: "app.lyve.ios.premium.monthly",
+    planCode: "premium_monthly",
+    interval: "month",
+  },
+  {
+    store: "apple",
+    productId: "app.lyve.ios.premium.annual",
+    planCode: "premium_annual",
+    interval: "year",
+  },
+  {
+    store: "google",
+    productId: "lyve_premium_monthly",
+    planCode: "premium_monthly",
+    interval: "month",
+  },
+  {
+    store: "google",
+    productId: "lyve_premium_annual",
+    planCode: "premium_annual",
+    interval: "year",
+  },
 ];
 
 export function productFor(store: StoreId, productId: string): StoreProduct | undefined {
@@ -57,10 +77,30 @@ export type StoreLifecycle = {
 const APPLE_MAP: Record<string, StoreLifecycle> = {
   SUBSCRIBED: { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "subscribed" },
   DID_RENEW: { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "renewed" },
-  OFFER_REDEEMED: { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "offer_redeemed" },
-  DID_CHANGE_RENEWAL_PREF: { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "plan_change" },
-  DID_FAIL_TO_RENEW: { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "billing_retry" },
-  GRACE_PERIOD_EXPIRED: { status: "expired", revoke: false, cancelAtPeriodEnd: false, reason: "grace_expired" },
+  OFFER_REDEEMED: {
+    status: "active",
+    revoke: false,
+    cancelAtPeriodEnd: false,
+    reason: "offer_redeemed",
+  },
+  DID_CHANGE_RENEWAL_PREF: {
+    status: "active",
+    revoke: false,
+    cancelAtPeriodEnd: false,
+    reason: "plan_change",
+  },
+  DID_FAIL_TO_RENEW: {
+    status: "past_due",
+    revoke: false,
+    cancelAtPeriodEnd: false,
+    reason: "billing_retry",
+  },
+  GRACE_PERIOD_EXPIRED: {
+    status: "expired",
+    revoke: false,
+    cancelAtPeriodEnd: false,
+    reason: "grace_expired",
+  },
   EXPIRED: { status: "expired", revoke: false, cancelAtPeriodEnd: false, reason: "expired" },
   REFUND: { status: "expired", revoke: true, cancelAtPeriodEnd: false, reason: "refund" },
   REVOKE: { status: "expired", revoke: true, cancelAtPeriodEnd: false, reason: "revocation" },
@@ -75,7 +115,12 @@ const APPLE_MAP: Record<string, StoreLifecycle> = {
 export function appleLifecycle(type: string, subtype: string | null): StoreLifecycle | null {
   if (type === "DID_CHANGE_RENEWAL_STATUS") {
     return subtype === "AUTO_RENEW_DISABLED"
-      ? { status: "canceled", revoke: false, cancelAtPeriodEnd: true, reason: "auto_renew_disabled" }
+      ? {
+          status: "canceled",
+          revoke: false,
+          cancelAtPeriodEnd: true,
+          reason: "auto_renew_disabled",
+        }
       : { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "auto_renew_enabled" };
   }
   if (type === "DID_FAIL_TO_RENEW" && subtype === "GRACE_PERIOD") {
@@ -93,10 +138,20 @@ export const GOOGLE_NOTIFICATION_TYPES: Record<number, StoreLifecycle> = {
   5: { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "on_hold" },
   6: { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "grace_period" },
   7: { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "restarted" },
-  8: { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "price_change_confirmed" },
+  8: {
+    status: "active",
+    revoke: false,
+    cancelAtPeriodEnd: false,
+    reason: "price_change_confirmed",
+  },
   9: { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "deferred" },
   10: { status: "paused", revoke: false, cancelAtPeriodEnd: false, reason: "paused" },
-  11: { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "pause_schedule_changed" },
+  11: {
+    status: "active",
+    revoke: false,
+    cancelAtPeriodEnd: false,
+    reason: "pause_schedule_changed",
+  },
   12: { status: "expired", revoke: true, cancelAtPeriodEnd: false, reason: "revoked" },
   13: { status: "expired", revoke: false, cancelAtPeriodEnd: false, reason: "expired" },
 };
@@ -119,13 +174,28 @@ export function appleStatusLifecycle(status: number, autoRenew = true): StoreLif
     case 1:
       return autoRenew
         ? { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "api_active" }
-        : { status: "canceled", revoke: false, cancelAtPeriodEnd: true, reason: "api_auto_renew_off" };
+        : {
+            status: "canceled",
+            revoke: false,
+            cancelAtPeriodEnd: true,
+            reason: "api_auto_renew_off",
+          };
     case 2:
       return { status: "expired", revoke: false, cancelAtPeriodEnd: false, reason: "api_expired" };
     case 3:
-      return { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "api_billing_retry" };
+      return {
+        status: "past_due",
+        revoke: false,
+        cancelAtPeriodEnd: false,
+        reason: "api_billing_retry",
+      };
     case 4:
-      return { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "api_grace_period" };
+      return {
+        status: "past_due",
+        revoke: false,
+        cancelAtPeriodEnd: false,
+        reason: "api_grace_period",
+      };
     case 5:
       return { status: "expired", revoke: true, cancelAtPeriodEnd: false, reason: "api_revoked" };
     default:
@@ -139,9 +209,19 @@ export function googleStateLifecycle(state: string, autoRenew = true): StoreLife
     case "SUBSCRIPTION_STATE_ACTIVE":
       return autoRenew
         ? { status: "active", revoke: false, cancelAtPeriodEnd: false, reason: "api_active" }
-        : { status: "canceled", revoke: false, cancelAtPeriodEnd: true, reason: "api_auto_renew_off" };
+        : {
+            status: "canceled",
+            revoke: false,
+            cancelAtPeriodEnd: true,
+            reason: "api_auto_renew_off",
+          };
     case "SUBSCRIPTION_STATE_IN_GRACE_PERIOD":
-      return { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "api_grace_period" };
+      return {
+        status: "past_due",
+        revoke: false,
+        cancelAtPeriodEnd: false,
+        reason: "api_grace_period",
+      };
     case "SUBSCRIPTION_STATE_ON_HOLD":
       return { status: "past_due", revoke: false, cancelAtPeriodEnd: false, reason: "api_on_hold" };
     case "SUBSCRIPTION_STATE_PAUSED":
@@ -152,7 +232,12 @@ export function googleStateLifecycle(state: string, autoRenew = true): StoreLife
       return { status: "expired", revoke: false, cancelAtPeriodEnd: false, reason: "api_expired" };
     case "SUBSCRIPTION_STATE_PENDING":
     case "SUBSCRIPTION_STATE_PENDING_PURCHASE_CANCELED":
-      return { status: "incomplete", revoke: false, cancelAtPeriodEnd: false, reason: "api_pending" };
+      return {
+        status: "incomplete",
+        revoke: false,
+        cancelAtPeriodEnd: false,
+        reason: "api_pending",
+      };
     default:
       return null;
   }
@@ -170,7 +255,6 @@ export type StoreSnapshot = {
   /** Store-issued marker used to build a stable idempotency key. */
   stateToken: string;
 };
-
 
 /**
  * A store event after authenticity verification, before any database work.

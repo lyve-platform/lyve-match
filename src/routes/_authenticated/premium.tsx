@@ -74,7 +74,6 @@ function PremiumPage() {
     else toast.success(copy.checkoutOpened);
   }
 
-
   async function run(action: "cancel" | "resume" | "manage" | "restore") {
     try {
       if (action === "restore") {
@@ -181,21 +180,37 @@ function PremiumPage() {
       </section>
 
       <div className="flex flex-wrap gap-3">
-        <Button variant="outline" className="min-h-11 rounded-full" onClick={() => void run("restore")}>
+        <Button
+          variant="outline"
+          className="min-h-11 rounded-full"
+          onClick={() => void run("restore")}
+        >
           {copy.actions.restore}
         </Button>
         {data.portalSupported ? (
-          <Button variant="outline" className="min-h-11 rounded-full" onClick={() => void run("manage")}>
+          <Button
+            variant="outline"
+            className="min-h-11 rounded-full"
+            onClick={() => void run("manage")}
+          >
             {copy.actions.manage}
           </Button>
         ) : null}
         {data.subscription && !data.subscription.cancelAtPeriodEnd ? (
-          <Button variant="outline" className="min-h-11 rounded-full" onClick={() => void run("cancel")}>
+          <Button
+            variant="outline"
+            className="min-h-11 rounded-full"
+            onClick={() => void run("cancel")}
+          >
             {copy.actions.cancel}
           </Button>
         ) : null}
         {data.subscription?.cancelAtPeriodEnd ? (
-          <Button variant="outline" className="min-h-11 rounded-full" onClick={() => void run("resume")}>
+          <Button
+            variant="outline"
+            className="min-h-11 rounded-full"
+            onClick={() => void run("resume")}
+          >
             {copy.actions.resume}
           </Button>
         ) : null}

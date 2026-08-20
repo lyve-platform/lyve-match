@@ -151,12 +151,19 @@ async function main() {
     await seedMember(hidden, { name: "Hana", gender: "woman", age: 27, discoverable: false });
     await seedMember(deleted, { name: "Dana", gender: "woman", age: 33 });
     await seedMember(blocker, { name: "Bass", gender: "man", age: 30 });
-    await deleted.client.from("profiles").update({ deleted_at: new Date().toISOString() }).eq("id", deleted.id);
+    await deleted.client
+      .from("profiles")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", deleted.id);
 
     /* ================================================= SECURITY DEFINER model */
     {
       const unauth = await anon.rpc("discover_candidates", { p_limit: 10, p_offset: 0 });
-      check("discover_candidates rejects anonymous callers", Boolean(unauth.error), unauth.error?.message);
+      check(
+        "discover_candidates rejects anonymous callers",
+        Boolean(unauth.error),
+        unauth.error?.message,
+      );
 
       const likesAnon = await anon.rpc("likes_received");
       check("likes_received rejects anonymous callers", Boolean(likesAnon.error));
@@ -178,22 +185,37 @@ async function main() {
       // is_blocked_pair now lives in the non-exposed `private` schema: RLS policies
       // still evaluate it, but the API cannot call it directly.
       const helper = await a.client.rpc("is_blocked_pair", { a: a.id, b: b.id } as never);
-      check("is_blocked_pair is not callable through the API", Boolean(helper.error), helper.error?.message);
-      const foreignHelper = await a.client.rpc("is_blocked_pair", { a: b.id, b: hidden.id } as never);
+      check(
+        "is_blocked_pair is not callable through the API",
+        Boolean(helper.error),
+        helper.error?.message,
+      );
+      const foreignHelper = await a.client.rpc("is_blocked_pair", {
+        a: b.id,
+        b: hidden.id,
+      } as never);
       check(
         "is_blocked_pair cannot be used to probe other members' blocks",
         Boolean(foreignHelper.error),
         foreignHelper.error?.message ?? foreignHelper.data,
       );
 
-
       const completeness = await a.client.rpc("profile_completeness", { p_id: b.id } as never);
-      check("internal helper profile_completeness is not callable by members", Boolean(completeness.error));
+      check(
+        "internal helper profile_completeness is not callable by members",
+        Boolean(completeness.error),
+      );
 
       const distance = await a.client.rpc("approx_distance_km", {
-        lat1: 1, lng1: 1, lat2: 2, lng2: 2,
+        lat1: 1,
+        lng1: 1,
+        lat2: 2,
+        lng2: 2,
       } as never);
-      check("internal helper approx_distance_km is not callable by members", Boolean(distance.error));
+      check(
+        "internal helper approx_distance_km is not callable by members",
+        Boolean(distance.error),
+      );
     }
 
     /* ============================================================= discovery */
@@ -223,16 +245,30 @@ async function main() {
 
       const negative = await a.client.rpc("discover_candidates", { p_limit: -5, p_offset: -100 });
       check("negative pagination is clamped, not an error", !negative.error);
-      const negIds = ((negative.data ?? []) as Array<{ profile_id: string }>).map((r) => r.profile_id);
-      check("negative pagination cannot reach ineligible members", !negIds.includes(hidden.id) && !negIds.includes(deleted.id));
+      const negIds = ((negative.data ?? []) as Array<{ profile_id: string }>).map(
+        (r) => r.profile_id,
+      );
+      check(
+        "negative pagination cannot reach ineligible members",
+        !negIds.includes(hidden.id) && !negIds.includes(deleted.id),
+      );
 
       const huge = await a.client.rpc("discover_candidates", { p_limit: 10, p_offset: 999999999 });
-      check("huge offset returns an empty page safely", !huge.error && (huge.data ?? []).length === 0);
+      check(
+        "huge offset returns an empty page safely",
+        !huge.error && (huge.data ?? []).length === 0,
+      );
 
-      const nulls = await a.client.rpc("discover_candidates", { p_limit: null, p_offset: null } as never);
+      const nulls = await a.client.rpc("discover_candidates", {
+        p_limit: null,
+        p_offset: null,
+      } as never);
       check("null pagination falls back to safe defaults", !nulls.error);
 
-      const bogus = await a.client.rpc("discover_candidates", { p_limit: "abc", p_offset: "x" } as never);
+      const bogus = await a.client.rpc("discover_candidates", {
+        p_limit: "abc",
+        p_offset: "x",
+      } as never);
       check("non-numeric pagination is rejected", Boolean(bogus.error));
     }
 
@@ -248,19 +284,34 @@ async function main() {
       check("cannot read another member's privacy settings", (privacy.data ?? []).length === 0);
 
       const photos = await a.client.from("profile_photos").select("*").eq("profile_id", b.id);
-      check("cannot read another member's photo rows or storage paths", (photos.data ?? []).length === 0);
+      check(
+        "cannot read another member's photo rows or storage paths",
+        (photos.data ?? []).length === 0,
+      );
 
-      const onboarding = await a.client.from("onboarding_progress").select("*").eq("profile_id", b.id);
+      const onboarding = await a.client
+        .from("onboarding_progress")
+        .select("*")
+        .eq("profile_id", b.id);
       check("cannot read another member's onboarding state", (onboarding.data ?? []).length === 0);
 
-      const deletion = await a.client.from("account_deletion_requests").select("*").eq("profile_id", b.id);
+      const deletion = await a.client
+        .from("account_deletion_requests")
+        .select("*")
+        .eq("profile_id", b.id);
       check("cannot read another member's deletion requests", (deletion.data ?? []).length === 0);
 
       const anonProfiles = await anon.from("profiles").select("*").limit(1);
-      check("signed-out visitors cannot read profiles", Boolean(anonProfiles.error) || (anonProfiles.data ?? []).length === 0);
+      check(
+        "signed-out visitors cannot read profiles",
+        Boolean(anonProfiles.error) || (anonProfiles.data ?? []).length === 0,
+      );
 
       const anonLikes = await anon.from("likes").select("*").limit(1);
-      check("signed-out visitors cannot read likes", Boolean(anonLikes.error) || (anonLikes.data ?? []).length === 0);
+      check(
+        "signed-out visitors cannot read likes",
+        Boolean(anonLikes.error) || (anonLikes.data ?? []).length === 0,
+      );
     }
 
     /* ================================================================= likes */
@@ -271,16 +322,22 @@ async function main() {
       const forgedActor = await a.client.from("likes").insert({ liker_id: b.id, likee_id: a.id });
       check("like with a forged actor id is rejected", Boolean(forgedActor.error));
 
-      const fakeTarget = await a.client.from("likes").insert({ liker_id: a.id, likee_id: FAKE_UUID });
+      const fakeTarget = await a.client
+        .from("likes")
+        .insert({ liker_id: a.id, likee_id: FAKE_UUID });
       check("like against a non-existent target is rejected", Boolean(fakeTarget.error));
 
-      const badUuid = await a.client.from("likes").insert({ liker_id: a.id, likee_id: "not-a-uuid" });
+      const badUuid = await a.client
+        .from("likes")
+        .insert({ liker_id: a.id, likee_id: "not-a-uuid" });
       check("like with a malformed uuid is rejected", Boolean(badUuid.error));
 
       const nullTarget = await a.client.from("likes").insert({ liker_id: a.id, likee_id: null });
       check("like with a null target is rejected", Boolean(nullTarget.error));
 
-      const deletedTarget = await a.client.from("likes").insert({ liker_id: a.id, likee_id: deleted.id });
+      const deletedTarget = await a.client
+        .from("likes")
+        .insert({ liker_id: a.id, likee_id: deleted.id });
       check("like against a soft-deleted member is rejected", Boolean(deletedTarget.error));
 
       const first = await a.client.from("likes").insert({ liker_id: a.id, likee_id: b.id });
@@ -293,22 +350,47 @@ async function main() {
       check("liked member leaves the caller's discovery feed", !afterLike.includes(b.id));
 
       const received = await b.client.rpc("likes_received");
-      const receivedIds = ((received.data ?? []) as Array<{ profile_id: string }>).map((r) => r.profile_id);
+      const receivedIds = ((received.data ?? []) as Array<{ profile_id: string }>).map(
+        (r) => r.profile_id,
+      );
       check("recipient sees the like in likes_received", receivedIds.includes(a.id));
 
-      const receivedStray = Object.keys(((received.data ?? []) as Array<Record<string, unknown>>)[0] ?? {})
-        .filter((key) => !CANDIDATE_ALLOWLIST.has(key));
-      check("likes_received projection contains only allowlisted fields", receivedStray.length === 0, receivedStray);
+      const receivedStray = Object.keys(
+        ((received.data ?? []) as Array<Record<string, unknown>>)[0] ?? {},
+      ).filter((key) => !CANDIDATE_ALLOWLIST.has(key));
+      check(
+        "likes_received projection contains only allowlisted fields",
+        receivedStray.length === 0,
+        receivedStray,
+      );
 
       const otherReceived = await a.client.rpc("likes_received");
-      const otherIds = ((otherReceived.data ?? []) as Array<{ profile_id: string }>).map((r) => r.profile_id);
+      const otherIds = ((otherReceived.data ?? []) as Array<{ profile_id: string }>).map(
+        (r) => r.profile_id,
+      );
       check("likes_received is scoped to the caller", !otherIds.includes(a.id));
 
-      const likeRow = await a.client.from("likes").select("id").eq("liker_id", a.id).eq("likee_id", b.id).single();
-      const foreignUpdate = await b.client.from("likes").update({ likee_id: b.id }).eq("id", likeRow.data!.id).select();
-      check("cannot modify another member's like", Boolean(foreignUpdate.error) || (foreignUpdate.data ?? []).length === 0);
+      const likeRow = await a.client
+        .from("likes")
+        .select("id")
+        .eq("liker_id", a.id)
+        .eq("likee_id", b.id)
+        .single();
+      const foreignUpdate = await b.client
+        .from("likes")
+        .update({ likee_id: b.id })
+        .eq("id", likeRow.data!.id)
+        .select();
+      check(
+        "cannot modify another member's like",
+        Boolean(foreignUpdate.error) || (foreignUpdate.data ?? []).length === 0,
+      );
 
-      const foreignDelete = await b.client.from("likes").delete().eq("id", likeRow.data!.id).select();
+      const foreignDelete = await b.client
+        .from("likes")
+        .delete()
+        .eq("id", likeRow.data!.id)
+        .select();
       check("cannot delete another member's like", (foreignDelete.data ?? []).length === 0);
     }
 
@@ -323,13 +405,19 @@ async function main() {
       const fake = await a.client.from("passes").insert({ passer_id: a.id, passed_id: FAKE_UUID });
       check("pass against a non-existent target is rejected", Boolean(fake.error));
 
-      const deletedTarget = await a.client.from("passes").insert({ passer_id: a.id, passed_id: deleted.id });
+      const deletedTarget = await a.client
+        .from("passes")
+        .insert({ passer_id: a.id, passed_id: deleted.id });
       check("pass against a soft-deleted member is rejected", Boolean(deletedTarget.error));
 
-      const first = await a.client.from("passes").insert({ passer_id: a.id, passed_id: blocker.id });
+      const first = await a.client
+        .from("passes")
+        .insert({ passer_id: a.id, passed_id: blocker.id });
       check("member can pass an eligible candidate", !first.error, first.error?.message);
 
-      const duplicate = await a.client.from("passes").insert({ passer_id: a.id, passed_id: blocker.id });
+      const duplicate = await a.client
+        .from("passes")
+        .insert({ passer_id: a.id, passed_id: blocker.id });
       check("duplicate pass is rejected", Boolean(duplicate.error));
 
       const feed = await feedIds(a);
@@ -339,10 +427,21 @@ async function main() {
       check("a member cannot see who passed on them", (visible.data ?? []).length === 0);
 
       const row = await a.client.from("passes").select("id").eq("passer_id", a.id).single();
-      const foreignUpdate = await blocker.client.from("passes").update({ passed_id: a.id }).eq("id", row.data!.id).select();
-      check("cannot modify another member's pass", Boolean(foreignUpdate.error) || (foreignUpdate.data ?? []).length === 0);
+      const foreignUpdate = await blocker.client
+        .from("passes")
+        .update({ passed_id: a.id })
+        .eq("id", row.data!.id)
+        .select();
+      check(
+        "cannot modify another member's pass",
+        Boolean(foreignUpdate.error) || (foreignUpdate.data ?? []).length === 0,
+      );
 
-      const foreignDelete = await blocker.client.from("passes").delete().eq("id", row.data!.id).select();
+      const foreignDelete = await blocker.client
+        .from("passes")
+        .delete()
+        .eq("id", row.data!.id)
+        .select();
       check("cannot delete another member's pass", (foreignDelete.data ?? []).length === 0);
     }
 
@@ -351,7 +450,9 @@ async function main() {
       const fake = await a.client.from("matches").insert({ profile_a: a.id, profile_b: b.id });
       check("a client cannot insert a match directly", Boolean(fake.error), fake.error?.message);
 
-      const foreign = await a.client.from("matches").insert({ profile_a: b.id, profile_b: blocker.id });
+      const foreign = await a.client
+        .from("matches")
+        .insert({ profile_a: b.id, profile_b: blocker.id });
       check("a client cannot fabricate a match between other members", Boolean(foreign.error));
 
       // Genuine mutual like → trigger creates the match.
@@ -364,43 +465,82 @@ async function main() {
       check("match exposes the other member only", rows[0]?.["profile_id"] === b.id);
 
       const matchStray = Object.keys(rows[0] ?? {}).filter((key) => !CANDIDATE_ALLOWLIST.has(key));
-      check("my_matches projection contains only allowlisted fields", matchStray.length === 0, matchStray);
+      check(
+        "my_matches projection contains only allowlisted fields",
+        matchStray.length === 0,
+        matchStray,
+      );
 
-      const dbRows = await admin.from("matches").select("id").eq("profile_a", a.id < b.id ? a.id : b.id);
+      const dbRows = await admin
+        .from("matches")
+        .select("id")
+        .eq("profile_a", a.id < b.id ? a.id : b.id);
       check("no duplicate match rows exist for the pair", (dbRows.data ?? []).length === 1);
 
       const outsider = await blocker.client.from("matches").select("*");
       check("a non-participant cannot read the match", (outsider.data ?? []).length === 0);
 
       const matchId = rows[0]!["match_id"] as string;
-      const ownership = await a.client.from("matches").update({ profile_b: blocker.id }).eq("id", matchId).select();
+      const ownership = await a.client
+        .from("matches")
+        .update({ profile_b: blocker.id })
+        .eq("id", matchId)
+        .select();
       check(
         "a participant cannot change match ownership",
         !ownership.error && (ownership.data ?? [])[0]?.["profile_b"] !== blocker.id,
       );
 
-      const outsiderUnmatch = await blocker.client.from("matches").update({ status: "unmatched" }).eq("id", matchId).select();
+      const outsiderUnmatch = await blocker.client
+        .from("matches")
+        .update({ status: "unmatched" })
+        .eq("id", matchId)
+        .select();
       check("a non-participant cannot unmatch", (outsiderUnmatch.data ?? []).length === 0);
 
       const del = await a.client.from("matches").delete().eq("id", matchId).select();
-      check("a participant cannot delete a match row", Boolean(del.error) || (del.data ?? []).length === 0);
+      check(
+        "a participant cannot delete a match row",
+        Boolean(del.error) || (del.data ?? []).length === 0,
+      );
 
-      const unmatch = await a.client.from("matches").update({ status: "unmatched" }).eq("id", matchId).select();
-      check("a participant can unmatch", !unmatch.error && (unmatch.data ?? [])[0]?.["status"] === "unmatched");
+      const unmatch = await a.client
+        .from("matches")
+        .update({ status: "unmatched" })
+        .eq("id", matchId)
+        .select();
+      check(
+        "a participant can unmatch",
+        !unmatch.error && (unmatch.data ?? [])[0]?.["status"] === "unmatched",
+      );
 
-      const repeat = await a.client.from("matches").update({ status: "unmatched" }).eq("id", matchId).select();
+      const repeat = await a.client
+        .from("matches")
+        .update({ status: "unmatched" })
+        .eq("id", matchId)
+        .select();
       check("repeated unmatch is safe and idempotent", !repeat.error);
 
-      const revive = await a.client.from("matches").update({ status: "active" }).eq("id", matchId).select();
+      const revive = await a.client
+        .from("matches")
+        .update({ status: "active" })
+        .eq("id", matchId)
+        .select();
       check("an ended match cannot be re-activated by a client", Boolean(revive.error));
 
       const gone = await b.client.rpc("my_matches");
-      check("unmatched pair disappears for both sides", ((gone.data ?? []) as unknown[]).length === 0);
+      check(
+        "unmatched pair disappears for both sides",
+        ((gone.data ?? []) as unknown[]).length === 0,
+      );
 
       const relike = await a.client.from("likes").insert({ liker_id: a.id, likee_id: b.id });
       check("unmatch clears the underlying likes and prevents silent re-matching", !relike.error);
       const rematch = await admin.from("matches").select("status").eq("id", matchId).single();
-      check("re-liking after an unmatch does not resurrect the match", rematch.data?.["status"] === "unmatched");
+      check(
+        "re-liking after an unmatch does not resurrect the match",
+        rematch.data?.["status"] === "unmatched",
+      );
       await admin.from("likes").delete().eq("liker_id", a.id).eq("likee_id", b.id);
     }
 
@@ -412,7 +552,9 @@ async function main() {
       const forged = await a.client.from("blocks").insert({ blocker_id: b.id, blocked_id: a.id });
       check("block with a forged actor id is rejected", Boolean(forged.error));
 
-      const fake = await a.client.from("blocks").insert({ blocker_id: a.id, blocked_id: FAKE_UUID });
+      const fake = await a.client
+        .from("blocks")
+        .insert({ blocker_id: a.id, blocked_id: FAKE_UUID });
       check("block against a non-existent profile is rejected", Boolean(fake.error));
 
       // Fresh pair for block effects: A and blocker (clear the earlier pass first).
@@ -427,48 +569,90 @@ async function main() {
         .maybeSingle();
       check("mutual like created a match to block against", preMatch.data?.["status"] === "active");
 
-      const block = await a.client.from("blocks").insert({ blocker_id: a.id, blocked_id: blocker.id });
+      const block = await a.client
+        .from("blocks")
+        .insert({ blocker_id: a.id, blocked_id: blocker.id });
       check("member can block another member", !block.error, block.error?.message);
 
-      const duplicate = await a.client.from("blocks").insert({ blocker_id: a.id, blocked_id: blocker.id });
+      const duplicate = await a.client
+        .from("blocks")
+        .insert({ blocker_id: a.id, blocked_id: blocker.id });
       check("duplicate block is rejected", Boolean(duplicate.error));
 
       const likesLeft = await admin
         .from("likes")
         .select("id")
-        .or(`and(liker_id.eq.${a.id},likee_id.eq.${blocker.id}),and(liker_id.eq.${blocker.id},likee_id.eq.${a.id})`);
+        .or(
+          `and(liker_id.eq.${a.id},likee_id.eq.${blocker.id}),and(liker_id.eq.${blocker.id},likee_id.eq.${a.id})`,
+        );
       check("block deletes likes in both directions", (likesLeft.data ?? []).length === 0);
 
-      const matchAfter = await admin.from("matches").select("status").eq("id", preMatch.data!["id"]).single();
+      const matchAfter = await admin
+        .from("matches")
+        .select("status")
+        .eq("id", preMatch.data!["id"])
+        .single();
       check("block invalidates the existing match", matchAfter.data?.["status"] === "blocked");
 
-      check("blocked member disappears from the blocker's discovery", !(await feedIds(a)).includes(blocker.id));
-      check("blocker disappears from the blocked member's discovery", !(await feedIds(blocker)).includes(a.id));
+      check(
+        "blocked member disappears from the blocker's discovery",
+        !(await feedIds(a)).includes(blocker.id),
+      );
+      check(
+        "blocker disappears from the blocked member's discovery",
+        !(await feedIds(blocker)).includes(a.id),
+      );
 
-      const blockedLike = await blocker.client.from("likes").insert({ liker_id: blocker.id, likee_id: a.id });
+      const blockedLike = await blocker.client
+        .from("likes")
+        .insert({ liker_id: blocker.id, likee_id: a.id });
       check("the blocked member cannot create a new like", Boolean(blockedLike.error));
 
-      const blockerLike = await a.client.from("likes").insert({ liker_id: a.id, likee_id: blocker.id });
+      const blockerLike = await a.client
+        .from("likes")
+        .insert({ liker_id: a.id, likee_id: blocker.id });
       check("the blocker cannot create a new like either", Boolean(blockerLike.error));
 
       const blockedMatches = await blocker.client.rpc("my_matches");
-      check("blocked pair has no visible match", ((blockedMatches.data ?? []) as unknown[]).length === 0);
+      check(
+        "blocked pair has no visible match",
+        ((blockedMatches.data ?? []) as unknown[]).length === 0,
+      );
 
       const blockedLikes = await blocker.client.rpc("likes_received");
-      const blockedLikeIds = ((blockedLikes.data ?? []) as Array<{ profile_id: string }>).map((r) => r.profile_id);
+      const blockedLikeIds = ((blockedLikes.data ?? []) as Array<{ profile_id: string }>).map(
+        (r) => r.profile_id,
+      );
       check("blocked pair is filtered out of likes_received", !blockedLikeIds.includes(a.id));
 
       const seeBlock = await blocker.client.from("blocks").select("*");
       check("the blocked member cannot see the block row", (seeBlock.data ?? []).length === 0);
 
-      const blockRow = await a.client.from("blocks").select("id").eq("blocked_id", blocker.id).single();
-      const foreignDelete = await blocker.client.from("blocks").delete().eq("id", blockRow.data!.id).select();
+      const blockRow = await a.client
+        .from("blocks")
+        .select("id")
+        .eq("blocked_id", blocker.id)
+        .single();
+      const foreignDelete = await blocker.client
+        .from("blocks")
+        .delete()
+        .eq("id", blockRow.data!.id)
+        .select();
       check("the blocked member cannot delete the block", (foreignDelete.data ?? []).length === 0);
 
-      const foreignUpdate = await blocker.client.from("blocks").update({ blocked_id: b.id }).eq("id", blockRow.data!.id).select();
-      check("the blocked member cannot modify the block", Boolean(foreignUpdate.error) || (foreignUpdate.data ?? []).length === 0);
+      const foreignUpdate = await blocker.client
+        .from("blocks")
+        .update({ blocked_id: b.id })
+        .eq("id", blockRow.data!.id)
+        .select();
+      check(
+        "the blocked member cannot modify the block",
+        Boolean(foreignUpdate.error) || (foreignUpdate.data ?? []).length === 0,
+      );
 
-      const reverse = await blocker.client.from("blocks").insert({ blocker_id: blocker.id, blocked_id: a.id });
+      const reverse = await blocker.client
+        .from("blocks")
+        .insert({ blocker_id: blocker.id, blocked_id: a.id });
       check("the blocked member may still block back (no contradictory state)", !reverse.error);
 
       const unblock = await a.client.from("blocks").delete().eq("id", blockRow.data!.id).select();
@@ -478,10 +662,14 @@ async function main() {
 
     /* =============================================================== reports */
     {
-      const self = await a.client.from("reports").insert({ reporter_id: a.id, reported_id: a.id, category: "spam" });
+      const self = await a.client
+        .from("reports")
+        .insert({ reporter_id: a.id, reported_id: a.id, category: "spam" });
       check("self-report is rejected", Boolean(self.error));
 
-      const forged = await a.client.from("reports").insert({ reporter_id: b.id, reported_id: a.id, category: "spam" });
+      const forged = await a.client
+        .from("reports")
+        .insert({ reporter_id: b.id, reported_id: a.id, category: "spam" });
       check("report with a forged reporter id is rejected", Boolean(forged.error));
 
       const badCategory = await a.client
@@ -489,46 +677,86 @@ async function main() {
         .insert({ reporter_id: a.id, reported_id: b.id, category: "not_a_category" as never });
       check("unexpected report category is rejected", Boolean(badCategory.error));
 
-      const preStatus = await a.client
-        .from("reports")
-        .insert({ reporter_id: a.id, reported_id: b.id, category: "spam", status: "resolved" as never });
+      const preStatus = await a.client.from("reports").insert({
+        reporter_id: a.id,
+        reported_id: b.id,
+        category: "spam",
+        status: "resolved" as never,
+      });
       check("a member cannot create a pre-resolved report", Boolean(preStatus.error));
 
-      const oversized = await a.client
-        .from("reports")
-        .insert({ reporter_id: a.id, reported_id: b.id, category: "spam", description: "x".repeat(2500) });
+      const oversized = await a.client.from("reports").insert({
+        reporter_id: a.id,
+        reported_id: b.id,
+        category: "spam",
+        description: "x".repeat(2500),
+      });
       check("oversized report description is rejected", Boolean(oversized.error));
 
       const report = await a.client
         .from("reports")
-        .insert({ reporter_id: a.id, reported_id: b.id, category: "spam", description: "audit fixture" })
+        .insert({
+          reporter_id: a.id,
+          reported_id: b.id,
+          category: "spam",
+          description: "audit fixture",
+        })
         .select()
         .single();
       check("member can report an eligible target", !report.error, report.error?.message);
 
       const reportedView = await b.client.from("reports").select("*");
-      check("the reported member cannot see the report or its description", (reportedView.data ?? []).length === 0);
+      check(
+        "the reported member cannot see the report or its description",
+        (reportedView.data ?? []).length === 0,
+      );
 
       const enumerate = await blocker.client.from("reports").select("*");
       check("ordinary members cannot enumerate reports", (enumerate.data ?? []).length === 0);
 
       const anonReports = await anon.from("reports").select("*");
-      check("signed-out visitors cannot read reports", Boolean(anonReports.error) || (anonReports.data ?? []).length === 0);
+      check(
+        "signed-out visitors cannot read reports",
+        Boolean(anonReports.error) || (anonReports.data ?? []).length === 0,
+      );
 
-      const update = await b.client.from("reports").update({ status: "dismissed" as never }).eq("id", report.data!["id"]).select();
-      check("a member cannot modify another member's report", Boolean(update.error) || (update.data ?? []).length === 0);
+      const update = await b.client
+        .from("reports")
+        .update({ status: "dismissed" as never })
+        .eq("id", report.data!["id"])
+        .select();
+      check(
+        "a member cannot modify another member's report",
+        Boolean(update.error) || (update.data ?? []).length === 0,
+      );
 
-      const ownUpdate = await a.client.from("reports").update({ description: "changed" }).eq("id", report.data!["id"]).select();
-      check("reports are append-only, even for their author", Boolean(ownUpdate.error) || (ownUpdate.data ?? []).length === 0);
+      const ownUpdate = await a.client
+        .from("reports")
+        .update({ description: "changed" })
+        .eq("id", report.data!["id"])
+        .select();
+      check(
+        "reports are append-only, even for their author",
+        Boolean(ownUpdate.error) || (ownUpdate.data ?? []).length === 0,
+      );
 
       const del = await b.client.from("reports").delete().eq("id", report.data!["id"]).select();
-      check("a member cannot delete another member's report", Boolean(del.error) || (del.data ?? []).length === 0);
+      check(
+        "a member cannot delete another member's report",
+        Boolean(del.error) || (del.data ?? []).length === 0,
+      );
 
       const feed = await feedIds(b);
-      check("reporting does not surface moderation state in discovery", !feed.includes(a.id) || true);
+      check(
+        "reporting does not surface moderation state in discovery",
+        !feed.includes(a.id) || true,
+      );
       const feedRows = await b.client.rpc("discover_candidates", { p_limit: 100, p_offset: 0 });
       const serialised = JSON.stringify(feedRows.data ?? []);
-      check("discovery payload carries no report or moderation fields", !/report|moderat/i.test(serialised));
+      check(
+        "discovery payload carries no report or moderation fields",
+        !/report|moderat/i.test(serialised),
+      );
     }
 
     /* ================================================================ photos */
@@ -538,25 +766,50 @@ async function main() {
         .from("profile-photos")
         .upload(path, new Blob([new Uint8Array([1, 2, 3])], { type: "image/jpeg" }));
       check("fixture photo uploaded", !upload.error, upload.error?.message);
-      await admin.from("profile_photos").insert({ profile_id: b.id, storage_path: path, is_primary: true });
+      await admin
+        .from("profile_photos")
+        .insert({ profile_id: b.id, storage_path: path, is_primary: true });
 
       const foreignDownload = await a.client.storage.from("profile-photos").download(path);
-      check("a member cannot download another member's private photo", Boolean(foreignDownload.error));
+      check(
+        "a member cannot download another member's private photo",
+        Boolean(foreignDownload.error),
+      );
 
       const guess = await a.client.storage.from("profile-photos").list(b.id);
-      check("a member cannot list another member's storage folder", Boolean(guess.error) || (guess.data ?? []).length === 0);
+      check(
+        "a member cannot list another member's storage folder",
+        Boolean(guess.error) || (guess.data ?? []).length === 0,
+      );
 
       const foreignSign = await a.client.storage.from("profile-photos").createSignedUrl(path, 60);
-      check("a member cannot mint a signed URL for someone else's photo", Boolean(foreignSign.error));
+      check(
+        "a member cannot mint a signed URL for someone else's photo",
+        Boolean(foreignSign.error),
+      );
 
       const anonDownload = await anon.storage.from("profile-photos").download(path);
       check("signed-out visitors cannot download private photos", Boolean(anonDownload.error));
 
-      const foreignRowUpdate = await a.client.from("profile_photos").update({ is_primary: false }).eq("profile_id", b.id).select();
-      check("a member cannot modify another member's photo row", (foreignRowUpdate.data ?? []).length === 0);
+      const foreignRowUpdate = await a.client
+        .from("profile_photos")
+        .update({ is_primary: false })
+        .eq("profile_id", b.id)
+        .select();
+      check(
+        "a member cannot modify another member's photo row",
+        (foreignRowUpdate.data ?? []).length === 0,
+      );
 
-      const foreignRowDelete = await a.client.from("profile_photos").delete().eq("profile_id", b.id).select();
-      check("a member cannot delete another member's photo row", (foreignRowDelete.data ?? []).length === 0);
+      const foreignRowDelete = await a.client
+        .from("profile_photos")
+        .delete()
+        .eq("profile_id", b.id)
+        .select();
+      check(
+        "a member cannot delete another member's photo row",
+        (foreignRowDelete.data ?? []).length === 0,
+      );
 
       const expired = await admin.storage.from("profile-photos").createSignedUrl(path, 1);
       await new Promise((resolve) => setTimeout(resolve, 2500));
@@ -565,7 +818,10 @@ async function main() {
 
       const htmlUpload = await b.client.storage
         .from("profile-photos")
-        .upload(`${b.id}/payload-${stamp}.html`, new Blob(["<script>1</script>"], { type: "text/html" }));
+        .upload(
+          `${b.id}/payload-${stamp}.html`,
+          new Blob(["<script>1</script>"], { type: "text/html" }),
+        );
       check("non-image uploads are still blocked after Phase 2", Boolean(htmlUpload.error));
 
       await admin.storage.from("profile-photos").remove([path]);
@@ -575,21 +831,55 @@ async function main() {
     {
       // A widens nothing client-side; eligibility comes from the server. Prove that
       // narrowing the *candidate's* preferences removes them for the viewer.
-      await b.client.from("preferences").update({ min_age: 60, max_age: 99 }).eq("profile_id", b.id);
-      check("mutual preference filtering is enforced server-side", !(await feedIds(a)).includes(b.id));
-      await b.client.from("preferences").update({ min_age: 18, max_age: 99 }).eq("profile_id", b.id);
+      await b.client
+        .from("preferences")
+        .update({ min_age: 60, max_age: 99 })
+        .eq("profile_id", b.id);
+      check(
+        "mutual preference filtering is enforced server-side",
+        !(await feedIds(a)).includes(b.id),
+      );
+      await b.client
+        .from("preferences")
+        .update({ min_age: 18, max_age: 99 })
+        .eq("profile_id", b.id);
 
-      const widen = await a.client.from("preferences").update({ min_age: 5 }).eq("profile_id", a.id).select();
+      const widen = await a.client
+        .from("preferences")
+        .update({ min_age: 5 })
+        .eq("profile_id", a.id)
+        .select();
       check("preferences cannot be set below the 18+ floor", Boolean(widen.error));
 
-      const foreignPrefs = await a.client.from("preferences").update({ max_distance_km: 20000 }).eq("profile_id", b.id).select();
-      check("a member cannot widen another member's preferences", (foreignPrefs.data ?? []).length === 0);
+      const foreignPrefs = await a.client
+        .from("preferences")
+        .update({ max_distance_km: 20000 })
+        .eq("profile_id", b.id)
+        .select();
+      check(
+        "a member cannot widen another member's preferences",
+        (foreignPrefs.data ?? []).length === 0,
+      );
 
-      const foreignPrivacy = await a.client.from("privacy_settings").update({ discoverable: true }).eq("profile_id", hidden.id).select();
-      check("a member cannot force another member to become discoverable", (foreignPrivacy.data ?? []).length === 0);
+      const foreignPrivacy = await a.client
+        .from("privacy_settings")
+        .update({ discoverable: true })
+        .eq("profile_id", hidden.id)
+        .select();
+      check(
+        "a member cannot force another member to become discoverable",
+        (foreignPrivacy.data ?? []).length === 0,
+      );
 
-      const foreignActivity = await a.client.from("profiles").update({ last_active_at: new Date().toISOString() }).eq("id", b.id).select();
-      check("a member cannot forge another member's activity for ranking", (foreignActivity.data ?? []).length === 0);
+      const foreignActivity = await a.client
+        .from("profiles")
+        .update({ last_active_at: new Date().toISOString() })
+        .eq("id", b.id)
+        .select();
+      check(
+        "a member cannot forge another member's activity for ranking",
+        (foreignActivity.data ?? []).length === 0,
+      );
     }
 
     /* =============================================================== hygiene */

@@ -37,17 +37,15 @@ export type GoogleFailure =
   | "UNKNOWN_PRODUCT"
   | "UNSUPPORTED_STATE";
 
-export type GoogleResult = { ok: true; snapshot: StoreSnapshot } | { ok: false; reason: GoogleFailure };
+export type GoogleResult =
+  { ok: true; snapshot: StoreSnapshot } | { ok: false; reason: GoogleFailure };
 
 /* ------------------------------------------------------------------ */
 /* Pub/Sub push envelope                                               */
 /* ------------------------------------------------------------------ */
 
 export type PushFailure =
-  | "PUSH_NOT_CONFIGURED"
-  | "MISSING_TOKEN"
-  | "INVALID_TOKEN"
-  | "MALFORMED_ENVELOPE";
+  "PUSH_NOT_CONFIGURED" | "MISSING_TOKEN" | "INVALID_TOKEN" | "MALFORMED_ENVELOPE";
 
 export type PushResult =
   | { ok: true; message: Record<string, unknown>; messageId: string }
@@ -70,7 +68,10 @@ export function decodePubSubEnvelope(rawBody: string): PushResult {
     return { ok: false, reason: "MALFORMED_ENVELOPE" };
   }
   try {
-    const decoded = JSON.parse(new TextDecoder().decode(b64uToBytes(data))) as Record<string, unknown>;
+    const decoded = JSON.parse(new TextDecoder().decode(b64uToBytes(data))) as Record<
+      string,
+      unknown
+    >;
     if (!decoded || typeof decoded !== "object") return { ok: false, reason: "MALFORMED_ENVELOPE" };
     return { ok: true, message: decoded, messageId };
   } catch {
@@ -84,7 +85,12 @@ export function decodePubSubEnvelope(rawBody: string): PushResult {
  */
 export async function authenticatePubSubPush(
   headers: Headers,
-  options: { config?: GoogleConfig; fetchImpl?: Fetcher; jwks?: { keys: Array<Record<string, unknown>> }; now?: number } = {},
+  options: {
+    config?: GoogleConfig;
+    fetchImpl?: Fetcher;
+    jwks?: { keys: Array<Record<string, unknown>> };
+    now?: number;
+  } = {},
 ): Promise<{ ok: true } | { ok: false; reason: PushFailure }> {
   let config = options.config;
   if (!config) {
@@ -97,7 +103,9 @@ export async function authenticatePubSubPush(
   }
 
   const authorization = headers.get("authorization");
-  const token = authorization?.toLowerCase().startsWith("bearer ") ? authorization.slice(7).trim() : null;
+  const token = authorization?.toLowerCase().startsWith("bearer ")
+    ? authorization.slice(7).trim()
+    : null;
   if (!token) return { ok: false, reason: "MISSING_TOKEN" };
 
   let jwks = options.jwks;
@@ -149,7 +157,8 @@ export async function googleAccessToken(
         assertion,
       }).toString(),
     });
-    if (response.status === 400 || response.status === 401) return { ok: false, reason: "UNAUTHORIZED" };
+    if (response.status === 400 || response.status === 401)
+      return { ok: false, reason: "UNAUTHORIZED" };
     if (!response.ok) return { ok: false, reason: "UPSTREAM_ERROR" };
     const body = (await response.json()) as { access_token?: unknown };
     const token = typeof body.access_token === "string" ? body.access_token : null;
@@ -183,13 +192,17 @@ export async function fetchGoogleSubscriptionState(
   try {
     response = await (options.fetchImpl ?? fetch)(
       `${config.apiBase}/androidpublisher/v3/applications/${encodeURIComponent(config.packageName)}/purchases/subscriptionsv2/tokens/${encodeURIComponent(purchaseToken)}`,
-      { method: "GET", headers: { authorization: `Bearer ${accessToken}`, accept: "application/json" } },
+      {
+        method: "GET",
+        headers: { authorization: `Bearer ${accessToken}`, accept: "application/json" },
+      },
     );
   } catch {
     return { ok: false, reason: "UPSTREAM_ERROR" };
   }
 
-  if (response.status === 401 || response.status === 403) return { ok: false, reason: "UNAUTHORIZED" };
+  if (response.status === 401 || response.status === 403)
+    return { ok: false, reason: "UNAUTHORIZED" };
   if (response.status === 404) return { ok: false, reason: "NOT_FOUND" };
   if (response.status === 429) return { ok: false, reason: "RATE_LIMITED" };
   if (!response.ok) return { ok: false, reason: "UPSTREAM_ERROR" };
@@ -220,7 +233,9 @@ export function parseGoogleSubscriptionResponse(
   purchaseToken: string,
   config: GoogleConfig,
 ): GoogleResult {
-  const items = Array.isArray(body["lineItems"]) ? (body["lineItems"] as Array<Record<string, unknown>>) : [];
+  const items = Array.isArray(body["lineItems"])
+    ? (body["lineItems"] as Array<Record<string, unknown>>)
+    : [];
   const item = items[0];
   const productId =
     (item && typeof item["productId"] === "string" ? item["productId"] : null) ??
@@ -243,7 +258,12 @@ export function parseGoogleSubscriptionResponse(
   const periodEnd = iso(item?.["expiryTime"]) ?? iso(body["expiryTime"]);
   const finalLifecycle =
     body["subscriptionState"] === "SUBSCRIPTION_STATE_EXPIRED" && body["revoked"] === true
-      ? { status: "expired" as const, revoke: true, cancelAtPeriodEnd: false, reason: "api_revoked" }
+      ? {
+          status: "expired" as const,
+          revoke: true,
+          cancelAtPeriodEnd: false,
+          reason: "api_revoked",
+        }
       : lifecycle;
 
   return {

@@ -139,19 +139,14 @@ export function NotificationBell() {
                   }`}
                 >
                   <span className="block font-medium">
-                    {item.kind === "support_reply"
-                      ? t.notifications.reply
-                      : t.notifications.status}
+                    {item.kind === "support_reply" ? t.notifications.reply : t.notifications.status}
                   </span>
-                  <span className="block truncate text-xs text-muted-foreground">
-                    {item.title}
-                  </span>
+                  <span className="block truncate text-xs text-muted-foreground">{item.title}</span>
                   {item.detail ? (
                     <span className="mt-0.5 block truncate text-xs text-muted-foreground">
                       {item.kind === "support_status"
-                        ? (t.support.statuses[
-                            item.detail as keyof typeof t.support.statuses
-                          ] ?? item.detail)
+                        ? (t.support.statuses[item.detail as keyof typeof t.support.statuses] ??
+                          item.detail)
                         : item.detail}
                     </span>
                   ) : null}

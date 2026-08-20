@@ -8,11 +8,7 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@/integrations/supabase/types";
 import { DEFAULT_CURRENCY, PREMIUM_ENTITLEMENTS, planByCode } from "@/config/billing";
-import type {
-  MemberEntitlement,
-  MemberSubscription,
-  SubscriptionStatus,
-} from "@/lib/billing-core";
+import type { MemberEntitlement, MemberSubscription, SubscriptionStatus } from "@/lib/billing-core";
 
 type Client = SupabaseClient<Database>;
 
@@ -119,7 +115,6 @@ export async function applySubscriptionState(input: {
   } as unknown as Database["public"]["Functions"]["billing_apply_subscription"]["Args"];
 
   const { data, error } = await supabaseAdmin.rpc("billing_apply_subscription", args);
-
 
   if (error) throw error;
   return String(data);

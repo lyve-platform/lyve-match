@@ -169,7 +169,9 @@ export function MessageBubble({
               ))}
             </RadioGroup>
             <div className="space-y-2">
-              <Label htmlFor={`report-details-${message.id}`}>{t.discover.safety.reportDetails}</Label>
+              <Label htmlFor={`report-details-${message.id}`}>
+                {t.discover.safety.reportDetails}
+              </Label>
               <Textarea
                 id={`report-details-${message.id}`}
                 value={description}

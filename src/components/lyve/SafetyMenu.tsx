@@ -96,7 +96,9 @@ export function SafetyMenu({
       <AlertDialog open={confirmBlock} onOpenChange={setConfirmBlock}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>{fill(t.discover.safety.blockConfirmTitle, { name })}</AlertDialogTitle>
+            <AlertDialogTitle>
+              {fill(t.discover.safety.blockConfirmTitle, { name })}
+            </AlertDialogTitle>
             <AlertDialogDescription>{t.discover.safety.blockConfirmBody}</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

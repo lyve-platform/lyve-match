@@ -29,16 +29,13 @@ export function Footer() {
     },
   ];
 
-
   return (
     <footer className="border-t border-border bg-surface px-4 py-12 sm:px-6">
       <div className="mx-auto max-w-6xl">
         <div className="grid gap-10 md:grid-cols-[1.4fr_repeat(3,1fr)]">
           <div>
             <Logo />
-            <p className="mt-4 max-w-xs text-sm text-muted-foreground">
-              {t.footer.description}
-            </p>
+            <p className="mt-4 max-w-xs text-sm text-muted-foreground">{t.footer.description}</p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
               <LanguageSwitcher />
               <ThemeToggle />
@@ -78,14 +75,14 @@ export function Footer() {
               </ul>
             </nav>
           ))}
-
         </div>
 
         <div className="mt-10 flex flex-col gap-2 border-t border-border pt-6 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} LYVE. {t.footer.rights}</p>
+          <p>
+            © {new Date().getFullYear()} LYVE. {t.footer.rights}
+          </p>
           <p>{t.footer.ageNotice}</p>
         </div>
-
       </div>
     </footer>
   );

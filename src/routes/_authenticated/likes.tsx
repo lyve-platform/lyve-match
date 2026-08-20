@@ -72,7 +72,6 @@ function LikesPage() {
       ) : (
         <ul className="grid gap-4 sm:grid-cols-2">
           {cards.map((person) => (
-
             <li key={person.profileId}>
               <Card className="flex gap-4 overflow-hidden p-4">
                 <div className="size-20 shrink-0 overflow-hidden rounded-xl bg-muted">
@@ -89,7 +88,9 @@ function LikesPage() {
                   <div className="flex items-start justify-between gap-2">
                     <h2 className="truncate font-semibold">
                       {person.firstName || "—"}
-                      {person.age ? <span className="text-muted-foreground">, {person.age}</span> : null}
+                      {person.age ? (
+                        <span className="text-muted-foreground">, {person.age}</span>
+                      ) : null}
                     </h2>
                     <SafetyMenu profileId={person.profileId} name={person.firstName || "—"} />
                   </div>

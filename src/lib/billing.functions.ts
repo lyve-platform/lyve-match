@@ -20,11 +20,7 @@ import {
   planByCode,
   type BillingIntervalId,
 } from "@/config/billing";
-import type {
-  BillingActionResult,
-  BillingSnapshot,
-  CheckoutOutcome,
-} from "@/lib/billing-core";
+import type { BillingActionResult, BillingSnapshot, CheckoutOutcome } from "@/lib/billing-core";
 import { requireEntitlement } from "@/lib/entitlements.server";
 import {
   applySubscriptionState,
@@ -113,7 +109,12 @@ export const createCheckoutSession = createServerFn({ method: "POST" })
       });
     } catch {
       // Provider errors can carry credentials or internal detail: never surface them.
-      return { mode: provider.isLive ? "live" : "test", code: "CHECKOUT_UNAVAILABLE", url: null, sessionId: null };
+      return {
+        mode: provider.isLive ? "live" : "test",
+        code: "CHECKOUT_UNAVAILABLE",
+        url: null,
+        sessionId: null,
+      };
     }
   });
 
@@ -125,7 +126,10 @@ export const cancelSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<BillingActionResult> => {
     const provider = resolveProvider();
-    const { subscription, providerRef } = await loadOwnSubscription(context.supabase, context.userId);
+    const { subscription, providerRef } = await loadOwnSubscription(
+      context.supabase,
+      context.userId,
+    );
     if (!subscription) return { code: "NO_SUBSCRIPTION" };
     if (!provider.supportsSelfServiceLifecycle) return { code: "NOT_SUPPORTED" };
 
@@ -150,7 +154,10 @@ export const resumeSubscription = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<BillingActionResult> => {
     const provider = resolveProvider();
-    const { subscription, providerRef } = await loadOwnSubscription(context.supabase, context.userId);
+    const { subscription, providerRef } = await loadOwnSubscription(
+      context.supabase,
+      context.userId,
+    );
     if (!subscription) return { code: "NO_SUBSCRIPTION" };
     if (!provider.supportsSelfServiceLifecycle) return { code: "NOT_SUPPORTED" };
 

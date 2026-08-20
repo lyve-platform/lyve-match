@@ -150,7 +150,11 @@ function scoreLocation(input: CompatibilityInput): Dim {
   if (city && input.viewer.city && city.toLowerCase() === input.viewer.city.toLowerCase()) {
     return { score: 1, reason: { key: "location", values: [city] } };
   }
-  if (country && input.viewer.country && country.toLowerCase() === input.viewer.country.toLowerCase()) {
+  if (
+    country &&
+    input.viewer.country &&
+    country.toLowerCase() === input.viewer.country.toLowerCase()
+  ) {
     return { score: 0.6, reason: { key: "location", values: country ? [country] : [] } };
   }
   if (!city && !country) return { score: null };

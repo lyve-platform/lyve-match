@@ -32,39 +32,42 @@ import { hasEntitlement, requireEntitlement } from "@/lib/entitlements.server";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
-
 export const getDiscoveryFeed = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { page?: number } | undefined) => ({
     page: Math.min(Math.max(Math.trunc(Number(input?.page ?? 0)) || 0, 0), 50),
   }))
-  .handler(async ({ data, context }): Promise<{ cards: DiscoveryCard[]; nextPage: number | null }> => {
-    const { supabase, userId } = context;
+  .handler(
+    async ({ data, context }): Promise<{ cards: DiscoveryCard[]; nextPage: number | null }> => {
+      const { supabase, userId } = context;
 
-    const { data: rows, error } = await supabase.rpc("discover_candidates", {
-      p_limit: DISCOVERY_POOL_SIZE,
-      p_offset: data.page * DISCOVERY_POOL_SIZE,
-    });
-    if (error) throw error;
+      const { data: rows, error } = await supabase.rpc("discover_candidates", {
+        p_limit: DISCOVERY_POOL_SIZE,
+        p_offset: data.page * DISCOVERY_POOL_SIZE,
+      });
+      if (error) throw error;
 
-    const pool = (rows ?? []) as unknown as CandidateRow[];
-    const viewer: ViewerFacts = await loadViewerFacts(supabase, userId);
-    const ranked = rankCandidates(viewer, pool, DISCOVERY_PAGE_SIZE);
+      const pool = (rows ?? []) as unknown as CandidateRow[];
+      const viewer: ViewerFacts = await loadViewerFacts(supabase, userId);
+      const ranked = rankCandidates(viewer, pool, DISCOVERY_PAGE_SIZE);
 
-    const urls = await signPhotoUrls(ranked.flatMap(({ row }) => (row.photo_paths ?? []).slice(0, 3)));
-    await touchLastActive(supabase, userId);
+      const urls = await signPhotoUrls(
+        ranked.flatMap(({ row }) => (row.photo_paths ?? []).slice(0, 3)),
+      );
+      await touchLastActive(supabase, userId);
 
-    return {
-      cards: ranked.map(({ row, compatibility }) =>
-        toDiscoveryCard(
-          row,
-          compatibility,
-          (row.photo_paths ?? []).slice(0, 3).flatMap((path) => (urls[path] ? [urls[path]] : [])),
+      return {
+        cards: ranked.map(({ row, compatibility }) =>
+          toDiscoveryCard(
+            row,
+            compatibility,
+            (row.photo_paths ?? []).slice(0, 3).flatMap((path) => (urls[path] ? [urls[path]] : [])),
+          ),
         ),
-      ),
-      nextPage: pool.length === DISCOVERY_POOL_SIZE ? data.page + 1 : null,
-    };
-  });
+        nextPage: pool.length === DISCOVERY_POOL_SIZE ? data.page + 1 : null,
+      };
+    },
+  );
 
 /**
  * Who Liked Me — Premium gate enforced HERE, not in the UI.
@@ -137,7 +140,6 @@ export const getCompatibilityInsight = createServerFn({ method: "POST" })
     return { available: true as const, compatibility: ranked?.compatibility ?? null };
   });
 
-
 export const getMatches = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<MatchCard[]> => {
@@ -162,15 +164,19 @@ export const getMatches = createServerFn({ method: "POST" })
 
 export const getBlockedMembers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }): Promise<Array<{ profileId: string; firstName: string | null; blockedAt: string }>> => {
-    const { data, error } = await context.supabase
-      .from("blocks")
-      .select("blocked_id, created_at")
-      .eq("blocker_id", context.userId)
-      .order("created_at", { ascending: false });
-    if (error) throw error;
+  .handler(
+    async ({
+      context,
+    }): Promise<Array<{ profileId: string; firstName: string | null; blockedAt: string }>> => {
+      const { data, error } = await context.supabase
+        .from("blocks")
+        .select("blocked_id, created_at")
+        .eq("blocker_id", context.userId)
+        .order("created_at", { ascending: false });
+      if (error) throw error;
 
-    return listBlockedNames(
-      (data ?? []).map((row) => ({ profileId: row.blocked_id, blockedAt: row.created_at })),
-    );
-  });
+      return listBlockedNames(
+        (data ?? []).map((row) => ({ profileId: row.blocked_id, blockedAt: row.created_at })),
+      );
+    },
+  );

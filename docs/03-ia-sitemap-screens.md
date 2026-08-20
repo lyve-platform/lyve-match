@@ -1,6 +1,7 @@
 # LYVE — Information Architecture, Sitemap, Screens
 
 ## 1. Sitemap
+
 ```text
 Public
   /                    Landing (hero, how it works, safety, compatibility, premium, FAQ)
@@ -45,6 +46,7 @@ Admin (RBAC, separate shell)
 ```
 
 ## 2. Screen list (MVP)
+
 Splash · Landing · Sign Up · Login · Age Gate · OTP · Onboarding (14) · Profile Setup ·
 Photo Upload · Preferences · Discover · Profile Details · Likes · Matches · Messages ·
 Conversation · Notifications · Premium · Boost · Super Like · Verification · Privacy ·
@@ -52,11 +54,13 @@ Settings · Help · Report · Block confirm · Account Deletion · Appeal status
 Admin (9 screens above).
 
 ## 3. Navigation rules
+
 - Bottom tab bar on mobile; left rail on desktop ≥1024px.
 - Onboarding is linear with progress bar; optional steps show "Skip for now".
 - Destructive actions (block, unmatch, delete, ban) always require confirmation.
 
 ## 4. Design system direction
+
 - Mood: premium, warm, minimal, romantic, global, trustworthy. Not neon, not Tinder-red.
 - Tokens only (oklch semantic variables): background, foreground, primary (warm ember),
   secondary (deep plum), accent (soft gold), muted, destructive, success, surfaces,
@@ -69,5 +73,6 @@ Admin (9 screens above).
 - Motion: soft spring on card actions, subtle fade/scale on match reveal. No confetti spam.
 
 ## 5. Localization
+
 - Locale files `en`, `ar`; direction from locale, `dir` on `<html>`.
 - All dates/numbers/currencies via Intl; per-user timezone; no hard-coded strings in UI.

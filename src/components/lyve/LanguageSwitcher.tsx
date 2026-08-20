@@ -21,7 +21,6 @@ export function LanguageSwitcher({ className }: { className?: string }) {
     >
       <Globe aria-hidden="true" className="ms-2 size-4 text-muted-foreground" />
       {enabledLocales.map((code) => (
-
         <button
           key={code}
           type="button"

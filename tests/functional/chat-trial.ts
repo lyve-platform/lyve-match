@@ -41,7 +41,11 @@ type Member = { id: string; email: string; name: string; client: SupabaseClient 
 
 async function createMember(tag: string, name: string): Promise<Member> {
   const email = `chat-${tag}-${stamp}@lyve.test`;
-  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
   if (error) throw error;
   const client = createClient(url, publishableKey, { auth: { persistSession: false } });
   const signIn = await client.auth.signInWithPassword({ email, password });
@@ -112,9 +116,13 @@ async function main() {
       discover.error?.message,
     );
 
-    const like1 = await amina.client.from("likes").insert({ liker_id: amina.id, likee_id: daniel.id });
+    const like1 = await amina.client
+      .from("likes")
+      .insert({ liker_id: amina.id, likee_id: daniel.id });
     check("Amina likes Daniel", !like1.error, like1.error?.message);
-    const like2 = await daniel.client.from("likes").insert({ liker_id: daniel.id, likee_id: amina.id });
+    const like2 = await daniel.client
+      .from("likes")
+      .insert({ liker_id: daniel.id, likee_id: amina.id });
     check("Daniel likes back", !like2.error, like2.error?.message);
 
     const lo = amina.id < daniel.id ? amina.id : daniel.id;
@@ -125,21 +133,28 @@ async function main() {
       .eq("profile_a", lo)
       .eq("profile_b", hi)
       .single();
-    check("mutual like creates a match and a conversation", !conv.error && Boolean(conv.data?.["id"]), conv.error?.message);
+    check(
+      "mutual like creates a match and a conversation",
+      !conv.error && Boolean(conv.data?.["id"]),
+      conv.error?.message,
+    );
     const conversationId = conv.data!["id"] as string;
 
     /* ---------------------------------------------------------- realtime */
     const received: string[] = [];
-    const channel = daniel.client
-      .channel(`trial:${conversationId}`)
-      .on(
-        "postgres_changes",
-        { event: "INSERT", schema: "public", table: "messages", filter: `conversation_id=eq.${conversationId}` },
-        (payload) => {
-          const body = (payload.new as Record<string, unknown>)["body"];
-          if (typeof body === "string") received.push(body);
-        },
-      );
+    const channel = daniel.client.channel(`trial:${conversationId}`).on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `conversation_id=eq.${conversationId}`,
+      },
+      (payload) => {
+        const body = (payload.new as Record<string, unknown>)["body"];
+        if (typeof body === "string") received.push(body);
+      },
+    );
     await new Promise<void>((resolve) => {
       channel.subscribe((status) => {
         if (status === "SUBSCRIBED") resolve();
@@ -158,11 +173,9 @@ async function main() {
     check("Amina follows up", !m3.error, m3.error?.message);
 
     await wait(2500);
-    check(
-      "Daniel receives Amina's messages over realtime",
-      received.length >= 1,
-      { received: received.length },
-    );
+    check("Daniel receives Amina's messages over realtime", received.length >= 1, {
+      received: received.length,
+    });
     await daniel.client.removeChannel(channel);
 
     /* ------------------------------------------------------------- reads */
@@ -171,7 +184,11 @@ async function main() {
       .select("id, sender_id, body, created_at")
       .eq("conversation_id", conversationId)
       .order("created_at", { ascending: true });
-    check("Daniel sees the full thread in order", (thread.data ?? []).length === 3, thread.error?.message ?? thread.data?.length);
+    check(
+      "Daniel sees the full thread in order",
+      (thread.data ?? []).length === 3,
+      thread.error?.message ?? thread.data?.length,
+    );
     console.log(
       "\n--- thread ---\n" +
         (thread.data ?? [])
@@ -180,11 +197,15 @@ async function main() {
         "\n",
     );
 
-    const markRead = await daniel.client.rpc("mark_conversation_read", { p_conversation: conversationId });
+    const markRead = await daniel.client.rpc("mark_conversation_read", {
+      p_conversation: conversationId,
+    });
     check("Daniel can mark the conversation as read", !markRead.error, markRead.error?.message);
 
     const list = await amina.client.rpc("my_conversations");
-    const row = (list.data ?? []).find((r: Record<string, unknown>) => r["conversation_id"] === conversationId);
+    const row = (list.data ?? []).find(
+      (r: Record<string, unknown>) => r["conversation_id"] === conversationId,
+    );
     check("the conversation appears in Amina's inbox", Boolean(row), list.error?.message);
     check(
       "the inbox row carries the last message preview",
@@ -193,17 +214,31 @@ async function main() {
     );
 
     /* --------------------------------------------------------- moderation */
-    const verdict = await screenMessage("Send me your WhatsApp +971500000000 and your bank IBAN now");
+    const verdict = await screenMessage(
+      "Send me your WhatsApp +971500000000 and your bank IBAN now",
+    );
     check("the safety screener flags a risky message", verdict.flagged, verdict);
 
     /* -------------------------------------------------------------- block */
-    const block = await amina.client.from("blocks").insert({ blocker_id: amina.id, blocked_id: daniel.id });
+    const block = await amina.client
+      .from("blocks")
+      .insert({ blocker_id: amina.id, blocked_id: daniel.id });
     check("Amina can block Daniel", !block.error, block.error?.message);
     await wait(500);
     const blockedSend = await send(daniel, conversationId, "Hello?");
-    check("Daniel can no longer message after being blocked", Boolean(blockedSend.error), blockedSend.error?.message);
-    const blockedRead = await daniel.client.from("messages").select("id").eq("conversation_id", conversationId);
-    check("the conversation disappears for the blocked member", (blockedRead.data ?? []).length === 0);
+    check(
+      "Daniel can no longer message after being blocked",
+      Boolean(blockedSend.error),
+      blockedSend.error?.message,
+    );
+    const blockedRead = await daniel.client
+      .from("messages")
+      .select("id")
+      .eq("conversation_id", conversationId);
+    check(
+      "the conversation disappears for the blocked member",
+      (blockedRead.data ?? []).length === 0,
+    );
   } finally {
     const removed = await sweepTestAccounts();
     console.log(`\ncleanup: removed ${removed} fixture account(s)`);

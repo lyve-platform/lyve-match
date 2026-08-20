@@ -13,11 +13,15 @@ export const Route = createFileRoute("/_authenticated/admin/store-readiness")({
       { title: "Store readiness — LYVE staff console" },
       {
         name: "description",
-        content: "Apple and Google production rail and webhook configuration status for LYVE billing.",
+        content:
+          "Apple and Google production rail and webhook configuration status for LYVE billing.",
       },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Store readiness — LYVE staff console" },
-      { property: "og:description", content: "Apple and Google billing rail configuration status." },
+      {
+        property: "og:description",
+        content: "Apple and Google billing rail configuration status.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
     ],
@@ -101,7 +105,15 @@ function StoreReadinessPage() {
             <Card key={row.store}>
               <CardHeader className="flex flex-row items-center justify-between gap-3 space-y-0">
                 <CardTitle>{copy.stores[row.store]}</CardTitle>
-                <Badge variant={row.state === "ready" ? "default" : row.state === "sandbox" ? "secondary" : "destructive"}>
+                <Badge
+                  variant={
+                    row.state === "ready"
+                      ? "default"
+                      : row.state === "sandbox"
+                        ? "secondary"
+                        : "destructive"
+                  }
+                >
                   {copy.states[row.state]}
                 </Badge>
               </CardHeader>

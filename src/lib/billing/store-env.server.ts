@@ -55,8 +55,14 @@ const APPLE_PRODUCTION_VARS = [
   "APPLE_IAP_PRIVATE_KEY",
   "APPLE_IAP_BUNDLE_ID",
 ] as const;
-const GOOGLE_SANDBOX_VARS = ["GOOGLE_PLAY_SANDBOX_SERVICE_ACCOUNT_JSON", "GOOGLE_PLAY_SANDBOX_PACKAGE_NAME"] as const;
-const GOOGLE_PRODUCTION_VARS = ["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON", "GOOGLE_PLAY_PACKAGE_NAME"] as const;
+const GOOGLE_SANDBOX_VARS = [
+  "GOOGLE_PLAY_SANDBOX_SERVICE_ACCOUNT_JSON",
+  "GOOGLE_PLAY_SANDBOX_PACKAGE_NAME",
+] as const;
+const GOOGLE_PRODUCTION_VARS = [
+  "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON",
+  "GOOGLE_PLAY_PACKAGE_NAME",
+] as const;
 
 function env(name: string): string | null {
   const value = process.env[name];
@@ -102,8 +108,10 @@ export function appleConfig(): ConfigResult<AppleConfig> {
   const environment = configuredStoreEnvironment();
   const names = environment === "sandbox" ? APPLE_SANDBOX_VARS : APPLE_PRODUCTION_VARS;
   const [issuerId, keyId, privateKeyPem, bundleId] = names.map((name) => env(name));
-  if (!issuerId && !keyId && !privateKeyPem && !bundleId) return { ok: false, reason: "NOT_CONFIGURED" };
-  if (!issuerId || !keyId || !privateKeyPem || !bundleId) return { ok: false, reason: "NOT_CONFIGURED" };
+  if (!issuerId && !keyId && !privateKeyPem && !bundleId)
+    return { ok: false, reason: "NOT_CONFIGURED" };
+  if (!issuerId || !keyId || !privateKeyPem || !bundleId)
+    return { ok: false, reason: "NOT_CONFIGURED" };
   if (!privateKeyPem.includes("PRIVATE KEY")) return { ok: false, reason: "INVALID_CREDENTIAL" };
 
   return {
@@ -123,7 +131,8 @@ export function appleConfig(): ConfigResult<AppleConfig> {
 export function googleConfig(): ConfigResult<GoogleConfig> {
   if (hasMisplacedGoogleCredentials()) return { ok: false, reason: "CREDENTIAL_MISPLACED" };
   const environment = configuredStoreEnvironment();
-  const [jsonName, packageName] = environment === "sandbox" ? GOOGLE_SANDBOX_VARS : GOOGLE_PRODUCTION_VARS;
+  const [jsonName, packageName] =
+    environment === "sandbox" ? GOOGLE_SANDBOX_VARS : GOOGLE_PRODUCTION_VARS;
   const raw = env(jsonName);
   const pkg = env(packageName);
   if (!raw && !pkg) return { ok: false, reason: "NOT_CONFIGURED" };
@@ -167,13 +176,15 @@ export type StoreRail = "api" | "hmac" | "none";
 export function appleRail(): StoreRail {
   const config = appleConfig();
   if (config.ok) return "api";
-  if (config.reason === "NOT_CONFIGURED" && configuredStoreEnvironment() === "sandbox") return "hmac";
+  if (config.reason === "NOT_CONFIGURED" && configuredStoreEnvironment() === "sandbox")
+    return "hmac";
   return "none";
 }
 
 export function googleRail(): StoreRail {
   const config = googleConfig();
   if (config.ok) return "api";
-  if (config.reason === "NOT_CONFIGURED" && configuredStoreEnvironment() === "sandbox") return "hmac";
+  if (config.reason === "NOT_CONFIGURED" && configuredStoreEnvironment() === "sandbox")
+    return "hmac";
   return "none";
 }

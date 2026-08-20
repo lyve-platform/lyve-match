@@ -10,16 +10,16 @@ Result: **43/43 automated security tests pass.** Three issues were found and fix
 
 ## 1. Database audit
 
-| Area | Finding |
-| --- | --- |
-| Tables | `profiles`, `profile_photos`, `interests`, `profile_interests`, `preferences`, `privacy_settings`, `onboarding_progress`, `account_deletion_requests` — all in `public`, all with primary keys. |
-| Foreign keys | Every child table references `profiles(id)` with `ON DELETE CASCADE`; `profiles.id` references the auth user with cascade. `profile_interests.interest_id` references `interests(id)`. |
-| Constraints | 18+/≤120 date-of-birth range, `max_age >= min_age`, age bounds [18, 120], bio/name/occupation length limits, max photos per profile, unique `profile_photos.storage_path`, one primary photo per profile (partial unique index). |
-| Enums | `gender_type`, `relationship_intent`, `profile_visibility`, `message_audience`, `deletion_request_status` — no free-text substitutes. |
-| Timestamps | `created_at` / `updated_at` on every table, with `set_updated_at` BEFORE UPDATE triggers. |
-| Indexes | Primary keys, foreign-key columns, and the partial primary-photo index are present; no unindexed hot path at Phase 1 data volume. |
-| Grants | `authenticated` and `service_role` hold Data API grants on every public table; access is gated by RLS. |
-| Orphans | None. Deleting an auth user cascades to profile, photos, interests, preferences, privacy settings, onboarding progress and deletion requests. |
+| Area         | Finding                                                                                                                                                                                                                          |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Tables       | `profiles`, `profile_photos`, `interests`, `profile_interests`, `preferences`, `privacy_settings`, `onboarding_progress`, `account_deletion_requests` — all in `public`, all with primary keys.                                  |
+| Foreign keys | Every child table references `profiles(id)` with `ON DELETE CASCADE`; `profiles.id` references the auth user with cascade. `profile_interests.interest_id` references `interests(id)`.                                           |
+| Constraints  | 18+/≤120 date-of-birth range, `max_age >= min_age`, age bounds [18, 120], bio/name/occupation length limits, max photos per profile, unique `profile_photos.storage_path`, one primary photo per profile (partial unique index). |
+| Enums        | `gender_type`, `relationship_intent`, `profile_visibility`, `message_audience`, `deletion_request_status` — no free-text substitutes.                                                                                            |
+| Timestamps   | `created_at` / `updated_at` on every table, with `set_updated_at` BEFORE UPDATE triggers.                                                                                                                                        |
+| Indexes      | Primary keys, foreign-key columns, and the partial primary-photo index are present; no unindexed hot path at Phase 1 data volume.                                                                                                |
+| Grants       | `authenticated` and `service_role` hold Data API grants on every public table; access is gated by RLS.                                                                                                                           |
+| Orphans      | None. Deleting an auth user cascades to profile, photos, interests, preferences, privacy settings, onboarding progress and deletion requests.                                                                                    |
 
 ## 2. RLS audit
 
@@ -111,10 +111,10 @@ The service-role key is used only to create and delete the test accounts; the ap
 
 ## 11. Summary of fixes applied
 
-| Severity | Issue | Fix |
-| --- | --- | --- |
-| HIGH | Photo bucket accepted any file type (HTML/SVG payloads) | Storage insert/update policies now require an image extension |
-| MEDIUM | Deletion request fields fully rewritable by owner (purge date, status) | Guard trigger; owner may only cancel; single pending request enforced |
-| MEDIUM | Onboarding could complete with no date of birth (age-gate bypass via API) | Trigger requiring a verified adult date of birth before completion |
+| Severity | Issue                                                                     | Fix                                                                   |
+| -------- | ------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| HIGH     | Photo bucket accepted any file type (HTML/SVG payloads)                   | Storage insert/update policies now require an image extension         |
+| MEDIUM   | Deletion request fields fully rewritable by owner (purge date, status)    | Guard trigger; owner may only cancel; single pending request enforced |
+| MEDIUM   | Onboarding could complete with no date of birth (age-gate bypass via API) | Trigger requiring a verified adult date of birth before completion    |
 
 Remaining open items: automated 30-day purge job (MEDIUM), bucket-level upload size limit (LOW). Both are recorded above and neither is an access-control weakness.

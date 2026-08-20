@@ -44,7 +44,11 @@ export function PasswordField({
           aria-label={visible ? t.auth.actions.hidePassword : t.auth.actions.showPassword}
           onClick={() => setVisible((current) => !current)}
         >
-          {visible ? <EyeOff aria-hidden="true" className="size-4" /> : <Eye aria-hidden="true" className="size-4" />}
+          {visible ? (
+            <EyeOff aria-hidden="true" className="size-4" />
+          ) : (
+            <Eye aria-hidden="true" className="size-4" />
+          )}
         </Button>
       </div>
       {hint ? <p className="text-xs text-muted-foreground">{hint}</p> : null}

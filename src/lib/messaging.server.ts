@@ -40,7 +40,6 @@ export async function recordModerationHints(
   }
 }
 
-
 /**
  * Resolves the header for a conversation the database has already confirmed
  * the viewer belongs to. Returns only card-safe fields.
@@ -72,27 +71,28 @@ export async function loadConversationHeader(
     conversation.profile_a === viewerId ? conversation.profile_b : conversation.profile_a;
 
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const [{ data: profile }, { data: match }, { data: privacy }, { data: photo }] = await Promise.all([
-    supabaseAdmin
-      .from("profiles")
-      .select("first_name, date_of_birth, city, country, deleted_at")
-      .eq("id", otherProfileId)
-      .maybeSingle(),
-    supabaseAdmin.from("matches").select("status").eq("id", conversation.match_id).maybeSingle(),
-    supabaseAdmin
-      .from("privacy_settings")
-      .select("show_online_status")
-      .eq("profile_id", otherProfileId)
-      .maybeSingle(),
-    supabaseAdmin
-      .from("profile_photos")
-      .select("storage_path")
-      .eq("profile_id", otherProfileId)
-      .order("is_primary", { ascending: false })
-      .order("display_order", { ascending: true })
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  const [{ data: profile }, { data: match }, { data: privacy }, { data: photo }] =
+    await Promise.all([
+      supabaseAdmin
+        .from("profiles")
+        .select("first_name, date_of_birth, city, country, deleted_at")
+        .eq("id", otherProfileId)
+        .maybeSingle(),
+      supabaseAdmin.from("matches").select("status").eq("id", conversation.match_id).maybeSingle(),
+      supabaseAdmin
+        .from("privacy_settings")
+        .select("show_online_status")
+        .eq("profile_id", otherProfileId)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("profile_photos")
+        .select("storage_path")
+        .eq("profile_id", otherProfileId)
+        .order("is_primary", { ascending: false })
+        .order("display_order", { ascending: true })
+        .limit(1)
+        .maybeSingle(),
+    ]);
 
   const age = profile?.date_of_birth
     ? Math.floor((Date.now() - new Date(profile.date_of_birth).getTime()) / 31_557_600_000)

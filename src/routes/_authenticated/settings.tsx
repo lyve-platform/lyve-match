@@ -144,7 +144,10 @@ function SettingsPage() {
   return (
     <AccountShell title={t.settingsPage.title} subtitle={t.settingsPage.subtitle}>
       {errorKey ? (
-        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
+        <p
+          role="alert"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm"
+        >
           {t.auth.errors[errorKey]}
         </p>
       ) : null}
@@ -188,7 +191,6 @@ function SettingsPage() {
         <p className="text-sm text-muted-foreground">{t.blockedList.hint}</p>
         <BlockedMembers />
       </section>
-
 
       <section aria-labelledby="account-heading" className="surface-panel space-y-4 p-5">
         <h2 id="account-heading" className="text-base font-semibold">

@@ -18,7 +18,8 @@ type LyveIapPlugin = {
 
 function plugin(): LyveIapPlugin | undefined {
   if (typeof window === "undefined") return undefined;
-  const plugins = (window as unknown as { Capacitor?: { Plugins?: Record<string, unknown> } }).Capacitor?.Plugins;
+  const plugins = (window as unknown as { Capacitor?: { Plugins?: Record<string, unknown> } })
+    .Capacitor?.Plugins;
   return plugins?.["LyveIAP"] as LyveIapPlugin | undefined;
 }
 
@@ -67,7 +68,9 @@ export async function restoreReceipts(): Promise<string[]> {
  */
 export async function purchaseAndLink(
   productId: IapProductId,
-  link: (input: { data: { store: string; receipt: string } }) => Promise<{ result: StoreLinkResult }>,
+  link: (input: {
+    data: { store: string; receipt: string };
+  }) => Promise<{ result: StoreLinkResult }>,
 ): Promise<{ outcome: IapOutcome; result?: StoreLinkResult }> {
   const outcome = await purchaseProduct(productId);
   if (outcome.kind !== "receipt") return { outcome };

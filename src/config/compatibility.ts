@@ -41,11 +41,41 @@ export const COMPATIBILITY_WEIGHTS: Record<CompatibilityDimension, number> = {
 
 /** How closely related two different intents are (0 = unrelated, 1 = identical). */
 export const INTENT_AFFINITY: Record<string, Record<string, number>> = {
-  marriage: { marriage: 1, serious_relationship: 0.7, dating: 0.3, open_to_possibilities: 0.3, new_connections: 0.1 },
-  serious_relationship: { marriage: 0.7, serious_relationship: 1, dating: 0.5, open_to_possibilities: 0.5, new_connections: 0.2 },
-  dating: { marriage: 0.3, serious_relationship: 0.5, dating: 1, open_to_possibilities: 0.7, new_connections: 0.5 },
-  open_to_possibilities: { marriage: 0.3, serious_relationship: 0.5, dating: 0.7, open_to_possibilities: 1, new_connections: 0.7 },
-  new_connections: { marriage: 0.1, serious_relationship: 0.2, dating: 0.5, open_to_possibilities: 0.7, new_connections: 1 },
+  marriage: {
+    marriage: 1,
+    serious_relationship: 0.7,
+    dating: 0.3,
+    open_to_possibilities: 0.3,
+    new_connections: 0.1,
+  },
+  serious_relationship: {
+    marriage: 0.7,
+    serious_relationship: 1,
+    dating: 0.5,
+    open_to_possibilities: 0.5,
+    new_connections: 0.2,
+  },
+  dating: {
+    marriage: 0.3,
+    serious_relationship: 0.5,
+    dating: 1,
+    open_to_possibilities: 0.7,
+    new_connections: 0.5,
+  },
+  open_to_possibilities: {
+    marriage: 0.3,
+    serious_relationship: 0.5,
+    dating: 0.7,
+    open_to_possibilities: 1,
+    new_connections: 0.7,
+  },
+  new_connections: {
+    marriage: 0.1,
+    serious_relationship: 0.2,
+    dating: 0.5,
+    open_to_possibilities: 0.7,
+    new_connections: 1,
+  },
 };
 
 /** Distance (km) at which the location dimension reaches its lowest score. */

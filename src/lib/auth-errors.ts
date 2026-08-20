@@ -33,7 +33,11 @@ export function toErrorKey(error: unknown): AppErrorKey {
   if (message.includes("jwt") || message.includes("session") || status === 401)
     return "sessionExpired";
   if (message.includes("failed to fetch") || message.includes("network")) return "network";
-  if (message.includes("storage") || message.includes("upload") || message.includes("payload too large"))
+  if (
+    message.includes("storage") ||
+    message.includes("upload") ||
+    message.includes("payload too large")
+  )
     return "uploadFailed";
   if (status === 403 || message.includes("row-level security") || message.includes("permission"))
     return "database";

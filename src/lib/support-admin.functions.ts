@@ -7,12 +7,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const SUPPORT_TICKET_STATUSES = [
-  "open",
-  "pending_user",
-  "resolved",
-  "closed",
-] as const;
+export const SUPPORT_TICKET_STATUSES = ["open", "pending_user", "resolved", "closed"] as const;
 export type SupportTicketStatus = (typeof SUPPORT_TICKET_STATUSES)[number];
 
 export type AdminSupportTicket = {
@@ -94,7 +89,9 @@ export const adminListTicketReplies = createServerFn({ method: "POST" })
 export const adminReplySupportTicket = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { ticketId: string; body?: string; status?: string | null }) => {
-    const body = String(input?.body ?? "").trim().slice(0, 4000);
+    const body = String(input?.body ?? "")
+      .trim()
+      .slice(0, 4000);
     const status =
       input?.status && SUPPORT_TICKET_STATUSES.includes(input.status as SupportTicketStatus)
         ? (input.status as SupportTicketStatus)

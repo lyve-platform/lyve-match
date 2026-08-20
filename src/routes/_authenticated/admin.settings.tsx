@@ -172,7 +172,9 @@ function AdminSettingsPage() {
               <dl className="grid gap-2 text-sm sm:grid-cols-2">
                 <div>
                   <dt className="text-muted-foreground">{t.adminSettings.status}</dt>
-                  <dd>{paymentsOn ? t.adminSettings.paymentsActive : t.adminSettings.paymentsInactive}</dd>
+                  <dd>
+                    {paymentsOn ? t.adminSettings.paymentsActive : t.adminSettings.paymentsInactive}
+                  </dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">{t.adminSettings.lastChanged}</dt>

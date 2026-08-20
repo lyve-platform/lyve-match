@@ -51,7 +51,11 @@ export async function handleStoreNotification(
   const key = callerKey(store, headers);
   const rate = await consumeRate(key, RATE_LIMITS.webhook);
   if (!rate.allowed) {
-    await raiseStoreAlert("store_rate_limited", key, { store, hits: rate.hits, reason: "webhook_flood" });
+    await raiseStoreAlert("store_rate_limited", key, {
+      store,
+      hits: rate.hits,
+      reason: "webhook_flood",
+    });
     return respond(429, "RATE_LIMITED");
   }
 
@@ -62,7 +66,10 @@ export async function handleStoreNotification(
     if (verification.reason === "NOT_CONFIGURED") return respond(503, "STORE_NOT_CONNECTED");
 
     if (verification.reason === "MISCONFIGURED") {
-      await raiseStoreAlert("store_misconfiguration", `webhook:${store}`, { store, reason: "credentials_misplaced" });
+      await raiseStoreAlert("store_misconfiguration", `webhook:${store}`, {
+        store,
+        reason: "credentials_misplaced",
+      });
       return respond(503, "STORE_NOT_CONNECTED");
     }
     if (verification.reason === "UPSTREAM_UNAVAILABLE") {

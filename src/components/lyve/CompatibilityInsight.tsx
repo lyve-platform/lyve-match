@@ -82,7 +82,9 @@ export function CompatibilityInsight({
                       ({Math.round(COMPATIBILITY_WEIGHTS[dimension] * 100)}%)
                     </span>
                   </span>
-                  <span className="text-muted-foreground">{value === null ? "—" : `${value}%`}</span>
+                  <span className="text-muted-foreground">
+                    {value === null ? "—" : `${value}%`}
+                  </span>
                 </div>
                 <Progress value={value ?? 0} className="h-1.5" />
               </li>

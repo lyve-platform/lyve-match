@@ -16,9 +16,7 @@ export function DateOfBirthField({
 
   return (
     <fieldset className="space-y-2">
-      <legend className="text-sm font-medium text-foreground">
-        {t.auth.fields.dateOfBirth}
-      </legend>
+      <legend className="text-sm font-medium text-foreground">{t.auth.fields.dateOfBirth}</legend>
       <div className="grid grid-cols-3 gap-2">
         <div className="space-y-1">
           <Label htmlFor={`${idPrefix}-day`} className="text-xs text-muted-foreground">
@@ -58,7 +56,9 @@ export function DateOfBirthField({
             autoComplete="bday-year"
             maxLength={4}
             value={value.year}
-            onChange={(event) => onChange({ ...value, year: event.target.value.replace(/\D/g, "") })}
+            onChange={(event) =>
+              onChange({ ...value, year: event.target.value.replace(/\D/g, "") })
+            }
           />
         </div>
       </div>

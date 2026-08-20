@@ -194,7 +194,6 @@ export function useConversationThread(conversationId: string) {
     },
   });
 
-
   return {
     messages,
     loading,

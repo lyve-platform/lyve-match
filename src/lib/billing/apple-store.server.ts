@@ -31,7 +31,8 @@ export type AppleFailure =
   | "UNKNOWN_PRODUCT"
   | "UNSUPPORTED_STATE";
 
-export type AppleResult = { ok: true; snapshot: StoreSnapshot } | { ok: false; reason: AppleFailure };
+export type AppleResult =
+  { ok: true; snapshot: StoreSnapshot } | { ok: false; reason: AppleFailure };
 
 export type Fetcher = typeof fetch;
 
@@ -71,7 +72,8 @@ export async function fetchAppleSubscriptionState(
     config = resolved.config;
   }
 
-  if (!/^[A-Za-z0-9._-]{1,200}$/.test(originalTransactionId)) return { ok: false, reason: "NOT_FOUND" };
+  if (!/^[A-Za-z0-9._-]{1,200}$/.test(originalTransactionId))
+    return { ok: false, reason: "NOT_FOUND" };
 
   let token: string;
   try {
@@ -97,7 +99,8 @@ export async function fetchAppleSubscriptionState(
     return { ok: false, reason: "UPSTREAM_ERROR" };
   }
 
-  if (response.status === 401 || response.status === 403) return { ok: false, reason: "UNAUTHORIZED" };
+  if (response.status === 401 || response.status === 403)
+    return { ok: false, reason: "UNAUTHORIZED" };
   if (response.status === 404) return { ok: false, reason: "NOT_FOUND" };
   if (response.status === 429) return { ok: false, reason: "RATE_LIMITED" };
   if (!response.ok) return { ok: false, reason: "UPSTREAM_ERROR" };
@@ -118,9 +121,13 @@ export async function parseAppleSubscriptionResponse(
   config: AppleConfig,
   now?: number,
 ): Promise<AppleResult> {
-  const groups = Array.isArray(body["data"]) ? (body["data"] as Array<Record<string, unknown>>) : [];
+  const groups = Array.isArray(body["data"])
+    ? (body["data"] as Array<Record<string, unknown>>)
+    : [];
   const transactions = groups.flatMap((group) =>
-    Array.isArray(group["lastTransactions"]) ? (group["lastTransactions"] as Array<Record<string, unknown>>) : [],
+    Array.isArray(group["lastTransactions"])
+      ? (group["lastTransactions"] as Array<Record<string, unknown>>)
+      : [],
   );
   const latest = transactions[0];
   if (!latest) return { ok: false, reason: "MALFORMED_RESPONSE" };
@@ -129,7 +136,9 @@ export async function parseAppleSubscriptionResponse(
   if (typeof signed !== "string") return { ok: false, reason: "MALFORMED_RESPONSE" };
 
   const verified = await verifyAppleJws<SignedTransaction>(signed, {
-    ...(config.trustedRootFingerprints.length ? { trustedRootFingerprints: config.trustedRootFingerprints } : {}),
+    ...(config.trustedRootFingerprints.length
+      ? { trustedRootFingerprints: config.trustedRootFingerprints }
+      : {}),
     ...(now ? { now: new Date(now) } : {}),
   });
   if (!verified.ok) return { ok: false, reason: "SIGNATURE_INVALID" };
@@ -142,9 +151,11 @@ export async function parseAppleSubscriptionResponse(
   const environment = normalizeEnvironment(
     typeof body["environment"] === "string" ? body["environment"] : info.environment,
   );
-  if (!environment || environment !== config.environment) return { ok: false, reason: "WRONG_ENVIRONMENT" };
+  if (!environment || environment !== config.environment)
+    return { ok: false, reason: "WRONG_ENVIRONMENT" };
 
-  const purchaseRef = typeof info.originalTransactionId === "string" ? info.originalTransactionId : null;
+  const purchaseRef =
+    typeof info.originalTransactionId === "string" ? info.originalTransactionId : null;
   const productId = typeof info.productId === "string" ? info.productId : null;
   if (!purchaseRef || !productId) return { ok: false, reason: "MALFORMED_RESPONSE" };
   if (!productFor("apple", productId)) return { ok: false, reason: "UNKNOWN_PRODUCT" };
@@ -184,7 +195,9 @@ async function appleAutoRenew(
   const signed = latest["signedRenewalInfo"];
   if (typeof signed !== "string") return true;
   const verified = await verifyAppleJws<{ autoRenewStatus?: unknown }>(signed, {
-    ...(config.trustedRootFingerprints.length ? { trustedRootFingerprints: config.trustedRootFingerprints } : {}),
+    ...(config.trustedRootFingerprints.length
+      ? { trustedRootFingerprints: config.trustedRootFingerprints }
+      : {}),
     ...(now ? { now: new Date(now) } : {}),
   });
   if (!verified.ok) return true;

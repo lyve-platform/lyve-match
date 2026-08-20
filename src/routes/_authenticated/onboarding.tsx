@@ -89,7 +89,7 @@ function OnboardingPage() {
   const nicknameDraft =
     typeof draft?.["firstName"] === "string"
       ? (draft["firstName"] as string)
-      : account?.profile.first_name ?? "";
+      : (account?.profile.first_name ?? "");
   const nicknameStatus = useNicknameAvailability(
     nicknameDraft,
     account?.profile.first_name ?? null,
@@ -104,9 +104,10 @@ function OnboardingPage() {
   }
 
   const value = <K extends keyof typeof state>(key: K): (typeof state)[K] =>
-    (draft && key in draft ? (draft[key as string] as (typeof state)[K]) : state[key]);
+    draft && key in draft ? (draft[key as string] as (typeof state)[K]) : state[key];
 
-  const set = (key: string, next: unknown) => setDraft((prev) => ({ ...(prev ?? {}), [key]: next }));
+  const set = (key: string, next: unknown) =>
+    setDraft((prev) => ({ ...(prev ?? {}), [key]: next }));
 
   const step = ONBOARDING_STEPS[stepIndex]!;
   const stepKey = step.key as OnboardingStepKey;
@@ -128,7 +129,9 @@ function OnboardingPage() {
         }
         case "name":
           if (nicknameStatus === "taken") throw new Error("nickname taken");
-          await updateProfile(user.id, { first_name: (value("firstName") as string).trim() || null });
+          await updateProfile(user.id, {
+            first_name: (value("firstName") as string).trim() || null,
+          });
           break;
         case "gender":
           await updateProfile(user.id, { gender: value("gender") });
@@ -184,7 +187,11 @@ function OnboardingPage() {
     } catch (error) {
       const message = error instanceof Error ? error.message : "";
       setErrorKey(
-        message === "underage" ? "underage" : message === "invalid dob" ? "invalidDob" : toErrorKey(error),
+        message === "underage"
+          ? "underage"
+          : message === "invalid dob"
+            ? "invalidDob"
+            : toErrorKey(error),
       );
       return false;
     } finally {
@@ -384,9 +391,7 @@ function OnboardingPage() {
               value={value("bio") as string}
               onChange={(event) => set("bio", event.target.value)}
             />
-            <p className="text-xs text-muted-foreground">
-              {(value("bio") as string).length}/1000
-            </p>
+            <p className="text-xs text-muted-foreground">{(value("bio") as string).length}/1000</p>
           </div>
         ) : null}
 

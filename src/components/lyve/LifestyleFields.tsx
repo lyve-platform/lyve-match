@@ -71,7 +71,7 @@ export function LifestyleFields({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value={UNSET}>{labels['unset']}</SelectItem>
+              <SelectItem value={UNSET}>{labels["unset"]}</SelectItem>
               {options.map((option) => (
                 <SelectItem key={option} value={option}>
                   {labels[option] ?? option}

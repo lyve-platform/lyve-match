@@ -44,10 +44,13 @@ async function requirePermission(
   userId: string,
   permission: string,
 ): Promise<void> {
-  const { data } = await supabase.rpc("has_permission" as never, {
-    _permission: permission,
-    _user_id: userId,
-  } as never);
+  const { data } = await supabase.rpc(
+    "has_permission" as never,
+    {
+      _permission: permission,
+      _user_id: userId,
+    } as never,
+  );
   if (data !== true) throw new Error("FORBIDDEN");
 }
 
@@ -92,7 +95,8 @@ export const storeReadiness = createServerFn({ method: "POST" })
       if (credentials === "CREDENTIAL_MISPLACED") nextSteps.push("removeOtherEnvCredentials");
       if (credentials === "INVALID_CREDENTIAL") nextSteps.push("fixCredentialFormat");
       if (credentials === "NOT_CONFIGURED") nextSteps.push("storeCredentials");
-      if (credentials === "CONFIGURED" && environment !== "production") nextSteps.push("flipEnvironment");
+      if (credentials === "CONFIGURED" && environment !== "production")
+        nextSteps.push("flipEnvironment");
       if (state !== "ready") nextSteps.push("keepGatesClosed");
       if (credentials === "CONFIGURED") nextSteps.push("pointWebhookAtProduction");
 
@@ -131,7 +135,8 @@ export const storeReadiness = createServerFn({ method: "POST" })
 
     return {
       environment,
-      productionBillingActive: environment === "production" && stores.every((row) => row.state === "ready"),
+      productionBillingActive:
+        environment === "production" && stores.every((row) => row.state === "ready"),
       stores,
       lastReconciliation: latest
         ? { startedAt: latest.started_at, finishedAt: latest.finished_at, failed: latest.failed }

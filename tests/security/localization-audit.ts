@@ -121,10 +121,7 @@ async function main() {
       .from("admin_audit_logs")
       .update({ reason: "tampered" })
       .eq("actor_id", owner.id);
-    const after = await admin
-      .from("admin_audit_logs")
-      .select("reason")
-      .eq("actor_id", owner.id);
+    const after = await admin.from("admin_audit_logs").select("reason").eq("actor_id", owner.id);
     check(
       "admin audit log stays immutable",
       (after.data ?? []).every((row) => row.reason == null),
@@ -135,7 +132,11 @@ async function main() {
   /* ------------------------------------------- 4. unauthorised principals */
   {
     const memberWrite = await member.client.rpc("admin_set_arabic_enabled", { p_enabled: true });
-    check("a normal member cannot change the setting", memberWrite.error != null, memberWrite.error?.code);
+    check(
+      "a normal member cannot change the setting",
+      memberWrite.error != null,
+      memberWrite.error?.code,
+    );
 
     const memberRead = await member.client.rpc("admin_localization_setting");
     check("a normal member cannot read setting provenance", memberRead.error != null);
@@ -150,7 +151,11 @@ async function main() {
       .from("app_settings")
       .update({ value: { arabic_enabled: true } })
       .eq("key", "localization");
-    check("a normal member cannot update app_settings directly", (await currentFlag()) === false, memberUpdate.error?.code);
+    check(
+      "a normal member cannot update app_settings directly",
+      (await currentFlag()) === false,
+      memberUpdate.error?.code,
+    );
 
     const memberInsert = await member.client
       .from("app_settings")
@@ -158,7 +163,11 @@ async function main() {
     check("a normal member cannot insert app_settings rows", memberInsert.error != null);
 
     const anonWrite = await anon.rpc("admin_set_arabic_enabled", { p_enabled: true });
-    check("an anonymous caller cannot change the setting", anonWrite.error != null, anonWrite.error?.code);
+    check(
+      "an anonymous caller cannot change the setting",
+      anonWrite.error != null,
+      anonWrite.error?.code,
+    );
 
     const anonRead = await anon.rpc("admin_localization_setting");
     check("an anonymous caller cannot read setting provenance", anonRead.error != null);
@@ -170,7 +179,10 @@ async function main() {
     );
 
     const anonPublic = await anon.rpc("locale_availability");
-    check("an anonymous caller may read only the effective state", anonPublic.error == null && anonPublic.data === false);
+    check(
+      "an anonymous caller may read only the effective state",
+      anonPublic.error == null && anonPublic.data === false,
+    );
 
     check("no member or anonymous attempt changed the flag", (await currentFlag()) === false);
   }
@@ -186,7 +198,11 @@ async function main() {
       },
       body: JSON.stringify({ p_enabled: true, actor_id: owner.id, role: "super_admin" }),
     });
-    check("a forged request body cannot grant authority", forgedBody.status >= 400, forgedBody.status);
+    check(
+      "a forged request body cannot grant authority",
+      forgedBody.status >= 400,
+      forgedBody.status,
+    );
 
     const noAuth = await fetch(`${url}/rest/v1/rpc/admin_set_arabic_enabled`, {
       method: "POST",
@@ -224,7 +240,7 @@ async function main() {
     );
     check(
       "browser language cannot bypass the server flag",
-      /navigator\.language\?\.startsWith\("ar"\)/.test(i18n) && i18n.includes("setPreferred(\"ar\")"),
+      /navigator\.language\?\.startsWith\("ar"\)/.test(i18n) && i18n.includes('setPreferred("ar")'),
     );
     check(
       "the selector renders only server-enabled locales",
@@ -234,8 +250,14 @@ async function main() {
       "the Arabic dictionary remains in the codebase",
       readFileSync("src/i18n/ar.ts", "utf8").length > 1000,
     );
-    check("RTL is still derived from the Arabic locale", i18n.includes('locale === "ar" ? "rtl" : "ltr"'));
-    check("English remains the always-available default", i18n.includes('DEFAULT_LOCALE: Locale = "en"'));
+    check(
+      "RTL is still derived from the Arabic locale",
+      i18n.includes('locale === "ar" ? "rtl" : "ltr"'),
+    );
+    check(
+      "English remains the always-available default",
+      i18n.includes('DEFAULT_LOCALE: Locale = "en"'),
+    );
   }
 
   /* ----------------------------------------------------------- teardown */

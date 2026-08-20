@@ -21,9 +21,7 @@ export function ThemeToggle({ className }: { className?: string }) {
       className={cn("min-h-11 min-w-11 rounded-full", className)}
     >
       {isDark ? <Sun aria-hidden="true" /> : <Moon aria-hidden="true" />}
-      <span className="sr-only">
-        {isDark ? t.theme.switchToLight : t.theme.switchToDark}
-      </span>
+      <span className="sr-only">{isDark ? t.theme.switchToLight : t.theme.switchToDark}</span>
     </Button>
   );
 }

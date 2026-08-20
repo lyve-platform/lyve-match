@@ -35,7 +35,9 @@ import { Textarea } from "@/components/ui/textarea";
 function useDate() {
   const { locale } = useI18n();
   return (value: string | null | undefined) =>
-    value ? new Date(value).toLocaleDateString(locale === "ar" ? "ar" : "en", { dateStyle: "medium" }) : "—";
+    value
+      ? new Date(value).toLocaleDateString(locale === "ar" ? "ar" : "en", { dateStyle: "medium" })
+      : "—";
 }
 
 function shortId(value: string | null) {
@@ -141,7 +143,9 @@ export function UsersPanel({ enabled }: { enabled: boolean }) {
                   <span className="font-medium">{user.firstName ?? "—"}</span>
                   <code className="text-xs text-muted-foreground">{shortId(user.profileId)}</code>
                   <StatusBadge status={user.effectiveStatus} />
-                  {user.openCaseId ? <Badge variant="outline">{t.admin.users.openCase}</Badge> : null}
+                  {user.openCaseId ? (
+                    <Badge variant="outline">{t.admin.users.openCase}</Badge>
+                  ) : null}
                 </div>
                 <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground sm:grid-cols-3">
                   <div>
@@ -150,7 +154,9 @@ export function UsersPanel({ enabled }: { enabled: boolean }) {
                   </div>
                   <div>
                     <dt className="inline">{t.admin.users.lastActive}: </dt>
-                    <dd className="inline">{formatDate(user.lastActiveAt) || t.admin.users.never}</dd>
+                    <dd className="inline">
+                      {formatDate(user.lastActiveAt) || t.admin.users.never}
+                    </dd>
                   </div>
                   <div>
                     <dt className="inline">{t.admin.users.reports}: </dt>
@@ -178,13 +184,7 @@ export function UsersPanel({ enabled }: { enabled: boolean }) {
 }
 
 /* --------------------------------------------------------------------- cases */
-function CaseDetail({
-  caseRow,
-  permissions,
-}: {
-  caseRow: AdminCaseRow;
-  permissions: string[];
-}) {
+function CaseDetail({ caseRow, permissions }: { caseRow: AdminCaseRow; permissions: string[] }) {
   const { t } = useI18n();
   const formatDate = useDate();
   const detail = useCaseDetail(caseRow.caseId);
@@ -227,9 +227,13 @@ function CaseDetail({
               <li key={report.reportId} className="rounded-lg bg-muted/50 p-3 text-xs">
                 <div className="flex flex-wrap gap-2">
                   <Badge variant="outline">{report.kind}</Badge>
-                  <span>{report.category ? t.discover.reportCategories[
-                    report.category as keyof typeof t.discover.reportCategories
-                  ] : "—"}</span>
+                  <span>
+                    {report.category
+                      ? t.discover.reportCategories[
+                          report.category as keyof typeof t.discover.reportCategories
+                        ]
+                      : "—"}
+                  </span>
                   <span className="text-muted-foreground">{formatDate(report.createdAt)}</span>
                 </div>
                 {report.description ? <p className="mt-2">{report.description}</p> : null}
@@ -331,7 +335,9 @@ export function CasesPanel({ enabled, permissions }: { enabled: boolean; permiss
                 </span>
                 <Badge variant="outline">{t.admin.priority[row.priority]}</Badge>
                 <Badge variant="secondary">{t.admin.caseStatus[row.status]}</Badge>
-                <Badge variant="outline">{t.admin.source[row.source as keyof typeof t.admin.source]}</Badge>
+                <Badge variant="outline">
+                  {t.admin.source[row.source as keyof typeof t.admin.source]}
+                </Badge>
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-2 p-4 pt-0 text-sm">
@@ -342,8 +348,8 @@ export function CasesPanel({ enabled, permissions }: { enabled: boolean; permiss
                 <StatusBadge status={row.subjectStatus} />
               </div>
               <p className="text-xs text-muted-foreground">
-                {t.admin.cases.reports}: {row.reportCount} · {t.admin.cases.signals}: {row.signalCount} ·{" "}
-                {t.admin.cases.opened}: {formatDate(row.createdAt)}
+                {t.admin.cases.reports}: {row.reportCount} · {t.admin.cases.signals}:{" "}
+                {row.signalCount} · {t.admin.cases.opened}: {formatDate(row.createdAt)}
               </p>
               <Button
                 size="sm"
@@ -365,7 +371,13 @@ export function CasesPanel({ enabled, permissions }: { enabled: boolean; permiss
 }
 
 /* ------------------------------------------------------------------- appeals */
-export function AppealsPanel({ enabled, permissions }: { enabled: boolean; permissions: string[] }) {
+export function AppealsPanel({
+  enabled,
+  permissions,
+}: {
+  enabled: boolean;
+  permissions: string[];
+}) {
   const { t } = useI18n();
   const formatDate = useDate();
   const query = useAppeals(enabled);
@@ -459,7 +471,8 @@ export function AuditPanel({ enabled }: { enabled: boolean }) {
               </span>
             </div>
             <p className="mt-1 text-muted-foreground">
-              {t.admin.audit.actor}: {entry.actorName ?? shortId(entry.actorId) ?? t.admin.audit.system} ·{" "}
+              {t.admin.audit.actor}:{" "}
+              {entry.actorName ?? shortId(entry.actorId) ?? t.admin.audit.system} ·{" "}
               {t.admin.audit.target}: {entry.targetType}/{shortId(entry.targetId)}
             </p>
             {entry.reason ? (

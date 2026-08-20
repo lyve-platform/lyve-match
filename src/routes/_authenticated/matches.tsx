@@ -85,7 +85,9 @@ function MatchesPage() {
                   <div className="flex items-start justify-between gap-2">
                     <h2 className="truncate font-semibold">
                       {match.firstName || "—"}
-                      {match.age ? <span className="text-muted-foreground">, {match.age}</span> : null}
+                      {match.age ? (
+                        <span className="text-muted-foreground">, {match.age}</span>
+                      ) : null}
                     </h2>
                     <SafetyMenu profileId={match.profileId} name={match.firstName || "—"} />
                   </div>
@@ -103,7 +105,9 @@ function MatchesPage() {
                     variant="outline"
                     size="sm"
                     className="mt-3 min-h-11 rounded-full"
-                    onClick={() => setPending({ matchId: match.matchId, name: match.firstName || "—" })}
+                    onClick={() =>
+                      setPending({ matchId: match.matchId, name: match.firstName || "—" })
+                    }
                   >
                     {t.matchesPage.unmatch}
                   </Button>

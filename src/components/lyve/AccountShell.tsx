@@ -65,10 +65,20 @@ export function AccountShell({
             <Button asChild variant="ghost" size="sm" className="rounded-full">
               <Link to="/messages">{t.messagingNav.messages}</Link>
             </Button>
-            <Button asChild variant="ghost" size="sm" className="hidden rounded-full sm:inline-flex">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="hidden rounded-full sm:inline-flex"
+            >
               <Link to="/premium">{t.premiumPage.title}</Link>
             </Button>
-            <Button asChild variant="ghost" size="sm" className="hidden rounded-full sm:inline-flex">
+            <Button
+              asChild
+              variant="ghost"
+              size="sm"
+              className="hidden rounded-full sm:inline-flex"
+            >
               <Link to="/profile">{t.authNav.profile}</Link>
             </Button>
 
@@ -105,7 +115,9 @@ export function AccountShell({
               {t.authNav.signedInAs} {user.email}
             </p>
           ) : null}
-          {standing.data && standing.data.status !== "active" && standing.data.status !== "deleted" ? (
+          {standing.data &&
+          standing.data.status !== "active" &&
+          standing.data.status !== "deleted" ? (
             <Alert className="mt-6">
               <AlertTitle>
                 {standing.data.status === "restricted"

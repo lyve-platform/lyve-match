@@ -5,6 +5,7 @@ Conventions: UUID v4 PKs (`gen_random_uuid()`), `created_at`/`updated_at timesta
 every public table gets explicit GRANTs plus RLS policies.
 
 ## 1. Enums
+
 ```
 app_role            USER | MODERATOR | SUPPORT | ADMIN | SUPER_ADMIN
 relationship_intent DATING | SERIOUS_RELATIONSHIP | MARRIAGE | NEW_CONNECTIONS | OPEN_TO_POSSIBILITIES
@@ -23,6 +24,7 @@ frequency_pref      LOW | MEDIUM | HIGH | NEVER   -- smoking/drinking/etc.
 ```
 
 ## 2. Core entities
+
 ```text
 users(id, auth_user_id, email_hash, phone_hash, dob, status, verification_level,
       locale, country_code, timezone, last_active_at, created_at, updated_at, deleted_at)
@@ -48,6 +50,7 @@ privacy_settings(id, user_id unique, profile_visibility, photo_visibility,
 ```
 
 ## 3. Interaction
+
 ```text
 likes(id, from_user_id, to_user_id, type like_type, created_at, unique(from,to))
 passes(id, from_user_id, to_user_id, created_at, unique(from,to))
@@ -64,6 +67,7 @@ saved_profiles(id, user_id, target_user_id, unique pair)
 ```
 
 ## 4. Trust & safety
+
 ```text
 reports(id, reporter_id, target_user_id, category, description, evidence jsonb,
         status report_status, assigned_to, resolution, created_at, resolved_at)
@@ -77,6 +81,7 @@ consents(id, user_id, consent_type, version, granted_at, revoked_at, ip_hash)
 ```
 
 ## 5. Monetization
+
 ```text
 subscription_plans(id, code unique, name, features jsonb, is_active,
                    trial_days, sort_order)
@@ -90,6 +95,7 @@ boosts(id, user_id, boost_type, start_at, end_at, payment_id, status boost_statu
 ```
 
 ## 6. Platform
+
 ```text
 notifications(id, user_id, type, payload jsonb, read_at, created_at)
 notification_preferences(id, user_id unique, channel_prefs jsonb)
@@ -103,6 +109,7 @@ audit_logs(id, actor_id, actor_role, action, target_type, target_id, ip_hash,
 ```
 
 ## 7. Indexing plan
+
 - `profiles(country_code, city)`, GiST/geo index on coarsened coords for radius queries.
 - `likes(to_user_id, created_at desc)`, `likes(from_user_id, created_at desc)`.
 - `messages(conversation_id, created_at desc)`; partial index on `risk_flags` non-empty.
@@ -110,6 +117,7 @@ audit_logs(id, actor_id, actor_role, action, target_type, target_id, ip_hash,
 - `reports(status, created_at)`, `subscriptions(user_id, status)`.
 
 ## 8. Access rules (RLS sketch)
+
 - Users read/write only their own rows (`auth.uid()`), plus read-limited discovery views.
 - Discovery reads go through a security-definer function that returns only public fields
   and enforces blocks, privacy, incognito, and status.

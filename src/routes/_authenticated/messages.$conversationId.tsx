@@ -155,7 +155,10 @@ function ConversationPage() {
         </div>
 
         {other.canSend ? (
-          <form onSubmit={handleSend} className="flex items-end gap-2 border-t border-border/70 p-3">
+          <form
+            onSubmit={handleSend}
+            className="flex items-end gap-2 border-t border-border/70 p-3"
+          >
             <Label htmlFor="composer" className="sr-only">
               {t.messaging.composerLabel}
             </Label>

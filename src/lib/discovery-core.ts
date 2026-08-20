@@ -10,10 +10,7 @@
  * profile id needed to like/pass, no storage paths, no coordinates, no
  * preferences and no privacy settings.
  */
-import {
-  ACTIVITY_HORIZON_DAYS,
-  RANKING_WEIGHTS,
-} from "@/config/compatibility";
+import { ACTIVITY_HORIZON_DAYS, RANKING_WEIGHTS } from "@/config/compatibility";
 import {
   computeCompatibility,
   hasEstimate,

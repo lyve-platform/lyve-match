@@ -23,7 +23,6 @@ export const MODERATION_CATEGORIES = [
   "contact_sharing",
 ] as const;
 
-
 export type ModerationCategory = (typeof MODERATION_CATEGORIES)[number];
 
 export type ModerationVerdict = {

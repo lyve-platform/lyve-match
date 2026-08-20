@@ -101,7 +101,9 @@ export const listAdminUsers = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { status?: AccountStatus | null; page?: number }) => ({
     status:
-      input?.status && ACCOUNT_STATUSES.includes(input.status) ? (input.status as AccountStatus) : null,
+      input?.status && ACCOUNT_STATUSES.includes(input.status)
+        ? (input.status as AccountStatus)
+        : null,
     page: clamp(input?.page, 0, 200),
   }))
   .handler(async ({ data, context }): Promise<AdminUserRow[]> => {
@@ -132,7 +134,8 @@ export const listAdminUsers = createServerFn({ method: "POST" })
 export const listModerationCases = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { status?: CaseStatus | null; page?: number }) => ({
-    status: input?.status && CASE_STATUSES.includes(input.status) ? (input.status as CaseStatus) : null,
+    status:
+      input?.status && CASE_STATUSES.includes(input.status) ? (input.status as CaseStatus) : null,
     page: clamp(input?.page, 0, 200),
   }))
   .handler(async ({ data, context }): Promise<AdminCaseRow[]> => {
@@ -296,7 +299,11 @@ export const decideAppeal = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { appealId: string; status: AppealStatus; note?: string }) => {
     if (!APPEAL_STATUSES.includes(input?.status)) throw new Error("INVALID_STATUS");
-    return { appealId: requireUuid(input?.appealId), status: input.status, note: reason(input?.note) };
+    return {
+      appealId: requireUuid(input?.appealId),
+      status: input.status,
+      note: reason(input?.note),
+    };
   })
   .handler(async ({ data, context }): Promise<{ ok: true }> => {
     const { error } = await context.supabase.rpc("admin_decide_appeal", {

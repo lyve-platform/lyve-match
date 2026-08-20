@@ -19,9 +19,7 @@ export function Testimonials() {
             <Badge variant="outline" className="mt-4 rounded-full text-xs">
               {t.testimonials.placeholder}
             </Badge>
-            <p className="mt-3 text-sm text-muted-foreground">
-              {t.testimonials.placeholderBody}
-            </p>
+            <p className="mt-3 text-sm text-muted-foreground">{t.testimonials.placeholderBody}</p>
           </li>
         ))}
       </ul>
