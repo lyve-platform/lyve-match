@@ -1,7 +1,8 @@
 name: iOS TestFlight Build
 
 # Builds the LYVE iOS shell (Capacitor) on a hosted macOS runner and uploads
-# it to TestFlight. Run it manually from the Actions tab — no Mac required.
+# it to TestFlight. Runs automatically on pull requests that touch iOS or
+# workflow files, and can also be triggered manually from the Actions tab.
 on:
   workflow_dispatch:
     inputs:
@@ -9,6 +10,13 @@ on:
         description: "Build number (leave empty to use the run number)"
         required: false
         default: ""
+  pull_request:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/ios-testflight.yml"
+      - "ios/**"
+      - "capacitor.config.ts"
 
 jobs:
   build:
