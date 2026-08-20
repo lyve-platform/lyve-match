@@ -8,15 +8,26 @@
  * so rather than inventing a number.
  */
 import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import { Check, Crown, Loader2, Minus } from "lucide-react";
 import { toast } from "sonner";
+import { useServerFn } from "@tanstack/react-start";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { useBilling, useBillingActions } from "@/hooks/useBilling";
 import { BILLING_PLANS, FEATURE_MATRIX, priceFor } from "@/config/billing";
+import {
+  fetchProducts,
+  iapAvailable,
+  productIdForPlan,
+  purchaseAndLink,
+  type IapProduct,
+} from "@/lib/native/iap";
+import { linkStorePurchase } from "@/lib/billing-store.functions";
 import type { BillingSnapshot } from "@/lib/billing-core";
+
 
 const title = "LYVE Premium — plans and subscription";
 const description =
