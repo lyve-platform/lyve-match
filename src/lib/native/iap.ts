@@ -11,8 +11,18 @@ import type { StoreLinkResult } from "@/lib/billing/store-core";
 
 export type IapProductId = `app.lyve.ios.premium.${"monthly" | "annual"}`;
 
+export type IapProduct = {
+  productId: string;
+  displayPrice: string;
+  currencyCode?: string;
+  title?: string;
+};
+
 type LyveIapPlugin = {
-  purchase(options: { productId: string }): Promise<{ jws?: string; cancelled?: boolean }>;
+  products(options: { productIds: string[] }): Promise<{ products?: IapProduct[] }>;
+  purchase(options: {
+    productId: string;
+  }): Promise<{ jws?: string; cancelled?: boolean; pending?: boolean }>;
   restore(): Promise<{ jws?: string[] }>;
 };
 
@@ -27,6 +37,31 @@ function plugin(): LyveIapPlugin | undefined {
 export function iapAvailable(): boolean {
   return isIosApp() && plugin() !== undefined;
 }
+
+/** Apple product id for a LYVE plan code. */
+export function productIdForPlan(planCode: string): IapProductId | undefined {
+  if (planCode === "premium_monthly") return "app.lyve.ios.premium.monthly";
+  if (planCode === "premium_annual") return "app.lyve.ios.premium.annual";
+  return undefined;
+}
+
+/**
+ * App Store localized prices. LYVE never hard-codes a price: what the member
+ * sees is exactly what StoreKit reports for their storefront.
+ */
+export async function fetchProducts(productIds: IapProductId[]): Promise<IapProduct[]> {
+  const iap = plugin();
+  if (!iap) return [];
+  try {
+    const result = await iap.products({ productIds });
+    return (result?.products ?? []).filter(
+      (product) => typeof product?.productId === "string" && typeof product?.displayPrice === "string",
+    );
+  } catch {
+    return [];
+  }
+}
+
 
 export type IapOutcome =
   | { kind: "unavailable" }
