@@ -1,0 +1,1 @@
+UPDATE public.app_settings SET value = jsonb_build_object('payments_enabled', true) WHERE key = 'billing';
