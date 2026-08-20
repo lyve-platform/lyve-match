@@ -72,7 +72,7 @@ jobs:
           fi
           echo "All required Apple secrets are present."
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Import signing certificate
         uses: apple-actions/import-codesign-certs@v3
@@ -152,7 +152,7 @@ jobs:
 
       - name: Upload IPA artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: lyve-ios-ipa
           path: ${{ runner.temp }}/export/*.ipa
