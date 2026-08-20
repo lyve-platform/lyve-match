@@ -16,6 +16,7 @@ import { emailSchema, passwordSchema, firstNameSchema, isValid } from "@/lib/val
 import { useNicknameAvailability } from "@/hooks/useNicknameAvailability";
 import { NicknameHint } from "@/components/lyve/NicknameHint";
 import { toErrorKey, type AppErrorKey } from "@/lib/auth-errors";
+import { SocialSignIn } from "@/components/auth/SocialSignIn";
 
 const title = "Sign in to LYVE — Meet. Match. Belong.";
 const description =
@@ -61,6 +62,7 @@ function AuthPage() {
   const nicknameStatus = useNicknameAvailability(firstName);
   const [dob, setDob] = useState<DateParts>({ day: "", month: "", year: "" });
   const [errorKey, setErrorKey] = useState<AppErrorKey | null>(null);
+  const [socialError, setSocialError] = useState<string | null>(null);
   const [underage, setUnderage] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
   const [busy, setBusy] = useState(false);
@@ -84,6 +86,7 @@ function AuthPage() {
     setErrorKey(null);
     setUnderage(false);
     setNotice(null);
+    setSocialError(null);
   }
 
   async function handleSignIn(event: FormEvent) {
@@ -216,14 +219,20 @@ function AuthPage() {
         </div>
       ) : null}
 
-      {errorKey ? (
+      {errorKey || socialError ? (
         <p
           role="alert"
           className="mb-5 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground"
         >
           <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-          {t.auth.errors[errorKey]}
+          {errorKey ? t.auth.errors[errorKey] : socialError}
         </p>
+      ) : null}
+
+      {mode !== "forgot" ? (
+        <div className="mb-6">
+          <SocialSignIn onError={setSocialError} />
+        </div>
       ) : null}
 
       {notice ? (
