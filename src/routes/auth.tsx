@@ -216,14 +216,20 @@ function AuthPage() {
         </div>
       ) : null}
 
-      {errorKey ? (
+      {errorKey || socialError ? (
         <p
           role="alert"
           className="mb-5 flex items-start gap-2 rounded-xl border border-destructive/40 bg-destructive/10 p-3 text-sm text-foreground"
         >
           <AlertCircle aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
-          {t.auth.errors[errorKey]}
+          {errorKey ? t.auth.errors[errorKey] : socialError}
         </p>
+      ) : null}
+
+      {mode !== "forgot" ? (
+        <div className="mb-6">
+          <SocialSignIn onError={setSocialError} />
+        </div>
       ) : null}
 
       {notice ? (
