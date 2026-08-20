@@ -152,6 +152,10 @@ jobs:
             <key>teamID</key><string>${{ secrets.APPLE_TEAM_ID }}</string>
             <key>uploadSymbols</key><true/>
             <key>signingStyle</key><string>manual</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>app.lyve.ios</key><string>${{ steps.profile.outputs.name }}</string>
+            </dict>
           </dict>
           </plist>
           PLIST
@@ -168,6 +172,17 @@ jobs:
             --apiKey "${{ secrets.APPSTORE_KEY_ID }}" \
             --apiIssuer "${{ secrets.APPSTORE_ISSUER_ID }}"
 
+      - name: Upload build logs
+        if: failure()
+        uses: actions/upload-artifact@v5
+        with:
+          name: lyve-ios-build-logs
+          path: |
+            ${{ runner.temp }}/xcodebuild-archive.log
+            ${{ runner.temp }}/ExportOptions.plist
+            ios/App/build.log
+          if-no-files-found: ignore
+
       - name: Upload IPA artifact
         if: always()
         uses: actions/upload-artifact@v5
@@ -175,6 +190,7 @@ jobs:
           name: lyve-ios-ipa
           path: ${{ runner.temp }}/export/*.ipa
           if-no-files-found: ignore
+
 
   # Required status check that branch protection can gate on before merging.
   # It mirrors the build result so that the overall workflow outcome is visible
