@@ -21,7 +21,8 @@ on:
 
 jobs:
   build:
-    runs-on: macos-14
+    # App Store Connect requires builds produced with the iOS 26 SDK or later.
+    runs-on: macos-26
     timeout-minutes: 60
 
     env:
@@ -101,8 +102,16 @@ jobs:
       - name: Sync Capacitor iOS project
         run: bunx cap sync ios
 
-      - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_15.4.app
+      - name: Verify Xcode and iOS SDK
+        run: |
+          xcodebuild -version
+          SDK_VERSION=$(xcrun --sdk iphoneos --show-sdk-version)
+          SDK_MAJOR=${SDK_VERSION%%.*}
+          echo "Using iOS SDK $SDK_VERSION"
+          if [ "$SDK_MAJOR" -lt 26 ]; then
+            echo "::error::App Store Connect requires iOS SDK 26 or later; runner provides $SDK_VERSION."
+            exit 1
+          fi
 
       - name: Set build number
         run: |
