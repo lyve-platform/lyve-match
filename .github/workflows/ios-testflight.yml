@@ -21,6 +21,47 @@ jobs:
       BUNDLE_ID: app.lyve.ios
 
     steps:
+      - name: Verify required Apple secrets
+        env:
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          IOS_DIST_CERT_P12_BASE64: ${{ secrets.IOS_DIST_CERT_P12_BASE64 }}
+          IOS_DIST_CERT_PASSWORD: ${{ secrets.IOS_DIST_CERT_PASSWORD }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_KEY_ID: ${{ secrets.APPSTORE_KEY_ID }}
+          APPSTORE_PRIVATE_KEY: ${{ secrets.APPSTORE_PRIVATE_KEY }}
+        run: |
+          missing=()
+          for name in APPLE_TEAM_ID IOS_DIST_CERT_P12_BASE64 IOS_DIST_CERT_PASSWORD \
+                      APPSTORE_ISSUER_ID APPSTORE_KEY_ID APPSTORE_PRIVATE_KEY; do
+            if [ -z "${!name:-}" ]; then missing+=("$name"); fi
+          done
+
+          # Shape checks only — values are never printed.
+          if [ -n "${APPSTORE_PRIVATE_KEY:-}" ] && \
+             ! printf '%s' "$APPSTORE_PRIVATE_KEY" | grep -q "BEGIN PRIVATE KEY"; then
+            echo "::error::APPSTORE_PRIVATE_KEY must contain the full .p8 contents, including the BEGIN/END PRIVATE KEY lines."
+            exit 1
+          fi
+          if [ -n "${IOS_DIST_CERT_P12_BASE64:-}" ] && \
+             ! printf '%s' "$IOS_DIST_CERT_P12_BASE64" | tr -d '\n' | base64 -d >/dev/null 2>&1; then
+            echo "::error::IOS_DIST_CERT_P12_BASE64 is not valid base64. Re-copy the contents of ios-certs/p12-base64.txt."
+            exit 1
+          fi
+
+          if [ ${#missing[@]} -gt 0 ]; then
+            echo "::error::Missing GitHub Secrets: ${missing[*]}"
+            echo "Add them in: GitHub → Settings → Secrets and variables → Actions → New repository secret"
+            echo "Required secrets:"
+            echo "  APPLE_TEAM_ID              Apple Developer Team ID"
+            echo "  IOS_DIST_CERT_P12_BASE64   contents of ios-certs/p12-base64.txt"
+            echo "  IOS_DIST_CERT_PASSWORD     password used when the .p12 was created"
+            echo "  APPSTORE_ISSUER_ID         App Store Connect → Integrations → Keys"
+            echo "  APPSTORE_KEY_ID            same page"
+            echo "  APPSTORE_PRIVATE_KEY       contents of AuthKey_XXXX.p8"
+            exit 1
+          fi
+          echo "All required Apple secrets are present."
+
       - uses: actions/checkout@v4
 
       - uses: oven-sh/setup-bun@v2
