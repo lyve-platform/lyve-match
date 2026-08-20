@@ -62,7 +62,24 @@ function PremiumPage() {
   const { t, locale } = useI18n();
   const { data, isLoading } = useBilling();
   const actions = useBillingActions();
+  const link = useServerFn(linkStorePurchase);
   const copy = t.premiumPage;
+
+  // StoreKit purchases only exist inside the iOS shell; the web build is untouched.
+  const [storeReady, setStoreReady] = useState(false);
+  const [storePrices, setStorePrices] = useState<Record<string, IapProduct>>({});
+  const [buying, setBuying] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!iapAvailable()) return;
+    setStoreReady(true);
+    const ids = BILLING_PLANS.map((plan) => productIdForPlan(plan.code)).filter(
+      (id): id is NonNullable<ReturnType<typeof productIdForPlan>> => id !== undefined,
+    );
+    void fetchProducts(ids).then((products) => {
+      setStorePrices(Object.fromEntries(products.map((product) => [product.productId, product])));
+    });
+  }, []);
 
   if (isLoading || !data) {
     return (
@@ -74,7 +91,36 @@ function PremiumPage() {
     );
   }
 
+  /** In-app purchase: StoreKit charges, the server verifies, LYVE never grants locally. */
+  async function subscribeInApp(planCode: string) {
+    const productId = productIdForPlan(planCode);
+    if (!productId) return;
+    setBuying(planCode);
+    try {
+      const { outcome, result } = await purchaseAndLink(productId, link);
+      if (outcome.kind === "cancelled") return;
+      if (outcome.kind !== "receipt" || !result) {
+        toast.error(copy.errors.GENERIC);
+        return;
+      }
+      if (result === "LINKED" || result === "ALREADY_OWNED") {
+        toast.success(copy.actions.restored);
+        await actions.restore.mutateAsync();
+        return;
+      }
+      toast.error(copy.storeErrors[result] ?? copy.errors.GENERIC);
+    } catch {
+      toast.error(copy.errors.GENERIC);
+    } finally {
+      setBuying(null);
+    }
+  }
+
   async function subscribe(planCode: string) {
+    if (storeReady) {
+      await subscribeInApp(planCode);
+      return;
+    }
     const result = await actions.checkout.mutateAsync(planCode);
     const created = result.code === "CHECKOUT_CREATED" || result.code === "TEST_CHECKOUT_CREATED";
     if (!created) {
@@ -84,6 +130,7 @@ function PremiumPage() {
     if (result.url) window.location.assign(result.url);
     else toast.success(copy.checkoutOpened);
   }
+
 
   async function run(action: "cancel" | "resume" | "manage" | "restore") {
     try {
