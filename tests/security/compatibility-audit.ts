@@ -20,8 +20,7 @@ import {
   MAX_REASONS,
 } from "../../src/config/compatibility";
 
-const stripComments = (source: string) =>
-  source.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
+const stripComments = (source: string) => source.replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, "");
 
 let passed = 0;
 let failed = 0;
@@ -115,9 +114,7 @@ check("ranking weights sum to 1", Math.abs(rankSum - 1) < 1e-9, rankSum);
 const configSource = stripComments(await Bun.file("src/config/compatibility.ts").text());
 check(
   "no protected characteristic is a scoring dimension",
-  !COMPATIBILITY_DIMENSIONS.some((d) =>
-    /gender|ethnic|religio|national|race|disab/i.test(d),
-  ),
+  !COMPATIBILITY_DIMENSIONS.some((d) => /gender|ethnic|religio|national|race|disab/i.test(d)),
 );
 const engineSource = stripComments(await Bun.file("src/lib/compatibility.ts").text());
 check(
@@ -156,7 +153,15 @@ check(
 /* --------------------------------------------------- missing-data behaviour */
 {
   const sparse = computeCompatibility({
-    viewer: { ...viewer, ...emptyFacts, age: null, city: null, country: null, intent: null, interestSlugs: [] },
+    viewer: {
+      ...viewer,
+      ...emptyFacts,
+      age: null,
+      city: null,
+      country: null,
+      intent: null,
+      interestSlugs: [],
+    },
     candidate: {
       ...candidate,
       ...emptyFacts,
@@ -206,16 +211,43 @@ check(
       theyWantMyIntent: null,
     },
   });
-  check("hostile input still produces a finite score", Number.isFinite(hostile.score), hostile.score);
-  check("hostile input stays within 0-100", hostile.score >= 0 && hostile.score <= 100, hostile.score);
+  check(
+    "hostile input still produces a finite score",
+    Number.isFinite(hostile.score),
+    hostile.score,
+  );
+  check(
+    "hostile input stays within 0-100",
+    hostile.score >= 0 && hostile.score <= 100,
+    hostile.score,
+  );
   check(
     "unknown intent values do not crash or score as compatible",
     hostile.subscores.intent === null || hostile.subscores.intent <= 100,
   );
 
   const nulls = computeCompatibility({
-    viewer: { ...viewer, ...emptyFacts, age: null, city: null, country: null, intent: null, interestSlugs: [] },
-    candidate: { ...candidate, ...emptyFacts, age: null, city: null, country: null, intent: null, interestSlugs: [], distanceKm: null, theyWantMyAge: null, theyWantMyIntent: null },
+    viewer: {
+      ...viewer,
+      ...emptyFacts,
+      age: null,
+      city: null,
+      country: null,
+      intent: null,
+      interestSlugs: [],
+    },
+    candidate: {
+      ...candidate,
+      ...emptyFacts,
+      age: null,
+      city: null,
+      country: null,
+      intent: null,
+      interestSlugs: [],
+      distanceKm: null,
+      theyWantMyAge: null,
+      theyWantMyIntent: null,
+    },
   });
   check("all-null input is handled safely", Number.isFinite(nulls.score) && nulls.score >= 0);
 }
@@ -253,7 +285,10 @@ check(
     completeness: 0,
     last_active_at: new Date(Date.now() - 400 * 24 * 3600 * 1000).toISOString(),
   });
-  check("ranking rewards completeness and recency", rankingScore(fresh, 80) > rankingScore(stale, 80));
+  check(
+    "ranking rewards completeness and recency",
+    rankingScore(fresh, 80) > rankingScore(stale, 80),
+  );
   check(
     "ranking is bounded to 0-1",
     rankingScore(fresh, 100) <= 1.0000001 && rankingScore(stale, 0) >= 0,
@@ -274,7 +309,8 @@ check(
   const orderedAgain = rankCandidates(viewer, [fresh, stale], 10);
   check(
     "ranking is stable regardless of input order",
-    ordered.map((r) => r.row.profile_id).join() === orderedAgain.map((r) => r.row.profile_id).join(),
+    ordered.map((r) => r.row.profile_id).join() ===
+      orderedAgain.map((r) => r.row.profile_id).join(),
   );
   check("ranking respects the page size", rankCandidates(viewer, [stale, fresh], 1).length === 1);
   check("ranking handles an empty pool", rankCandidates(viewer, [], 10).length === 0);

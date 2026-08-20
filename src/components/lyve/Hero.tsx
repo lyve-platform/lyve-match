@@ -9,7 +9,10 @@ export function Hero() {
   const { t } = useI18n();
 
   return (
-    <section id="top" className="relative overflow-hidden px-4 pb-16 pt-12 sm:px-6 md:pb-24 md:pt-20">
+    <section
+      id="top"
+      className="relative overflow-hidden px-4 pb-16 pt-12 sm:px-6 md:pb-24 md:pt-20"
+    >
       <div
         aria-hidden="true"
         className="gradient-veil pointer-events-none absolute inset-x-0 top-0 h-[420px]"

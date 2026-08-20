@@ -71,8 +71,7 @@
 
   /* Typography */
   --font-family-display: "Fraunces", "Noto Kufi Arabic", Georgia, serif;
-  --font-family-sans:
-    "Manrope", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-family-sans: "Manrope", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
 
   /* Brand surfaces — warm ivory, ember, plum, gold */
   --background: oklch(0.985 0.008 80);
@@ -135,10 +134,10 @@
   );
 
   /* Shadows */
-  --shadow-soft-value: 0 1px 2px oklch(0.3 0.04 30 / 0.06),
-    0 8px 24px -12px oklch(0.3 0.04 30 / 0.16);
-  --shadow-lift-value: 0 2px 6px oklch(0.3 0.04 30 / 0.08),
-    0 24px 48px -24px oklch(0.3 0.04 30 / 0.28);
+  --shadow-soft-value:
+    0 1px 2px oklch(0.3 0.04 30 / 0.06), 0 8px 24px -12px oklch(0.3 0.04 30 / 0.16);
+  --shadow-lift-value:
+    0 2px 6px oklch(0.3 0.04 30 / 0.08), 0 24px 48px -24px oklch(0.3 0.04 30 / 0.28);
   --shadow-glow-value: 0 18px 60px -20px color-mix(in oklab, var(--primary) 45%, transparent);
 }
 

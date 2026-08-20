@@ -36,7 +36,8 @@ export function AdminBillingPanel({
   const queryClient = useQueryClient();
 
   const canGrant = permissions.includes("billing.grant");
-  const limitedOnly = !permissions.includes("billing.view") && permissions.includes("billing.view.limited");
+  const limitedOnly =
+    !permissions.includes("billing.view") && permissions.includes("billing.view.limited");
 
   const overviewFn = useServerFn(adminBillingOverview);
   const listFn = useServerFn(adminListEntitlements);
@@ -64,8 +65,7 @@ export function AdminBillingPanel({
   const refresh = () => queryClient.invalidateQueries({ queryKey: ["admin", "billing"] });
 
   const grant = useMutation({
-    mutationFn: () =>
-      grantFn({ data: { profileId, key: "premium", days: Number(days), reason } }),
+    mutationFn: () => grantFn({ data: { profileId, key: "premium", days: Number(days), reason } }),
     onSuccess: () => {
       toast.success(copy.grant.granted);
       setReason("");
@@ -88,7 +88,9 @@ export function AdminBillingPanel({
   });
 
   const date = (value: string | null) =>
-    value ? new Date(value).toLocaleDateString(locale === "ar" ? "ar" : "en", { dateStyle: "medium" }) : "—";
+    value
+      ? new Date(value).toLocaleDateString(locale === "ar" ? "ar" : "en", { dateStyle: "medium" })
+      : "—";
 
   return (
     <div className="space-y-6">
@@ -111,17 +113,32 @@ export function AdminBillingPanel({
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-border text-start">
-                  <th scope="col" className="py-2 text-start font-medium">{copy.columns.member}</th>
-                  <th scope="col" className="py-2 text-start font-medium">{copy.columns.plan}</th>
-                  <th scope="col" className="py-2 text-start font-medium">{copy.columns.status}</th>
-                  <th scope="col" className="py-2 text-start font-medium">{copy.columns.provider}</th>
-                  <th scope="col" className="py-2 text-start font-medium">{copy.columns.periodEnd}</th>
-                  <th scope="col" className="py-2 text-start font-medium">{copy.columns.reference}</th>
+                  <th scope="col" className="py-2 text-start font-medium">
+                    {copy.columns.member}
+                  </th>
+                  <th scope="col" className="py-2 text-start font-medium">
+                    {copy.columns.plan}
+                  </th>
+                  <th scope="col" className="py-2 text-start font-medium">
+                    {copy.columns.status}
+                  </th>
+                  <th scope="col" className="py-2 text-start font-medium">
+                    {copy.columns.provider}
+                  </th>
+                  <th scope="col" className="py-2 text-start font-medium">
+                    {copy.columns.periodEnd}
+                  </th>
+                  <th scope="col" className="py-2 text-start font-medium">
+                    {copy.columns.reference}
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {(overview.data ?? []).map((row) => (
-                  <tr key={`${row.profileId}-${row.createdAt}`} className="border-b border-border/60">
+                  <tr
+                    key={`${row.profileId}-${row.createdAt}`}
+                    className="border-b border-border/60"
+                  >
                     <td className="py-2 font-mono text-xs">{row.profileId.slice(0, 8)}</td>
                     <td className="py-2">{row.planCode}</td>
                     <td className="py-2">

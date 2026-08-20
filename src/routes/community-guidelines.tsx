@@ -14,7 +14,10 @@ export const Route = createFileRoute("/community-guidelines")({
       { property: "og:description", content: description },
       { property: "og:type", content: "article" },
       { name: "twitter:card", content: "summary_large_image" },
-      { property: "og:url", content: "https://lyve-connect-build.lovable.app/community-guidelines" },
+      {
+        property: "og:url",
+        content: "https://lyve-connect-build.lovable.app/community-guidelines",
+      },
       { property: "og:image", content: "https://lyve-connect-build.lovable.app/og-image.jpg" },
       { property: "og:image:width", content: "1200" },
       { property: "og:image:height", content: "630" },

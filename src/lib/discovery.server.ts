@@ -69,7 +69,10 @@ export async function signPhotoUrls(paths: string[]): Promise<Record<string, str
 
 /** Keeps the recency ranking factor honest without exposing precise activity. */
 export async function touchLastActive(supabase: Client, userId: string): Promise<void> {
-  await supabase.from("profiles").update({ last_active_at: new Date().toISOString() }).eq("id", userId);
+  await supabase
+    .from("profiles")
+    .update({ last_active_at: new Date().toISOString() })
+    .eq("id", userId);
 }
 
 /**
@@ -84,7 +87,10 @@ export async function listBlockedNames(
   const { data } = await supabaseAdmin
     .from("profiles")
     .select("id, first_name")
-    .in("id", entries.map((entry) => entry.profileId));
+    .in(
+      "id",
+      entries.map((entry) => entry.profileId),
+    );
 
   const names = new Map((data ?? []).map((row) => [row.id, row.first_name]));
   return entries.map((entry) => ({ ...entry, firstName: names.get(entry.profileId) ?? null }));

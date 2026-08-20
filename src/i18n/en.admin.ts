@@ -175,7 +175,8 @@ export const enAdmin = {
     link: "Platform settings",
     localization: "Localization",
     arabicLabel: "Arabic language",
-    arabicHelp: "When disabled, Arabic is hidden from the language selector and cannot be forced by any client.",
+    arabicHelp:
+      "When disabled, Arabic is hidden from the language selector and cannot be forced by any client.",
     enabled: "Enabled",
     disabled: "Disabled",
     status: "Current status",
@@ -190,7 +191,8 @@ export const enAdmin = {
     loading: "Loading…",
     payments: "Payments",
     paymentsLabel: "Activate payments",
-    paymentsHelp: "When off, no checkout can be started and no store receipt is accepted, on any client. Turn on only after the store rails are verified.",
+    paymentsHelp:
+      "When off, no checkout can be started and no store receipt is accepted, on any client. Turn on only after the store rails are verified.",
     paymentsActive: "Payments active",
     paymentsInactive: "Payments off",
     paymentsDenied: "Only a Super Admin can activate payments.",
@@ -240,10 +242,13 @@ export const enAdmin = {
     steps: {
       storeCredentials: "Store the production credentials through the secure secret form.",
       fixCredentialFormat: "Replace the stored credential — it is not a valid key.",
-      removeOtherEnvCredentials: "Remove the credentials belonging to the other environment; a mixed set is refused.",
-      flipEnvironment: "Switch the store environment to production once both stores are configured.",
+      removeOtherEnvCredentials:
+        "Remove the credentials belonging to the other environment; a mixed set is refused.",
+      flipEnvironment:
+        "Switch the store environment to production once both stores are configured.",
       keepGatesClosed: "Keep Premium feature gates closed until validation passes.",
-      pointWebhookAtProduction: "Point the store notification URL at the published domain, not the preview build.",
+      pointWebhookAtProduction:
+        "Point the store notification URL at the published domain, not the preview build.",
     },
     credentialNotice: "This page never displays credential values — only whether they resolve.",
   },

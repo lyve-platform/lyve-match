@@ -52,7 +52,9 @@ export const getConversations = createServerFn({ method: "POST" })
       created_at: string;
     }>;
 
-    const urls = await signPhotoUrls(rows.flatMap((row) => (row.photo_path ? [row.photo_path] : [])));
+    const urls = await signPhotoUrls(
+      rows.flatMap((row) => (row.photo_path ? [row.photo_path] : [])),
+    );
 
     return rows.map((row) => ({
       conversationId: row.conversation_id,
@@ -77,7 +79,11 @@ export const getConversationHeader = createServerFn({ method: "POST" })
     conversationId: requireUuid(input?.conversationId),
   }))
   .handler(async ({ data, context }): Promise<ConversationHeader | null> => {
-    const header = await loadConversationHeader(context.supabase, data.conversationId, context.userId);
+    const header = await loadConversationHeader(
+      context.supabase,
+      data.conversationId,
+      context.userId,
+    );
     if (!header) return null;
 
     const urls = header.photoPath ? await signPhotoUrls([header.photoPath]) : {};
@@ -146,7 +152,10 @@ export const sendMessage = createServerFn({ method: "POST" })
   .inputValidator((input: { conversationId: string; body: string }) => {
     const body = String(input?.body ?? "").trim();
     if (body.length === 0) throw new Error("EMPTY_MESSAGE");
-    return { conversationId: requireUuid(input?.conversationId), body: body.slice(0, MESSAGE_BODY_MAX) };
+    return {
+      conversationId: requireUuid(input?.conversationId),
+      body: body.slice(0, MESSAGE_BODY_MAX),
+    };
   })
   .handler(async ({ data, context }): Promise<ChatMessage> => {
     // sender_id, timestamps and moderation state are stamped by the database

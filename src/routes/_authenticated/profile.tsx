@@ -14,12 +14,7 @@ import { useAuth } from "@/auth/AuthProvider";
 import { useNicknameAvailability } from "@/hooks/useNicknameAvailability";
 import { NicknameHint } from "@/components/lyve/NicknameHint";
 import { useAccount, useInterests } from "@/hooks/useAccount";
-import {
-  accountQueryKey,
-  setInterests,
-  updatePreferences,
-  updateProfile,
-} from "@/lib/account";
+import { accountQueryKey, setInterests, updatePreferences, updateProfile } from "@/lib/account";
 import {
   GENDERS,
   RELATIONSHIP_INTENTS,
@@ -202,7 +197,12 @@ function ProfilePage() {
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="profile-age">{t.profileFields.age}</Label>
-            <Input id="profile-age" value={age ? String(age) : t.profilePage.notSet} readOnly disabled />
+            <Input
+              id="profile-age"
+              value={age ? String(age) : t.profilePage.notSet}
+              readOnly
+              disabled
+            />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="profile-city">{t.profileFields.city}</Label>
@@ -384,7 +384,10 @@ function ProfilePage() {
       </section>
 
       {errorKey ? (
-        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
+        <p
+          role="alert"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm"
+        >
           {t.auth.errors[errorKey]}
         </p>
       ) : null}

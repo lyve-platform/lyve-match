@@ -19,12 +19,12 @@ App Store Server API and links it to the authenticated account.
 
 ## Repository pieces
 
-| File | Role |
-| --- | --- |
-| `capacitor.config.ts` | App id `app.lyve.ios`, name `LYVE Match`, hosted web URL |
-| `src/lib/native/runtime.ts` | Safe native/platform detection (web behaviour unchanged) |
-| `src/lib/native/iap.ts` | `LyveIAP` plugin bridge: `purchaseProduct`, `restoreReceipts`, `purchaseAndLink` |
-| `src/lib/billing/store-core.ts` | Product catalogue: `app.lyve.ios.premium.monthly` / `.annual` |
+| File                            | Role                                                                             |
+| ------------------------------- | -------------------------------------------------------------------------------- |
+| `capacitor.config.ts`           | App id `app.lyve.ios`, name `LYVE Match`, hosted web URL                         |
+| `src/lib/native/runtime.ts`     | Safe native/platform detection (web behaviour unchanged)                         |
+| `src/lib/native/iap.ts`         | `LyveIAP` plugin bridge: `purchaseProduct`, `restoreReceipts`, `purchaseAndLink` |
+| `src/lib/billing/store-core.ts` | Product catalogue: `app.lyve.ios.premium.monthly` / `.annual`                    |
 
 Web builds are untouched: `iapAvailable()` is `false` in the browser, so the
 existing premium UI keeps its current behaviour.

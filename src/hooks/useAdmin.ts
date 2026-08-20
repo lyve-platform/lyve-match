@@ -51,7 +51,12 @@ export function useAdminSession() {
 
 export function useAdminMetrics(enabled: boolean) {
   const fetchMetrics = useServerFn(getAdminMetrics);
-  return useQuery({ queryKey: adminKeys.metrics, queryFn: () => fetchMetrics(), enabled, retry: false });
+  return useQuery({
+    queryKey: adminKeys.metrics,
+    queryFn: () => fetchMetrics(),
+    enabled,
+    retry: false,
+  });
 }
 
 export function useAdminUsers(enabled: boolean, status: AccountStatus | null) {

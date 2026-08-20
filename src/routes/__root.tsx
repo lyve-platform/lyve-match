@@ -125,10 +125,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
       { title: "LYVE — Meet. Match. Belong." },
-      { name: "description", content: "A global 18+ platform for dating, serious relationships, and marriage." },
+      {
+        name: "description",
+        content: "A global 18+ platform for dating, serious relationships, and marriage.",
+      },
       { name: "author", content: "LYVE" },
       { property: "og:title", content: "LYVE — Meet. Match. Belong." },
-      { property: "og:description", content: "A global 18+ platform for dating, serious relationships, and marriage." },
+      {
+        property: "og:description",
+        content: "A global 18+ platform for dating, serious relationships, and marriage.",
+      },
       { property: "og:type", content: "website" },
       { property: "og:site_name", content: "LYVE" },
       { property: "og:locale", content: "en_US" },
@@ -136,7 +142,6 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "twitter:site", content: "@Lovable" },
       { name: "msapplication-TileColor", content: "#E85560" },
       { name: "msapplication-config", content: "/browserconfig.xml" },
-
     ],
     links: [
       { rel: "preconnect", href: "https://fonts.googleapis.com" },

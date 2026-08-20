@@ -6,7 +6,11 @@
  * module scope or shipped to the browser. Unknown or not-yet-implemented
  * providers fail closed to `none` rather than silently doing something.
  */
-import { BILLING_PROVIDERS, DEFAULT_BILLING_PROVIDER, type BillingProviderId } from "@/config/billing";
+import {
+  BILLING_PROVIDERS,
+  DEFAULT_BILLING_PROVIDER,
+  type BillingProviderId,
+} from "@/config/billing";
 import type { BillingProvider } from "./provider";
 import { noneProvider } from "./none";
 import { mockProvider } from "./mock";

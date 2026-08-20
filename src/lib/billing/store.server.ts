@@ -13,7 +13,13 @@
  */
 import type { Database } from "@/integrations/supabase/types";
 import { entitlementsForPlan } from "@/lib/billing.server";
-import { productFor, type StoreEventResult, type StoreId, type StoreLinkResult, type VerifiedStoreEvent } from "./store-core";
+import {
+  productFor,
+  type StoreEventResult,
+  type StoreId,
+  type StoreLinkResult,
+  type VerifiedStoreEvent,
+} from "./store-core";
 import { verifyStorePurchase } from "./store-verify.server";
 
 type Provider = Database["public"]["Enums"]["billing_provider"];

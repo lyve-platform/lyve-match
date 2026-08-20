@@ -112,7 +112,10 @@ export function parseCertificate(der: Uint8Array): Certificate {
   const algOid = oid(der, children(der, algorithm)[0]!);
   const size = algOid === OID_ECDSA_SHA384 ? 48 : 32;
   // BIT STRING content starts with the unused-bits byte.
-  const signature = derSignatureToRaw(der.slice(signatureBits.contentStart + 1, signatureBits.end), size);
+  const signature = derSignatureToRaw(
+    der.slice(signatureBits.contentStart + 1, signatureBits.end),
+    size,
+  );
 
   const tbsParts = children(der, tbs);
   let index = 0;
@@ -169,7 +172,10 @@ export async function importEcPublicKey(cert: Certificate): Promise<CryptoKey> {
 }
 
 /** Verifies that `child` was signed by `parent`. */
-export async function certificateSignedBy(child: Certificate, parent: Certificate): Promise<boolean> {
+export async function certificateSignedBy(
+  child: Certificate,
+  parent: Certificate,
+): Promise<boolean> {
   const hash = child.signatureAlgorithm === OID_ECDSA_SHA384 ? "SHA-384" : "SHA-256";
   const key = await importEcPublicKey(parent);
   return crypto.subtle.verify(

@@ -66,7 +66,10 @@ export async function blockProfile(profileId: string): Promise<void> {
   const blockerId = await currentUserId();
   const { error } = await supabase
     .from("blocks")
-    .upsert({ blocker_id: blockerId, blocked_id: profileId }, { onConflict: "blocker_id,blocked_id" });
+    .upsert(
+      { blocker_id: blockerId, blocked_id: profileId },
+      { onConflict: "blocker_id,blocked_id" },
+    );
   if (error) throw error;
 }
 

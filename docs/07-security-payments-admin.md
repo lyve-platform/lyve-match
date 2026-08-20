@@ -1,6 +1,7 @@
 # LYVE — Security, Payments, and Admin Architecture
 
 ## 1. Security architecture
+
 **Identity**: managed auth (email/phone + OTP), passwords hashed by the provider
 (bcrypt/argon2 class), short-lived access tokens with rotating refresh tokens, secure
 `HttpOnly` `SameSite` cookies for SSR, session revocation on password change or ban.
@@ -33,6 +34,7 @@ data exports and deletions; alerting on spikes in reports, failed logins, or web
 account deletion soft-deletes then purges.
 
 ## 2. Payment architecture
+
 Provider-agnostic layer — **no provider is configured yet**.
 
 ```text
@@ -51,6 +53,7 @@ Interface: `createCheckout`, `cancelSubscription`, `refund`, `parseWebhook`,
 `syncSubscription`.
 
 Rules:
+
 - Never store card numbers — provider tokens and references only.
 - Pricing lives in `subscription_plans` / `plan_prices`, configurable per currency
   and region; nothing hard-coded in code or UI.
@@ -61,15 +64,16 @@ Rules:
 - Mobile digital goods must use Apple/Google billing when native apps ship.
 
 ## 3. Admin architecture
+
 Separate authenticated shell at `/admin`, RBAC-gated, 2FA required, no shared accounts.
 
-| Role | Capabilities |
-|---|---|
-| USER | none |
-| MODERATOR | reports, flagged content, warn/restrict, escalate |
-| SUPPORT | user lookup (limited PII), tickets, appeals intake, no bans |
-| ADMIN | moderation + payments, plans, matching weights, verification decisions |
-| SUPER_ADMIN | staff/role management, destructive actions, audit access |
+| Role        | Capabilities                                                           |
+| ----------- | ---------------------------------------------------------------------- |
+| USER        | none                                                                   |
+| MODERATOR   | reports, flagged content, warn/restrict, escalate                      |
+| SUPPORT     | user lookup (limited PII), tickets, appeals intake, no bans            |
+| ADMIN       | moderation + payments, plans, matching weights, verification decisions |
+| SUPER_ADMIN | staff/role management, destructive actions, audit access               |
 
 Screens: Overview KPIs · Users · Moderation queue · Verification · Payments · Plans ·
 Matching weights · Analytics · Audit logs · Staff.
@@ -80,6 +84,7 @@ actions require typed confirmation and are reversible where possible; PII access
 logged and minimized.
 
 ## 4. MVP vs Phase 2
+
 **MVP:** auth + age gate + OTP · 14-step onboarding · profile & photos · discovery ·
 compatibility engine with admin weights · likes/passes/super likes · matches · realtime
 chat with safety detection · report/block/mute/unmatch · basic verification · privacy
@@ -94,12 +99,13 @@ retention analytics, experimentation framework.
 **Phase 3:** voice/video intros, events, travel mode, matchmaker-assisted tiers.
 
 ## 5. Roadmap
-| Phase | Scope | Exit criteria |
-|---|---|---|
-| 0 | Design system, landing, i18n scaffold | Landing live, tokens defined |
-| 1 | Auth, age gate, onboarding, profile | User can complete a real profile |
-| 2 | Discovery + compatibility + likes/matches | Mutual match creates a conversation |
-| 3 | Chat + safety detection + reporting | Report → moderation case works end to end |
-| 4 | Premium, plans, entitlements | Configurable plan gates features correctly |
-| 5 | Admin dashboard + audit + analytics | Moderator can resolve a case with audit trail |
-| 6 | Verification, notifications, hardening | Security review passed, tests green |
+
+| Phase | Scope                                     | Exit criteria                                 |
+| ----- | ----------------------------------------- | --------------------------------------------- |
+| 0     | Design system, landing, i18n scaffold     | Landing live, tokens defined                  |
+| 1     | Auth, age gate, onboarding, profile       | User can complete a real profile              |
+| 2     | Discovery + compatibility + likes/matches | Mutual match creates a conversation           |
+| 3     | Chat + safety detection + reporting       | Report → moderation case works end to end     |
+| 4     | Premium, plans, entitlements              | Configurable plan gates features correctly    |
+| 5     | Admin dashboard + audit + analytics       | Moderator can resolve a case with audit trail |
+| 6     | Verification, notifications, hardening    | Security review passed, tests green           |

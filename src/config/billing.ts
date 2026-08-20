@@ -19,9 +19,16 @@ export const BILLING_STAGE = "architecture" as const;
  */
 export const DEFAULT_BILLING_PROVIDER = "none" as const;
 
-export const BILLING_PROVIDERS = ["none", "mock", "stripe", "paddle", "apple", "google", "manual"] as const;
+export const BILLING_PROVIDERS = [
+  "none",
+  "mock",
+  "stripe",
+  "paddle",
+  "apple",
+  "google",
+  "manual",
+] as const;
 export type BillingProviderId = (typeof BILLING_PROVIDERS)[number];
-
 
 export const ENTITLEMENT_KEYS = [
   "premium",
@@ -140,4 +147,3 @@ export type GatedFeature = keyof typeof FEATURE_GATES;
  * paid for, and access ends at `current_period_end`. Do not invent a value.
  */
 export const PAYMENT_FAILURE_GRACE_DAYS: number | null = null;
-

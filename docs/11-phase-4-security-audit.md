@@ -8,10 +8,10 @@ actions, immutable audit trail, safety signals, appeals, and 30-day purge.
 
 ## Findings and fixes
 
-| # | Severity | Finding | Fix |
-|---|---|---|---|
-| 1 | HIGH | The case-opening trigger cast `source` as text, so **every profile and message report failed** and no moderation case could be created. | Explicit cast to `moderation_source`; reporting and case creation verified end to end. |
-| 2 | MEDIUM | Granting an appeal recorded the decision but left the account restricted/banned, so a successful appeal had no effect. | Granting now restores the account to good standing, dismisses open cases, and writes a separate `ACCOUNT_RESTORED` audit entry. |
+| #   | Severity | Finding                                                                                                                                 | Fix                                                                                                                             |
+| --- | -------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | HIGH     | The case-opening trigger cast `source` as text, so **every profile and message report failed** and no moderation case could be created. | Explicit cast to `moderation_source`; reporting and case creation verified end to end.                                          |
+| 2   | MEDIUM   | Granting an appeal recorded the decision but left the account restricted/banned, so a successful appeal had no effect.                  | Granting now restores the account to good standing, dismisses open cases, and writes a separate `ACCOUNT_RESTORED` audit entry. |
 
 ## Verified properties
 

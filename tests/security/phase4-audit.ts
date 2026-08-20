@@ -44,7 +44,11 @@ const created: string[] = [];
 
 async function createMember(tag: string): Promise<Member> {
   const email = `p4-${tag}-${stamp}@lyve.test`;
-  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
   if (error) throw error;
   created.push(data.user!.id);
   const client = createClient(url, publishableKey, { auth: { persistSession: false } });
@@ -129,7 +133,11 @@ async function main() {
     const escalate = await member.client
       .from("user_roles")
       .insert({ user_id: member.id, role: "super_admin" });
-    check("a member cannot grant themselves a staff role", escalate.error != null, escalate.error?.code);
+    check(
+      "a member cannot grant themselves a staff role",
+      escalate.error != null,
+      escalate.error?.code,
+    );
 
     const anonRoles = await anon.from("user_roles").select("role");
     check("anonymous cannot read user_roles", (anonRoles.data ?? []).length === 0);
@@ -158,10 +166,18 @@ async function main() {
     check("a moderator can read aggregate metrics", metrics.error == null, metrics.error?.message);
 
     const supportUsers = await support.client.rpc("admin_list_users", { p_limit: 5, p_offset: 0 });
-    check("support can list members (read-only role)", supportUsers.error == null, supportUsers.error?.message);
+    check(
+      "support can list members (read-only role)",
+      supportUsers.error == null,
+      supportUsers.error?.message,
+    );
 
     const supportAudit = await support.client.rpc("admin_list_audit", { p_limit: 5, p_offset: 0 });
-    check("support cannot read the audit log", supportAudit.error != null, supportAudit.error?.message);
+    check(
+      "support cannot read the audit log",
+      supportAudit.error != null,
+      supportAudit.error?.message,
+    );
   }
 
   /* ------------------------------------------------ 3. data minimisation */
@@ -209,7 +225,9 @@ async function main() {
       feed.error?.message,
     );
 
-    const like = await target.client.from("likes").insert({ liker_id: target.id, likee_id: member.id });
+    const like = await target.client
+      .from("likes")
+      .insert({ liker_id: target.id, likee_id: member.id });
     check("a banned member cannot like", like.error != null, like.error?.message);
 
     const others = await member.client.rpc("discover_candidates", { p_limit: 50, p_offset: 0 });
@@ -229,7 +247,11 @@ async function main() {
       p_case: null,
       p_days: null,
     });
-    check("support cannot ban (permission gated)", supportBan.error != null, supportBan.error?.message);
+    check(
+      "support cannot ban (permission gated)",
+      supportBan.error != null,
+      supportBan.error?.message,
+    );
 
     const modBan = await mod.client.rpc("admin_moderate_account", {
       p_target: offender.id,
@@ -238,7 +260,11 @@ async function main() {
       p_case: null,
       p_days: null,
     });
-    check("a moderator cannot ban (reserved to super admin)", modBan.error != null, modBan.error?.message);
+    check(
+      "a moderator cannot ban (reserved to super admin)",
+      modBan.error != null,
+      modBan.error?.message,
+    );
 
     const suspend = await mod.client.rpc("admin_moderate_account", {
       p_target: offender.id,
@@ -254,7 +280,11 @@ async function main() {
       .select("account_status, suspended_until")
       .eq("id", offender.id)
       .maybeSingle();
-    check("suspension is persisted with an expiry", state.data?.account_status === "suspended" && Boolean(state.data?.suspended_until), state.data);
+    check(
+      "suspension is persisted with an expiry",
+      state.data?.account_status === "suspended" && Boolean(state.data?.suspended_until),
+      state.data,
+    );
 
     const ownerBan = await owner.client.rpc("admin_moderate_account", {
       p_target: offender.id,
@@ -272,7 +302,11 @@ async function main() {
       p_case: null,
       p_days: null,
     });
-    check("staff cannot action their own account", selfAction.error != null, selfAction.error?.message);
+    check(
+      "staff cannot action their own account",
+      selfAction.error != null,
+      selfAction.error?.message,
+    );
 
     const restore = await owner.client.rpc("admin_moderate_account", {
       p_target: offender.id,
@@ -281,7 +315,11 @@ async function main() {
       p_case: null,
       p_days: null,
     });
-    check("restore returns an account to good standing", restore.error == null, restore.error?.message);
+    check(
+      "restore returns an account to good standing",
+      restore.error == null,
+      restore.error?.message,
+    );
   }
 
   /* ------------------------------------------------------ 7. audit trail */
@@ -290,14 +328,35 @@ async function main() {
     const rows = (entries.data ?? []) as Array<Record<string, unknown>>;
     check("every moderation action wrote an audit entry", rows.length >= 3, rows.length);
     const mine = rows.filter((r) => r["target_id"] === offender.id);
-    check("audit entries record actor, action and target", mine.length >= 2 && mine.every((r) => r["action"] && r["actor_id"]), mine.length);
-    check("audit entries carry the stated reason", mine.some((r) => String(r["reason"] ?? "").includes("audit:")));
+    check(
+      "audit entries record actor, action and target",
+      mine.length >= 2 && mine.every((r) => r["action"] && r["actor_id"]),
+      mine.length,
+    );
+    check(
+      "audit entries carry the stated reason",
+      mine.some((r) => String(r["reason"] ?? "").includes("audit:")),
+    );
 
     const first = (await admin.from("admin_audit_logs").select("id").limit(1).maybeSingle()).data;
-    const tamper = await admin.from("admin_audit_logs").update({ action: "TAMPERED" }).eq("id", first?.id ?? "");
-    check("audit entries cannot be updated, even with the service role", tamper.error != null, tamper.error?.message);
-    const wipe = await admin.from("admin_audit_logs").delete().eq("id", first?.id ?? "");
-    check("audit entries cannot be deleted, even with the service role", wipe.error != null, wipe.error?.message);
+    const tamper = await admin
+      .from("admin_audit_logs")
+      .update({ action: "TAMPERED" })
+      .eq("id", first?.id ?? "");
+    check(
+      "audit entries cannot be updated, even with the service role",
+      tamper.error != null,
+      tamper.error?.message,
+    );
+    const wipe = await admin
+      .from("admin_audit_logs")
+      .delete()
+      .eq("id", first?.id ?? "");
+    check(
+      "audit entries cannot be deleted, even with the service role",
+      wipe.error != null,
+      wipe.error?.message,
+    );
 
     const memberAudit = await member.client.from("admin_audit_logs").select("id");
     check("a member cannot read the audit log directly", (memberAudit.data ?? []).length === 0);
@@ -324,7 +383,11 @@ async function main() {
       const caseId = theCase["case_id"] as string;
       const detail = await mod.client.rpc("admin_case_reports", { p_case: caseId });
       const detailRows = (detail.data ?? []) as Array<Record<string, unknown>>;
-      check("case detail lists the attached reports", detailRows.length >= 1, detail.error?.message);
+      check(
+        "case detail lists the attached reports",
+        detailRows.length >= 1,
+        detail.error?.message,
+      );
       check(
         "a moderator with reports.reporter.view sees the reporter id",
         detailRows.some((r) => r["reporter_id"] === member.id),
@@ -339,7 +402,11 @@ async function main() {
       );
 
       const memberCase = await member.client.rpc("admin_case_reports", { p_case: caseId });
-      check("a member cannot read case detail", memberCase.error != null, memberCase.error?.message);
+      check(
+        "a member cannot read case detail",
+        memberCase.error != null,
+        memberCase.error?.message,
+      );
 
       const update = await mod.client.rpc("admin_update_case", {
         p_case: caseId,
@@ -355,7 +422,11 @@ async function main() {
         p_priority: null,
         p_note: null,
       });
-      check("support cannot change case state", supportUpdate.error != null, supportUpdate.error?.message);
+      check(
+        "support cannot change case state",
+        supportUpdate.error != null,
+        supportUpdate.error?.message,
+      );
     }
 
     const directCase = await member.client.from("moderation_cases").select("id");
@@ -367,14 +438,33 @@ async function main() {
   /* ----------------------------------------------------- 9. safety signals */
   {
     const clean = await assessContent("Looking forward to our coffee tomorrow.");
-    check("the safety engine leaves ordinary conversation alone", !clean.flagged && clean.riskLevel === "none", clean);
+    check(
+      "the safety engine leaves ordinary conversation alone",
+      !clean.flagged && clean.riskLevel === "none",
+      clean,
+    );
 
-    const scam = await assessContent("send me money via western union and I guarantee profit on bitcoin");
-    check("the safety engine flags financial solicitation", scam.categories.includes("financial_solicitation"), scam);
-    check("the safety engine raises risk for compound signals", scam.riskLevel === "high" || scam.riskLevel === "medium", scam.riskLevel);
+    const scam = await assessContent(
+      "send me money via western union and I guarantee profit on bitcoin",
+    );
+    check(
+      "the safety engine flags financial solicitation",
+      scam.categories.includes("financial_solicitation"),
+      scam,
+    );
+    check(
+      "the safety engine raises risk for compound signals",
+      scam.riskLevel === "high" || scam.riskLevel === "medium",
+      scam.riskLevel,
+    );
 
-    const again = await assessContent("send me money via western union and I guarantee profit on bitcoin");
-    check("the safety engine is deterministic", JSON.stringify(again.categories) === JSON.stringify(scam.categories));
+    const again = await assessContent(
+      "send me money via western union and I guarantee profit on bitcoin",
+    );
+    check(
+      "the safety engine is deterministic",
+      JSON.stringify(again.categories) === JSON.stringify(scam.categories),
+    );
 
     const legacy = await screenMessage("i know where you live");
     check("the legacy screener still flags threats", legacy.flagged, legacy);
@@ -397,7 +487,11 @@ async function main() {
     const activeAppeal = await member.client
       .from("account_appeals")
       .insert({ profile_id: member.id, body: "I have nothing to appeal." });
-    check("an account in good standing cannot file an appeal", activeAppeal.error != null, activeAppeal.error?.message);
+    check(
+      "an account in good standing cannot file an appeal",
+      activeAppeal.error != null,
+      activeAppeal.error?.message,
+    );
 
     await admin.from("profiles").update({ account_status: "banned" }).eq("id", target.id);
     const appeal = await target.client
@@ -413,7 +507,11 @@ async function main() {
     const forOther = await member.client
       .from("account_appeals")
       .insert({ profile_id: target.id, body: "Audit appeal filed on behalf of someone else." });
-    check("a member cannot file an appeal for another account", forOther.error != null, forOther.error?.message);
+    check(
+      "a member cannot file an appeal for another account",
+      forOther.error != null,
+      forOther.error?.message,
+    );
 
     const selfDecide = await target.client
       .from("account_appeals")
@@ -424,11 +522,10 @@ async function main() {
       .select("status")
       .eq("profile_id", target.id)
       .maybeSingle();
-    check(
-      "a member cannot decide their own appeal",
-      state.data?.status !== "granted",
-      { error: selfDecide.error?.code, status: state.data?.status },
-    );
+    check("a member cannot decide their own appeal", state.data?.status !== "granted", {
+      error: selfDecide.error?.code,
+      status: state.data?.status,
+    });
 
     const list = await mod.client.rpc("admin_list_appeals", { p_limit: 50, p_offset: 0 });
     const appealRow = ((list.data ?? []) as Array<Record<string, unknown>>).find(
@@ -443,25 +540,40 @@ async function main() {
         p_status: "denied",
         p_note: "audit: moderators may not decide",
       });
-      check("a moderator cannot decide an appeal", modDecide.error != null, modDecide.error?.message);
+      check(
+        "a moderator cannot decide an appeal",
+        modDecide.error != null,
+        modDecide.error?.message,
+      );
 
       const ownerDecide = await owner.client.rpc("admin_decide_appeal", {
         p_appeal: appealId,
         p_status: "granted",
         p_note: "audit: appeal granted",
       });
-      check("a super admin can decide an appeal", ownerDecide.error == null, ownerDecide.error?.message);
+      check(
+        "a super admin can decide an appeal",
+        ownerDecide.error == null,
+        ownerDecide.error?.message,
+      );
 
       const restored = await admin
         .from("profiles")
         .select("account_status")
         .eq("id", target.id)
         .maybeSingle();
-      check("granting an appeal restores the account", restored.data?.account_status === "active", restored.data);
+      check(
+        "granting an appeal restores the account",
+        restored.data?.account_status === "active",
+        restored.data,
+      );
     }
 
     const memberAppeals = await member.client.from("account_appeals").select("id");
-    check("a member sees only their own appeals", (memberAppeals.data ?? []).every(() => true));
+    check(
+      "a member sees only their own appeals",
+      (memberAppeals.data ?? []).every(() => true),
+    );
     const anonAppeals = await anon.from("account_appeals").select("id");
     check("anonymous cannot read appeals", (anonAppeals.data ?? []).length === 0);
   }
@@ -469,14 +581,22 @@ async function main() {
   /* --------------------------------------------------- 11. purge automation */
   {
     const memberPurge = await member.client.rpc("purge_expired_accounts", { p_dry_run: true });
-    check("a member cannot run the purge job", memberPurge.error != null, memberPurge.error?.message);
+    check(
+      "a member cannot run the purge job",
+      memberPurge.error != null,
+      memberPurge.error?.message,
+    );
     const anonPurge = await anon.rpc("purge_expired_accounts", { p_dry_run: true });
     check("anonymous cannot run the purge job", anonPurge.error != null, anonPurge.error?.message);
     const modPurge = await mod.client.rpc("purge_expired_accounts", { p_dry_run: true });
     check("a moderator cannot run the purge job", modPurge.error != null, modPurge.error?.message);
 
     const dryRun = await admin.rpc("purge_expired_accounts", { p_dry_run: true });
-    check("the purge job runs as a trusted job with a dry-run mode", dryRun.error == null, dryRun.error?.message);
+    check(
+      "the purge job runs as a trusted job with a dry-run mode",
+      dryRun.error == null,
+      dryRun.error?.message,
+    );
 
     const writeAudit = await member.client.rpc("write_audit", {
       _actor: member.id,
@@ -487,7 +607,11 @@ async function main() {
       _reason: null,
       _metadata: {},
     });
-    check("a member cannot write to the audit log", writeAudit.error != null, writeAudit.error?.message);
+    check(
+      "a member cannot write to the audit log",
+      writeAudit.error != null,
+      writeAudit.error?.message,
+    );
   }
 
   /* ------------------------------------------------ 12. anonymous exposure */
@@ -502,7 +626,11 @@ async function main() {
     ];
     for (const table of tables) {
       const read = await anon.from(table).select("*").limit(1);
-      check(`anonymous read of ${table} returns no rows`, (read.data ?? []).length === 0, read.error?.message);
+      check(
+        `anonymous read of ${table} returns no rows`,
+        (read.data ?? []).length === 0,
+        read.error?.message,
+      );
       const write = await anon.from(table).insert({});
       check(`anonymous write to ${table} is refused`, write.error != null);
     }

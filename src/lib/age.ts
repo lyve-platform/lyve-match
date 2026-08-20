@@ -26,8 +26,7 @@ export function calculateAge(isoDate: string, now: Date = new Date()): number | 
   if (!year || !month || !day) return null;
   let age = now.getUTCFullYear() - year;
   const beforeBirthday =
-    now.getUTCMonth() + 1 < month ||
-    (now.getUTCMonth() + 1 === month && now.getUTCDate() < day);
+    now.getUTCMonth() + 1 < month || (now.getUTCMonth() + 1 === month && now.getUTCDate() < day);
   if (beforeBirthday) age -= 1;
   return age;
 }

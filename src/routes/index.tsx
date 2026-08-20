@@ -58,7 +58,6 @@ function Index() {
         <Premium />
         <Testimonials />
         <Faq />
-        
       </main>
       <Footer />
     </div>

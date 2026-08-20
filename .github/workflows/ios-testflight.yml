@@ -1,7 +1,6 @@
 name: iOS TestFlight Build
 # sync: 2026-08-20
 
-
 # Builds the LYVE iOS shell (Capacitor) on a hosted macOS runner and uploads
 # it to TestFlight. Runs automatically on pull requests that touch iOS or
 # workflow files, and can also be triggered manually from the Actions tab.
@@ -178,4 +177,3 @@ jobs:
             echo "iOS TestFlight build did not pass (result: $BUILD_RESULT)."
             exit 1
           fi
-

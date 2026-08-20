@@ -61,9 +61,16 @@ export function decodeJws(token: string): JwsParts | null {
   const segments = token.split(".");
   if (segments.length !== 3) return null;
   try {
-    const header = JSON.parse(new TextDecoder().decode(b64uToBytes(segments[0]!))) as Record<string, unknown>;
-    const payload = JSON.parse(new TextDecoder().decode(b64uToBytes(segments[1]!))) as Record<string, unknown>;
-    if (!header || typeof header !== "object" || !payload || typeof payload !== "object") return null;
+    const header = JSON.parse(new TextDecoder().decode(b64uToBytes(segments[0]!))) as Record<
+      string,
+      unknown
+    >;
+    const payload = JSON.parse(new TextDecoder().decode(b64uToBytes(segments[1]!))) as Record<
+      string,
+      unknown
+    >;
+    if (!header || typeof header !== "object" || !payload || typeof payload !== "object")
+      return null;
     return {
       header,
       payload,
@@ -126,7 +133,8 @@ export async function verifyAppleJws<T = Record<string, unknown>>(
   for (let i = 0; i < chain.length - 1; i += 1) {
     const child = chain[i]!;
     const parent = chain[i + 1]!;
-    if (!sameBytes(child.issuerDer, parent.subjectDer)) return { ok: false, reason: "BROKEN_CHAIN" };
+    if (!sameBytes(child.issuerDer, parent.subjectDer))
+      return { ok: false, reason: "BROKEN_CHAIN" };
     if (!(await certificateSignedBy(child, parent))) return { ok: false, reason: "BROKEN_CHAIN" };
   }
 
@@ -226,7 +234,13 @@ export async function signGoogleServiceJwt(input: {
 /* Google Pub/Sub OIDC push-token verification                          */
 /* ------------------------------------------------------------------ */
 
-export type OidcClaims = { aud?: unknown; email?: unknown; email_verified?: unknown; exp?: unknown; iss?: unknown };
+export type OidcClaims = {
+  aud?: unknown;
+  email?: unknown;
+  email_verified?: unknown;
+  exp?: unknown;
+  iss?: unknown;
+};
 
 export type OidcFailure =
   | "MALFORMED"

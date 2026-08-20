@@ -82,12 +82,23 @@ async function main() {
       .from("profiles")
       .insert({ id: idA, date_of_birth: dob(18, 1) }) // 17 years 364 days
       .select();
-    check("age gate: 17y364d insert rejected by database", Boolean(insertA.error), insertA.error?.message);
+    check(
+      "age gate: 17y364d insert rejected by database",
+      Boolean(insertA.error),
+      insertA.error?.message,
+    );
 
-    const exact18 = await clientA.from("profiles").insert({ id: idA, date_of_birth: dob(18) }).select();
+    const exact18 = await clientA
+      .from("profiles")
+      .insert({ id: idA, date_of_birth: dob(18) })
+      .select();
     check("age gate: exactly 18 accepted", !exact18.error, exact18.error?.message);
 
-    const future = await clientA.from("profiles").update({ date_of_birth: dob(-1) }).eq("id", idA).select();
+    const future = await clientA
+      .from("profiles")
+      .update({ date_of_birth: dob(-1) })
+      .eq("id", idA)
+      .select();
     check("age gate: future date rejected", Boolean(future.error), future.error?.message);
 
     const ancient = await clientA
@@ -102,7 +113,11 @@ async function main() {
       .update({ date_of_birth: dob(16) })
       .eq("id", idA)
       .select();
-    check("age gate: cannot later set an underage date", Boolean(downgrade.error), downgrade.error?.message);
+    check(
+      "age gate: cannot later set an underage date",
+      Boolean(downgrade.error),
+      downgrade.error?.message,
+    );
 
     await clientB.from("profiles").insert({ id: idB, date_of_birth: dob(30), first_name: "Bee" });
     await clientB.from("preferences").insert({ profile_id: idB });
@@ -117,13 +132,31 @@ async function main() {
     check("A cannot read B's preferences", (readPrefs.data ?? []).length === 0, readPrefs.data);
 
     const readPrivacy = await clientA.from("privacy_settings").select("*").eq("profile_id", idB);
-    check("A cannot read B's privacy settings", (readPrivacy.data ?? []).length === 0, readPrivacy.data);
+    check(
+      "A cannot read B's privacy settings",
+      (readPrivacy.data ?? []).length === 0,
+      readPrivacy.data,
+    );
 
-    const readOnboarding = await clientA.from("onboarding_progress").select("*").eq("profile_id", idB);
-    check("A cannot read B's onboarding state", (readOnboarding.data ?? []).length === 0, readOnboarding.data);
+    const readOnboarding = await clientA
+      .from("onboarding_progress")
+      .select("*")
+      .eq("profile_id", idB);
+    check(
+      "A cannot read B's onboarding state",
+      (readOnboarding.data ?? []).length === 0,
+      readOnboarding.data,
+    );
 
-    const readDeletion = await clientA.from("account_deletion_requests").select("*").eq("profile_id", idB);
-    check("A cannot read B's deletion requests", (readDeletion.data ?? []).length === 0, readDeletion.data);
+    const readDeletion = await clientA
+      .from("account_deletion_requests")
+      .select("*")
+      .eq("profile_id", idB);
+    check(
+      "A cannot read B's deletion requests",
+      (readDeletion.data ?? []).length === 0,
+      readDeletion.data,
+    );
 
     /* ------------------------------------------ cross-user write protection */
     const writeProfile = await clientA
@@ -145,10 +178,21 @@ async function main() {
       .update({ discoverable: true, profile_visibility: "everyone" })
       .eq("profile_id", idB)
       .select();
-    check("A cannot modify B's privacy settings", (writePrivacy.data ?? []).length === 0, writePrivacy.data);
+    check(
+      "A cannot modify B's privacy settings",
+      (writePrivacy.data ?? []).length === 0,
+      writePrivacy.data,
+    );
 
-    const forgeProfile = await clientA.from("profiles").insert({ id: idB, first_name: "forged" }).select();
-    check("A cannot submit profile data as B", Boolean(forgeProfile.error), forgeProfile.error?.message);
+    const forgeProfile = await clientA
+      .from("profiles")
+      .insert({ id: idB, first_name: "forged" })
+      .select();
+    check(
+      "A cannot submit profile data as B",
+      Boolean(forgeProfile.error),
+      forgeProfile.error?.message,
+    );
 
     const forgeOnboarding = await clientA
       .from("onboarding_progress")
@@ -165,13 +209,21 @@ async function main() {
       .from("profile_interests")
       .insert({ profile_id: idB, interest_id: (await anonInterestId()) ?? "" })
       .select();
-    check("A cannot add interests to B", Boolean(forgeInterest.error), forgeInterest.error?.message);
+    check(
+      "A cannot add interests to B",
+      Boolean(forgeInterest.error),
+      forgeInterest.error?.message,
+    );
 
     const forgeDeletion = await clientA
       .from("account_deletion_requests")
       .insert({ profile_id: idB })
       .select();
-    check("A cannot request deletion of B's account", Boolean(forgeDeletion.error), forgeDeletion.error?.message);
+    check(
+      "A cannot request deletion of B's account",
+      Boolean(forgeDeletion.error),
+      forgeDeletion.error?.message,
+    );
 
     /* --------------------------------------------------------- photo + storage */
     const bytes = new Uint8Array([255, 216, 255, 219, 0, 0, 0, 0]);
@@ -191,10 +243,18 @@ async function main() {
     const crossUpload = await clientA.storage
       .from("profile-photos")
       .upload(`${idB}/intruder-${stamp}.jpg`, bytes, { contentType: "image/jpeg" });
-    check("A cannot upload into B's storage folder", Boolean(crossUpload.error), crossUpload.error?.message);
+    check(
+      "A cannot upload into B's storage folder",
+      Boolean(crossUpload.error),
+      crossUpload.error?.message,
+    );
 
     const crossDownload = await clientA.storage.from("profile-photos").download(pathB);
-    check("A cannot download B's photo", Boolean(crossDownload.error), crossDownload.error?.message);
+    check(
+      "A cannot download B's photo",
+      Boolean(crossDownload.error),
+      crossDownload.error?.message,
+    );
 
     const crossSign = await clientA.storage.from("profile-photos").createSignedUrl(pathB, 60);
     check("A cannot sign a URL for B's photo", Boolean(crossSign.error), crossSign.error?.message);
@@ -213,7 +273,11 @@ async function main() {
     }
 
     const anonDownload = await anon.storage.from("profile-photos").download(pathB);
-    check("anonymous cannot download private photos", Boolean(anonDownload.error), anonDownload.error?.message);
+    check(
+      "anonymous cannot download private photos",
+      Boolean(anonDownload.error),
+      anonDownload.error?.message,
+    );
 
     const badMime = await clientB.storage
       .from("profile-photos")
@@ -227,7 +291,11 @@ async function main() {
       .upload(`${idB}/payload-${stamp}.svg`, new Blob(["<svg onload=alert(1)>"]), {
         contentType: "image/svg+xml",
       });
-    check("storage rejects scriptable SVG uploads", Boolean(disguised.error), disguised.error?.message);
+    check(
+      "storage rejects scriptable SVG uploads",
+      Boolean(disguised.error),
+      disguised.error?.message,
+    );
 
     /* --------------------------------------------------------- anonymous access */
     for (const table of [
@@ -248,15 +316,25 @@ async function main() {
     check("anonymous cannot insert a profile", Boolean(anonWrite.error), anonWrite.error?.message);
 
     /* ------------------------------------------------------------- soft delete */
-    const deletion = await clientB.from("account_deletion_requests").insert({ profile_id: idB }).select().single();
+    const deletion = await clientB
+      .from("account_deletion_requests")
+      .insert({ profile_id: idB })
+      .select()
+      .single();
     check("B can request their own deletion", !deletion.error, deletion.error?.message);
 
     await clientB.from("profiles").update({ deleted_at: new Date().toISOString() }).eq("id", idB);
     const deletedVisibleToA = await clientA.from("profiles").select("id").eq("id", idB);
-    check("soft-deleted profile invisible to other users", (deletedVisibleToA.data ?? []).length === 0);
+    check(
+      "soft-deleted profile invisible to other users",
+      (deletedVisibleToA.data ?? []).length === 0,
+    );
 
     const deletedVisibleToAnon = await anon.from("profiles").select("id").eq("id", idB);
-    check("soft-deleted profile invisible to anonymous", (deletedVisibleToAnon.data ?? []).length === 0);
+    check(
+      "soft-deleted profile invisible to anonymous",
+      (deletedVisibleToAnon.data ?? []).length === 0,
+    );
 
     if (deletion.data) {
       const tamper = await clientB
@@ -297,9 +375,16 @@ async function main() {
       global: { headers: { Authorization: "Bearer invalid.token.value" } },
     });
     const expiredRead = await expired.from("profiles").select("*").limit(1);
-    check("invalid/expired token is rejected", Boolean(expiredRead.error), expiredRead.error?.message);
+    check(
+      "invalid/expired token is rejected",
+      Boolean(expiredRead.error),
+      expiredRead.error?.message,
+    );
   } finally {
-    await admin.storage.from("profile-photos").remove([`${idA}/`, `${idB}/`]).catch(() => undefined);
+    await admin.storage
+      .from("profile-photos")
+      .remove([`${idA}/`, `${idB}/`])
+      .catch(() => undefined);
     const { data: objects } = await admin.storage.from("profile-photos").list(idB);
     if (objects?.length) {
       await admin.storage.from("profile-photos").remove(objects.map((o) => `${idB}/${o.name}`));

@@ -34,11 +34,7 @@ export const PROFILE_VISIBILITIES: readonly ProfileVisibility[] = [
   "hidden",
 ];
 
-export const MESSAGE_AUDIENCES: readonly MessageAudience[] = [
-  "everyone",
-  "matches_only",
-  "no_one",
-];
+export const MESSAGE_AUDIENCES: readonly MessageAudience[] = ["everyone", "matches_only", "no_one"];
 
 export const MIN_AGE = 18;
 export const MAX_AGE = 120;
@@ -77,9 +73,24 @@ export type SocialEnergy = Database["public"]["Enums"]["social_energy"];
 export type CommunicationStyle = Database["public"]["Enums"]["communication_style"];
 export type ReportCategory = Database["public"]["Enums"]["report_category"];
 
-export const SMOKING_OPTIONS: readonly Smoking[] = ["never", "socially", "regularly", "prefer_not_to_say"];
-export const DRINKING_OPTIONS: readonly Drinking[] = ["never", "socially", "regularly", "prefer_not_to_say"];
-export const EXERCISE_OPTIONS: readonly Exercise[] = ["rarely", "sometimes", "often", "prefer_not_to_say"];
+export const SMOKING_OPTIONS: readonly Smoking[] = [
+  "never",
+  "socially",
+  "regularly",
+  "prefer_not_to_say",
+];
+export const DRINKING_OPTIONS: readonly Drinking[] = [
+  "never",
+  "socially",
+  "regularly",
+  "prefer_not_to_say",
+];
+export const EXERCISE_OPTIONS: readonly Exercise[] = [
+  "rarely",
+  "sometimes",
+  "often",
+  "prefer_not_to_say",
+];
 export const CHILDREN_OPTIONS: readonly ChildrenPlan[] = [
   "want_children",
   "do_not_want_children",

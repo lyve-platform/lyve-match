@@ -11,7 +11,8 @@ accounts and to observe ground truth. No test drives the UI.
 
 ## 1. Findings and fixes
 
-### HIGH-1 — Messaging was fully broken by a missing function privilege *(fixed)*
+### HIGH-1 — Messaging was fully broken by a missing function privilege _(fixed)_
+
 The Phase 3 RLS policies call `can_read_conversation`, `can_send_message` and
 `is_blocked_pair`. Policy expressions are evaluated with the **caller's**
 privileges, and Phase 2 hardening had revoked `EXECUTE` from `authenticated`.
@@ -25,7 +26,8 @@ called by a signed-in member for a pair they are not part of, it returns
 legitimate call sites (RLS, discovery, interaction guards) always pass the
 caller as one side of the pair, so behaviour is unchanged.
 
-### HIGH-2 — Latent full-table grants on the Phase 3 tables *(fixed)*
+### HIGH-2 — Latent full-table grants on the Phase 3 tables _(fixed)_
+
 `conversations`, `conversation_members`, `messages`, `message_reads` and
 `message_reports` were created with `ALL` privileges for both `anon` and
 `authenticated` (including `DELETE`, `TRUNCATE`, `TRIGGER`, `REFERENCES`). RLS
@@ -38,6 +40,7 @@ read receipts and message reports. `anon` now has **no** privilege on any
 messaging table.
 
 ### Accepted warnings
+
 The database linter flags nine `SECURITY DEFINER` functions as callable by
 signed-in users: the product RPCs (`discover_candidates`, `likes_received`,
 `my_matches`, `my_conversations`, `mark_conversation_read`) and the four RLS

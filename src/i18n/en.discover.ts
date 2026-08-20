@@ -6,7 +6,8 @@ export const enDiscover = {
   },
   discover: {
     title: "Discover",
-    subtitle: "People who match what you're looking for — and who are looking for someone like you.",
+    subtitle:
+      "People who match what you're looking for — and who are looking for someone like you.",
     loading: "Finding people for you…",
     error: "We couldn't load discovery right now. Please try again.",
     retry: "Try again",
@@ -126,7 +127,8 @@ export const enDiscover = {
     failed: "We couldn't save your location. Please try again.",
     denied: "Location permission was declined.",
     unsupported: "Your browser doesn't support location.",
-    privacy: "Your position is rounded before it is stored — LYVE never keeps your exact coordinates, and other members only see a distance range.",
+    privacy:
+      "Your position is rounded before it is stored — LYVE never keeps your exact coordinates, and other members only see a distance range.",
   },
   lifestyleFields: {
     sectionTitle: "Lifestyle & personality",

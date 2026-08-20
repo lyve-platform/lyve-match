@@ -58,7 +58,9 @@ function AppealPage() {
 
   return (
     <AccountShell title={t.standing.title} subtitle={t.standing.subtitle}>
-      {standing.isPending ? <p className="text-sm text-muted-foreground">{t.admin.loading}</p> : null}
+      {standing.isPending ? (
+        <p className="text-sm text-muted-foreground">{t.admin.loading}</p>
+      ) : null}
 
       {standing.data && standing.data.status === "active" ? (
         <div className="rounded-xl border border-border p-6">
@@ -69,7 +71,8 @@ function AppealPage() {
 
       {standing.data?.appeal ? (
         <div className="rounded-xl bg-muted/50 p-4 text-sm">
-          {standing.data.appeal.status === "pending" || standing.data.appeal.status === "reviewing" ? (
+          {standing.data.appeal.status === "pending" ||
+          standing.data.appeal.status === "reviewing" ? (
             <p>{fill(t.standing.pending, { date: formatDate(standing.data.appeal.createdAt) })}</p>
           ) : (
             <p>

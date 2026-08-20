@@ -24,7 +24,10 @@ export type StoreAlertKind =
   | "store_misconfiguration";
 
 /** Thresholds are per fingerprint per window; below them we only count. */
-const ALERT_POLICY: Record<StoreAlertKind, { severity: AlertSeverity; windowSeconds: number; threshold: number }> = {
+const ALERT_POLICY: Record<
+  StoreAlertKind,
+  { severity: AlertSeverity; windowSeconds: number; threshold: number }
+> = {
   store_signature_failure: { severity: "critical", windowSeconds: 300, threshold: 5 },
   store_rate_limited: { severity: "warning", windowSeconds: 300, threshold: 3 },
   store_link_rejected: { severity: "warning", windowSeconds: 900, threshold: 5 },
@@ -103,7 +106,11 @@ export async function raiseStoreAlert(
     if (outcome.breached) {
       // Alert transport (paging/email) is attached here once operations
       // choose one; the durable record is the source of truth either way.
-      console.warn("[store][ALERT]", { kind, severity: policy.severity, occurrences: outcome.occurrences });
+      console.warn("[store][ALERT]", {
+        kind,
+        severity: policy.severity,
+        occurrences: outcome.occurrences,
+      });
     }
     return outcome;
   } catch {
@@ -133,7 +140,8 @@ export function sanitizeDetails(details: Record<string, unknown>): Record<string
   for (const [key, value] of Object.entries(details)) {
     if (!ALLOWED_DETAIL_KEYS.has(key)) continue;
     if (typeof value === "string") out[key] = value.slice(0, 120);
-    else if (typeof value === "number" || typeof value === "boolean" || value === null) out[key] = value;
+    else if (typeof value === "number" || typeof value === "boolean" || value === null)
+      out[key] = value;
   }
   return out;
 }

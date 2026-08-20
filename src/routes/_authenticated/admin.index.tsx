@@ -92,17 +92,16 @@ function AdminPage() {
         </Button>
       </div>
 
-
       <Tabs value={tab} onValueChange={setTab} className="w-full">
         <TabsList className="flex w-full flex-wrap justify-start">
-          {canSeeMetrics ? <TabsTrigger value="overview">{t.admin.tabs.overview}</TabsTrigger> : null}
+          {canSeeMetrics ? (
+            <TabsTrigger value="overview">{t.admin.tabs.overview}</TabsTrigger>
+          ) : null}
           {canSeeCases ? <TabsTrigger value="cases">{t.admin.tabs.cases}</TabsTrigger> : null}
           {canSeeUsers ? <TabsTrigger value="users">{t.admin.tabs.users}</TabsTrigger> : null}
           {canSeeAppeals ? <TabsTrigger value="appeals">{t.admin.tabs.appeals}</TabsTrigger> : null}
           {canSeeBilling ? <TabsTrigger value="billing">{t.adminBilling.tab}</TabsTrigger> : null}
-          {canSeeSupport ? (
-            <TabsTrigger value="support">{t.adminSupport.title}</TabsTrigger>
-          ) : null}
+          {canSeeSupport ? <TabsTrigger value="support">{t.adminSupport.title}</TabsTrigger> : null}
           {canSeeAudit ? <TabsTrigger value="audit">{t.admin.tabs.audit}</TabsTrigger> : null}
           {canManageRoles ? <TabsTrigger value="staff">{t.admin.tabs.staff}</TabsTrigger> : null}
         </TabsList>
@@ -120,7 +119,10 @@ function AdminPage() {
           <AppealsPanel enabled={canSeeAppeals && tab === "appeals"} permissions={permissions} />
         </TabsContent>
         <TabsContent value="billing" className="mt-6">
-          <AdminBillingPanel enabled={canSeeBilling && tab === "billing"} permissions={permissions} />
+          <AdminBillingPanel
+            enabled={canSeeBilling && tab === "billing"}
+            permissions={permissions}
+          />
         </TabsContent>
         <TabsContent value="support" className="mt-6">
           <AdminSupportPanel

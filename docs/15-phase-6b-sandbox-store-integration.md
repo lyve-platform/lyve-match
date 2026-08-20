@@ -4,17 +4,17 @@ Status: implemented, sandbox rail only. No production Apple or Google credential
 
 ## 1. What was added
 
-| Area | Module |
-| --- | --- |
-| DER / X.509 chain reader | `src/lib/billing/x509.server.ts` |
-| JWS + JWT primitives (Apple ES256 chain, Apple client assertion, Google service JWT, Google OIDC) | `src/lib/billing/jws.server.ts` |
-| Credential + environment resolution | `src/lib/billing/store-env.server.ts` |
-| App Store Server API client | `src/lib/billing/apple-store.server.ts` |
-| Google Play Developer API + Pub/Sub push auth | `src/lib/billing/google-store.server.ts` |
-| Reconciliation engine | `src/lib/billing/store-reconcile.server.ts` |
-| Rate limiting + alerting | `src/lib/billing/store-ops.server.ts` |
-| Scheduled reconciliation endpoint | `src/routes/api/public/cron/store-reconcile.ts` |
-| Staff health read / manual pass | `src/lib/store-ops.functions.ts` |
+| Area                                                                                              | Module                                          |
+| ------------------------------------------------------------------------------------------------- | ----------------------------------------------- |
+| DER / X.509 chain reader                                                                          | `src/lib/billing/x509.server.ts`                |
+| JWS + JWT primitives (Apple ES256 chain, Apple client assertion, Google service JWT, Google OIDC) | `src/lib/billing/jws.server.ts`                 |
+| Credential + environment resolution                                                               | `src/lib/billing/store-env.server.ts`           |
+| App Store Server API client                                                                       | `src/lib/billing/apple-store.server.ts`         |
+| Google Play Developer API + Pub/Sub push auth                                                     | `src/lib/billing/google-store.server.ts`        |
+| Reconciliation engine                                                                             | `src/lib/billing/store-reconcile.server.ts`     |
+| Rate limiting + alerting                                                                          | `src/lib/billing/store-ops.server.ts`           |
+| Scheduled reconciliation endpoint                                                                 | `src/routes/api/public/cron/store-reconcile.ts` |
+| Staff health read / manual pass                                                                   | `src/lib/store-ops.functions.ts`                |
 
 ## 2. Verification rails
 
@@ -42,12 +42,12 @@ Schedule: `POST /api/public/cron/store-reconcile` hourly with `Authorization: Be
 
 Database-backed fixed windows (`store_rate_limit_hit`) shared across instances; a limiter outage denies traffic on the public webhook surface rather than allowing it.
 
-| Surface | Limit |
-| --- | --- |
+| Surface                    | Limit     |
+| -------------------------- | --------- |
 | Store webhook (per caller) | 120 / 60s |
 | Webhook signature failures | 20 / 300s |
-| Member purchase linking | 10 / 600s |
-| Reconciliation | 4 / hour |
+| Member purchase linking    | 10 / 600s |
+| Reconciliation             | 4 / hour  |
 
 Alerts group into `store_alerts` by kind + fingerprint + window with thresholds (signature failures 5/5min critical, processing failure 1 critical, drift 1 warning). Details are whitelisted and truncated: receipts, purchase tokens and authorization headers can never reach monitoring; purchase references appear only as a 16-hex digest.
 

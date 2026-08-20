@@ -26,7 +26,6 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
   const questionsTitle = content.contact?.title ?? t.legal.questionsTitle;
   const questionsBody = content.contact?.body ?? t.legal.questionsBody;
 
-
   return (
     <div className="min-h-screen bg-background">
       <a
@@ -59,15 +58,10 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
                 {t.legal.effectiveLabel}: {content.effective}
               </p>
             ) : null}
-            <p className="mt-4 text-pretty text-base text-muted-foreground">
-              {content.intro}
-            </p>
+            <p className="mt-4 text-pretty text-base text-muted-foreground">{content.intro}</p>
           </header>
 
-          <div
-            role="note"
-            className="surface-panel mt-8 border-s-4 border-s-primary p-5"
-          >
+          <div role="note" className="surface-panel mt-8 border-s-4 border-s-primary p-5">
             <h2 className="text-base font-semibold text-foreground">{noticeTitle}</h2>
             <p className="mt-2 text-sm text-muted-foreground">{noticeBody}</p>
           </div>
@@ -80,9 +74,7 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
               {content.sections.map((section, index) => (
                 <li key={section.title} className="surface-panel p-5">
                   <h3 className="flex items-baseline gap-3 text-base font-semibold text-foreground">
-                    <span className="text-sm font-semibold text-primary">
-                      {index + 1}.
-                    </span>
+                    <span className="text-sm font-semibold text-primary">{index + 1}.</span>
                     {section.title}
                   </h3>
                   <p className="mt-2 text-sm text-muted-foreground">{section.body}</p>
@@ -103,7 +95,6 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
               {t.support.link}
             </Link>
           </section>
-
         </div>
       </main>
       <Footer />

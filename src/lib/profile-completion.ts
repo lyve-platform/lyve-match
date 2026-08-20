@@ -1,11 +1,6 @@
 import type { AccountData } from "@/lib/account";
 
-export type CompletionSectionKey =
-  | "basics"
-  | "intent"
-  | "photo"
-  | "bio"
-  | "preferences";
+export type CompletionSectionKey = "basics" | "intent" | "photo" | "bio" | "preferences";
 
 export type CompletionResult = {
   percent: number;
@@ -25,10 +20,10 @@ export function computeCompletion(account: AccountData | undefined): CompletionR
       key: "basics",
       done: Boolean(
         profile?.first_name &&
-          profile?.date_of_birth &&
-          profile?.gender &&
-          profile?.country &&
-          profile?.city,
+        profile?.date_of_birth &&
+        profile?.gender &&
+        profile?.country &&
+        profile?.city,
       ),
     },
     { key: "intent", done: Boolean(profile?.relationship_intent) },
@@ -37,9 +32,7 @@ export function computeCompletion(account: AccountData | undefined): CompletionR
     {
       key: "preferences",
       done: Boolean(
-        preferences &&
-          preferences.preferred_genders.length > 0 &&
-          preferences.intents.length > 0,
+        preferences && preferences.preferred_genders.length > 0 && preferences.intents.length > 0,
       ),
     },
   ];

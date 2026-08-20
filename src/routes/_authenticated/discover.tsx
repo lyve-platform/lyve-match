@@ -18,7 +18,8 @@ import { useAccount } from "@/hooks/useAccount";
 import { useDecision, useDiscoveryFeed } from "@/hooks/useDiscovery";
 
 const title = "Discover people on LYVE";
-const description = "See members who match your preferences, with an explainable compatibility estimate.";
+const description =
+  "See members who match your preferences, with an explainable compatibility estimate.";
 
 export const Route = createFileRoute("/_authenticated/discover")({
   head: () => ({
@@ -44,9 +45,9 @@ function DiscoverPage() {
 
   const eligible = Boolean(
     account?.profile.date_of_birth &&
-      account?.profile.first_name &&
-      account?.profile.gender &&
-      account?.profile.relationship_intent,
+    account?.profile.first_name &&
+    account?.profile.gender &&
+    account?.profile.relationship_intent,
   );
 
   const card = feed.cards[0];
@@ -156,7 +157,9 @@ function EmptyState({
   return (
     <div className="rounded-2xl border border-border/70 bg-card p-8 text-center">
       <h2 className="text-lg font-semibold text-balance">{heading}</h2>
-      {body ? <p className="mx-auto mt-2 max-w-sm text-pretty text-sm text-muted-foreground">{body}</p> : null}
+      {body ? (
+        <p className="mx-auto mt-2 max-w-sm text-pretty text-sm text-muted-foreground">{body}</p>
+      ) : null}
       {action ? <div className="mt-5 flex justify-center">{action}</div> : null}
     </div>
   );

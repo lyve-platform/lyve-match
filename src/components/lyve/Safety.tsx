@@ -1,12 +1,4 @@
-import {
-  BadgeCheck,
-  Ban,
-  EyeOff,
-  Flag,
-  Gavel,
-  ShieldAlert,
-  UserCheck,
-} from "lucide-react";
+import { BadgeCheck, Ban, EyeOff, Flag, Gavel, ShieldAlert, UserCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useI18n } from "@/i18n";

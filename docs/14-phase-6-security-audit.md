@@ -8,17 +8,17 @@ and Stripe remain out of scope. Arabic remains disabled in production.
 
 ## 1. Result summary
 
-| Metric | Value |
-| --- | --- |
-| Total assertions (full suite) | 625 |
-| Passed | 625 |
-| Failed | 0 |
-| Phase 6 assertions | 137 |
-| Critical findings | 0 open (1 fixed) |
-| High findings | 0 open (2 fixed) |
-| Medium | 0 open (1 fixed) |
-| Low | 0 open |
-| Info | 3 (accepted, §7) |
+| Metric                        | Value            |
+| ----------------------------- | ---------------- |
+| Total assertions (full suite) | 625              |
+| Passed                        | 625              |
+| Failed                        | 0                |
+| Phase 6 assertions            | 137              |
+| Critical findings             | 0 open (1 fixed) |
+| High findings                 | 0 open (2 fixed) |
+| Medium                        | 0 open (1 fixed) |
+| Low                           | 0 open           |
+| Info                          | 3 (accepted, §7) |
 
 Baseline: Phases 1–5 remain at 488/488. Phase 6 adds 137 → **625/625**.
 
@@ -59,12 +59,12 @@ Key properties:
 
 ## 3. Database changes
 
-| Object | Purpose |
-| --- | --- |
-| `store_purchases` | Purchase→account binding. `UNIQUE (provider, purchase_ref)` is the anti-transfer control. Members hold read-only RLS on their own rows; no member write path exists. |
-| `store_purchase_audit` | Append-only trail of every link attempt and lifecycle application. Stores a SHA-256 hash of the purchase reference, never the raw store token. No member or anon grant. |
-| `billing_link_store_purchase()` | `SECURITY DEFINER`, row-locked. Returns `linked` / `already_owned` / `owned_by_other`. Execute revoked from `anon` and `authenticated`. |
-| `billing_apply_store_event()` | `SECURITY DEFINER`. Rejects unlinked purchases and out-of-order events, applies refunds/revocations immediately. Execute revoked from `anon` and `authenticated`. |
+| Object                          | Purpose                                                                                                                                                                 |
+| ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `store_purchases`               | Purchase→account binding. `UNIQUE (provider, purchase_ref)` is the anti-transfer control. Members hold read-only RLS on their own rows; no member write path exists.    |
+| `store_purchase_audit`          | Append-only trail of every link attempt and lifecycle application. Stores a SHA-256 hash of the purchase reference, never the raw store token. No member or anon grant. |
+| `billing_link_store_purchase()` | `SECURITY DEFINER`, row-locked. Returns `linked` / `already_owned` / `owned_by_other`. Execute revoked from `anon` and `authenticated`.                                 |
+| `billing_apply_store_event()`   | `SECURITY DEFINER`. Rejects unlinked purchases and out-of-order events, applies refunds/revocations immediately. Execute revoked from `anon` and `authenticated`.       |
 
 Idempotency reuses the Phase 5 `billing_events` ledger: the store-issued notification id
 is claimed under a unique index before any state change, so replays and concurrent
@@ -72,12 +72,12 @@ duplicates collapse to one application.
 
 ## 4. Findings fixed
 
-| Sev | Finding | Fix |
-| --- | --- | --- |
+| Sev      | Finding                                                                                                                              | Fix                                                                                                                                                             |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | CRITICAL | A purchase reference could otherwise be presented by a second account after the first account's session ended, transferring Premium. | Ownership is a unique, row-locked binding; a second account receives `owned_by_other` and the attempt is audited. Verified refunded purchases also cannot move. |
-| HIGH | Store lifecycle routines were callable by any signed-in role via PostgREST, allowing self-granted Premium. | `REVOKE ALL … FROM PUBLIC, anon, authenticated` on both routines; only `service_role` executes them. |
-| HIGH | Out-of-order store notifications could resurrect a refunded or expired subscription. | Events older than the newest applied event for that purchase return `stale` and are audited without changing state. |
-| MEDIUM | Raw purchase tokens would have been written into the audit trail. | Audit stores a SHA-256 digest of `provider:purchase_ref`; the ledger stores a summary only, never the store payload. |
+| HIGH     | Store lifecycle routines were callable by any signed-in role via PostgREST, allowing self-granted Premium.                           | `REVOKE ALL … FROM PUBLIC, anon, authenticated` on both routines; only `service_role` executes them.                                                            |
+| HIGH     | Out-of-order store notifications could resurrect a refunded or expired subscription.                                                 | Events older than the newest applied event for that purchase return `stale` and are audited without changing state.                                             |
+| MEDIUM   | Raw purchase tokens would have been written into the audit trail.                                                                    | Audit stores a SHA-256 digest of `provider:purchase_ref`; the ledger stores a summary only, never the store payload.                                            |
 
 ## 5. Test coverage (`tests/security/phase6-audit.ts`, 137 assertions)
 

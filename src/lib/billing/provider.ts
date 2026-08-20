@@ -42,8 +42,7 @@ export type WebhookFailureReason =
   | "UNSUPPORTED_EVENT";
 
 export type WebhookVerification =
-  | { ok: true; event: NormalizedBillingEvent }
-  | { ok: false; reason: WebhookFailureReason };
+  { ok: true; event: NormalizedBillingEvent } | { ok: false; reason: WebhookFailureReason };
 
 export interface BillingProvider {
   readonly id: BillingProviderId;

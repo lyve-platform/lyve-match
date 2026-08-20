@@ -18,13 +18,13 @@ One **HIGH** issue was found and fixed: blocking a member you were already match
 was rejected by the unmatch state machine, so a safety action silently failed. Two
 **LOW** hardening items were also fixed. No CRITICAL findings.
 
-| Severity | Found | Fixed | Open |
-| --- | --- | --- | --- |
-| CRITICAL | 0 | 0 | 0 |
-| HIGH | 1 | 1 | 0 |
-| MEDIUM | 0 | 0 | 0 |
-| LOW | 3 | 3 | 0 |
-| INFO | 3 | n/a | 3 (documented) |
+| Severity | Found | Fixed | Open           |
+| -------- | ----- | ----- | -------------- |
+| CRITICAL | 0     | 0     | 0              |
+| HIGH     | 1     | 1     | 0              |
+| MEDIUM   | 0     | 0     | 0              |
+| LOW      | 3     | 3     | 0              |
+| INFO     | 3     | n/a   | 3 (documented) |
 
 **Regression:** Phase 1 43/43 · Phase 2 119/119 · Compatibility 29/29 · **Total 191/191**.
 
@@ -43,12 +43,12 @@ identity verification.
 
 **Adversaries modelled**
 
-1. *Authenticated member with a REST client* — the primary threat. Can craft any Data API
+1. _Authenticated member with a REST client_ — the primary threat. Can craft any Data API
    call, forge ids, replay requests, and manipulate parameters.
-2. *Anonymous internet caller* — has the publishable key.
-3. *Curious matched member* — wants private fields of someone they can legitimately see.
-4. *Blocked or reported member* — wants to bypass a safety control or learn about it.
-5. *Ranking gamer* — wants to inflate their position in other people's feeds.
+2. _Anonymous internet caller_ — has the publishable key.
+3. _Curious matched member_ — wants private fields of someone they can legitimately see.
+4. _Blocked or reported member_ — wants to bypass a safety control or learn about it.
+5. _Ranking gamer_ — wants to inflate their position in other people's feeds.
 
 **Assumptions:** the service role key never reaches a browser; Supabase Auth issues and
 validates JWTs; `auth.uid()` is trustworthy inside the database.
@@ -59,19 +59,19 @@ validates JWTs; `auth.uid()` is trustworthy inside the database.
 
 All three RPCs share one model:
 
-| Property | `discover_candidates` | `likes_received` | `my_matches` |
-| --- | --- | --- | --- |
-| Viewer source | `auth.uid()` | `auth.uid()` | `auth.uid()` |
-| Viewer parameter | none | none | none |
-| Other parameters | `p_limit`, `p_offset` (clamped 1–100 / ≥0) | none | none |
-| `search_path` | `public` (pinned) | `public` (pinned) | `public` (pinned) |
-| Owner | `postgres` | `postgres` | `postgres` |
-| EXECUTE | `authenticated`, `service_role` | same | same |
-| PUBLIC / `anon` | revoked | revoked | revoked |
-| Unauthenticated call | `RAISE insufficient_privilege` | same | same |
-| Rows returned | only rows the viewer is entitled to | likes addressed to the viewer | matches the viewer participates in |
+| Property             | `discover_candidates`                      | `likes_received`              | `my_matches`                       |
+| -------------------- | ------------------------------------------ | ----------------------------- | ---------------------------------- |
+| Viewer source        | `auth.uid()`                               | `auth.uid()`                  | `auth.uid()`                       |
+| Viewer parameter     | none                                       | none                          | none                               |
+| Other parameters     | `p_limit`, `p_offset` (clamped 1–100 / ≥0) | none                          | none                               |
+| `search_path`        | `public` (pinned)                          | `public` (pinned)             | `public` (pinned)                  |
+| Owner                | `postgres`                                 | `postgres`                    | `postgres`                         |
+| EXECUTE              | `authenticated`, `service_role`            | same                          | same                               |
+| PUBLIC / `anon`      | revoked                                    | revoked                       | revoked                            |
+| Unauthenticated call | `RAISE insufficient_privilege`             | same                          | same                               |
+| Rows returned        | only rows the viewer is entitled to        | likes addressed to the viewer | matches the viewer participates in |
 
-Why definer rights are required: the functions must read *other* members' profile,
+Why definer rights are required: the functions must read _other_ members' profile,
 preference and privacy rows to decide eligibility, which owner-scoped RLS deliberately
 forbids. The functions therefore act as a **fixed, non-parameterised query** — there is no
 input that can widen the row set, so definer rights cannot be turned into an RLS bypass.
@@ -90,7 +90,7 @@ Verified explicitly:
 
 The Supabase linter flags all three RPCs as "signed-in users can execute a SECURITY
 DEFINER function". That is the intended design for these three and only these three:
-they *are* the authorisation boundary for discovery, and each derives its subject from the
+they _are_ the authorisation boundary for discovery, and each derives its subject from the
 session. Accepted and recorded in security memory.
 
 ---
@@ -99,13 +99,13 @@ session. Accepted and recorded in security memory.
 
 RLS is enabled on all five Phase 2 tables. Policies are `TO authenticated` only.
 
-| Table | SELECT | INSERT | UPDATE | DELETE |
-| --- | --- | --- | --- | --- |
-| `likes` | liker **or** likee (`likes_received` needs it) | `auth.uid() = liker_id` | denied | own row only |
-| `passes` | passer only (targets never learn they were passed) | `auth.uid() = passer_id` | denied | own row only |
-| `matches` | participants only | **denied** (trigger-only) | participants, further constrained by trigger | **denied** |
-| `blocks` | blocker only | `auth.uid() = blocker_id` | denied | blocker only (unblock) |
-| `reports` | reporter only | `auth.uid() = reporter_id AND status = 'open'` | **denied** (append-only) | **denied** |
+| Table     | SELECT                                             | INSERT                                         | UPDATE                                       | DELETE                 |
+| --------- | -------------------------------------------------- | ---------------------------------------------- | -------------------------------------------- | ---------------------- |
+| `likes`   | liker **or** likee (`likes_received` needs it)     | `auth.uid() = liker_id`                        | denied                                       | own row only           |
+| `passes`  | passer only (targets never learn they were passed) | `auth.uid() = passer_id`                       | denied                                       | own row only           |
+| `matches` | participants only                                  | **denied** (trigger-only)                      | participants, further constrained by trigger | **denied**             |
+| `blocks`  | blocker only                                       | `auth.uid() = blocker_id`                      | denied                                       | blocker only (unblock) |
+| `reports` | reporter only                                      | `auth.uid() = reporter_id AND status = 'open'` | **denied** (append-only)                     | **denied**             |
 
 Grants were tightened to match: `INSERT/DELETE` revoked from `authenticated` on `matches`,
 `UPDATE/DELETE` revoked on `reports`, and all latent `anon` privileges revoked across every
@@ -120,13 +120,13 @@ so a pair can only exist once), FKs to `profiles` with `ON DELETE CASCADE`.
 
 ## 5. Trigger review
 
-| Trigger | Timing | Function | Behaviour |
-| --- | --- | --- | --- |
-| `likes_guard` / `passes_guard` / `blocks_guard` | BEFORE INSERT | `guard_interaction` | Target must exist; for likes/passes the target must not be soft-deleted and the pair must not be blocked. |
-| `likes_create_match` | AFTER INSERT | `create_match_on_mutual_like` | Inserts the ordered pair when the reverse like exists, `ON CONFLICT DO NOTHING`. Atomic with the like; duplicates impossible. |
-| `matches_guard_update` | BEFORE UPDATE | `guard_match_update` | Pins `id`, both participants and `created_at`; allows only `active → unmatched` by a participant (plus block-driven `→ blocked`); stamps `ended_by`/`ended_at` server-side; clears likes and writes mutual passes so an unmatched pair cannot silently re-match. |
-| `blocks_apply_effects` | AFTER INSERT | `apply_block_effects` | Deletes likes in both directions and moves any match to `blocked`. |
-| `matches_set_updated_at` / `reports_set_updated_at` | BEFORE UPDATE | `set_updated_at` | Timestamp only. |
+| Trigger                                             | Timing        | Function                      | Behaviour                                                                                                                                                                                                                                                        |
+| --------------------------------------------------- | ------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `likes_guard` / `passes_guard` / `blocks_guard`     | BEFORE INSERT | `guard_interaction`           | Target must exist; for likes/passes the target must not be soft-deleted and the pair must not be blocked.                                                                                                                                                        |
+| `likes_create_match`                                | AFTER INSERT  | `create_match_on_mutual_like` | Inserts the ordered pair when the reverse like exists, `ON CONFLICT DO NOTHING`. Atomic with the like; duplicates impossible.                                                                                                                                    |
+| `matches_guard_update`                              | BEFORE UPDATE | `guard_match_update`          | Pins `id`, both participants and `created_at`; allows only `active → unmatched` by a participant (plus block-driven `→ blocked`); stamps `ended_by`/`ended_at` server-side; clears likes and writes mutual passes so an unmatched pair cannot silently re-match. |
+| `blocks_apply_effects`                              | AFTER INSERT  | `apply_block_effects`         | Deletes likes in both directions and moves any match to `blocked`.                                                                                                                                                                                               |
+| `matches_set_updated_at` / `reports_set_updated_at` | BEFORE UPDATE | `set_updated_at`              | Timestamp only.                                                                                                                                                                                                                                                  |
 
 All trigger functions are SECURITY DEFINER with `search_path = public`, are not directly
 callable by members, and take no client-controlled arguments beyond the row itself — every
@@ -215,7 +215,7 @@ with a 30-minute TTL, capped at 3 photos per card. Expired URLs are rejected (te
 
 **Discovery** — eligibility is entirely server-side: adult, not soft-deleted, discoverable,
 `profile_visibility = 'everyone'`, not blocked either way, not already liked/passed/matched,
-inside *both* members' age, gender, intent and distance preferences. The caller is always
+inside _both_ members' age, gender, intent and distance preferences. The caller is always
 excluded. The only client input is a page number, clamped to 0–50 in the server function
 and again in SQL. Manipulating pagination or filters cannot surface a hidden, deleted or
 blocked profile (tested).

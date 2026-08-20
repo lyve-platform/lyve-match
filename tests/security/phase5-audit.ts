@@ -25,11 +25,12 @@ import {
   statusGrantsAccess,
   type NormalizedBillingEvent,
 } from "../../src/lib/billing-core";
+import { ADMIN_GRANT_MAX_DAYS, ADMIN_GRANT_MIN_DAYS } from "../../src/lib/billing-core";
 import {
-  ADMIN_GRANT_MAX_DAYS,
-  ADMIN_GRANT_MIN_DAYS,
-} from "../../src/lib/billing-core";
-import { PAYMENT_FAILURE_GRACE_DAYS, isCheckoutOffered, isLiveCheckout } from "../../src/config/billing";
+  PAYMENT_FAILURE_GRACE_DAYS,
+  isCheckoutOffered,
+  isLiveCheckout,
+} from "../../src/config/billing";
 
 const url = process.env["SUPABASE_URL"]!;
 const publishableKey = process.env["SUPABASE_PUBLISHABLE_KEY"]!;
@@ -64,7 +65,11 @@ const created: string[] = [];
 
 async function createMember(tag: string): Promise<Member> {
   const email = `p5-${tag}-${stamp}@lyve.test`;
-  const { data, error } = await admin.auth.admin.createUser({ email, password, email_confirm: true });
+  const { data, error } = await admin.auth.admin.createUser({
+    email,
+    password,
+    email_confirm: true,
+  });
   if (error) throw error;
   created.push(data.user!.id);
   const client = createClient(url, publishableKey, { auth: { persistSession: false } });
@@ -122,7 +127,12 @@ function eventBody(overrides: Record<string, unknown> = {}, data: Record<string,
 }
 
 /** Applies a subscription the way a VERIFIED webhook would. */
-async function applyAsProvider(profileId: string, status: string, periodEnd: string | null, ref: string) {
+async function applyAsProvider(
+  profileId: string,
+  status: string,
+  periodEnd: string | null,
+  ref: string,
+) {
   return admin.rpc("billing_apply_subscription", {
     p_profile: profileId,
     p_provider: "mock",
@@ -164,14 +174,26 @@ async function main() {
   await grantRole(support.id, "support");
 
   const paidRef = `sub_paid_${stamp}`;
-  await applyAsProvider(paid.id, "active", new Date(Date.now() + 30 * 86_400_000).toISOString(), paidRef);
+  await applyAsProvider(
+    paid.id,
+    "active",
+    new Date(Date.now() + 30 * 86_400_000).toISOString(),
+    paidRef,
+  );
 
   /* ------------------------------------------------ 1. entitlement authority */
   {
     const premium = await paid.client.rpc("has_entitlement", { _user: paid.id, _key: "premium" });
-    check("a provider-applied subscription grants Premium", premium.data === true, premium.error?.message);
+    check(
+      "a provider-applied subscription grants Premium",
+      premium.data === true,
+      premium.error?.message,
+    );
 
-    const freePremium = await free.client.rpc("has_entitlement", { _user: free.id, _key: "premium" });
+    const freePremium = await free.client.rpc("has_entitlement", {
+      _user: free.id,
+      _key: "premium",
+    });
     check("a free member holds no Premium entitlement", freePremium.data !== true);
 
     const mine = await free.client.rpc("my_entitlements");
@@ -192,8 +214,11 @@ async function main() {
       source: "web",
       starts_at: new Date().toISOString(),
     });
-    check("a member cannot insert their own entitlement", insertEntitlement.error != null,
-      insertEntitlement.error?.code);
+    check(
+      "a member cannot insert their own entitlement",
+      insertEntitlement.error != null,
+      insertEntitlement.error?.code,
+    );
 
     const insertSubscription = await free.client.from("subscriptions").insert({
       profile_id: free.id,
@@ -225,14 +250,20 @@ async function main() {
       .from("entitlements")
       .update({ expires_at: "2099-01-01T00:00:00Z" })
       .eq("profile_id", paid.id);
-    const entAfter = await admin.from("entitlements").select("expires_at").eq("profile_id", paid.id);
+    const entAfter = await admin
+      .from("entitlements")
+      .select("expires_at")
+      .eq("profile_id", paid.id);
     check(
       "a member cannot change their entitlement expiry",
       updateEntitlement.error != null ||
         (entAfter.data ?? []).every((row) => !String(row.expires_at ?? "").startsWith("2099")),
     );
 
-    const deleteEntitlement = await paid.client.from("entitlements").delete().eq("profile_id", paid.id);
+    const deleteEntitlement = await paid.client
+      .from("entitlements")
+      .delete()
+      .eq("profile_id", paid.id);
     const entRows = await admin.from("entitlements").select("id").eq("profile_id", paid.id);
     check(
       "a member cannot delete entitlement rows",
@@ -251,21 +282,32 @@ async function main() {
       .from("subscriptions")
       .select("id")
       .eq("profile_id", paid.id);
-    check("cross-user subscription read returns nothing", (crossSubscription.data ?? []).length === 0);
+    check(
+      "cross-user subscription read returns nothing",
+      (crossSubscription.data ?? []).length === 0,
+    );
 
     const crossEntitlement = await other.client
       .from("entitlements")
       .select("id")
       .eq("profile_id", paid.id);
-    check("cross-user entitlement read returns nothing", (crossEntitlement.data ?? []).length === 0);
+    check(
+      "cross-user entitlement read returns nothing",
+      (crossEntitlement.data ?? []).length === 0,
+    );
 
     const crossAccount = await other.client
       .from("billing_accounts")
       .select("id")
       .eq("profile_id", paid.id);
-    check("cross-user billing account read returns nothing", (crossAccount.data ?? []).length === 0);
+    check(
+      "cross-user billing account read returns nothing",
+      (crossAccount.data ?? []).length === 0,
+    );
 
-    const ownSubscription = await paid.client.from("subscriptions").select("id, provider_subscription_id");
+    const ownSubscription = await paid.client
+      .from("subscriptions")
+      .select("id, provider_subscription_id");
     check("a member can read their own subscription", (ownSubscription.data ?? []).length === 1);
   }
 
@@ -286,7 +328,13 @@ async function main() {
 
     const memberWrite = await paid.client
       .from("billing_events")
-      .insert({ provider: "mock", provider_event_id: "x", event_type: "payment.succeeded", status: "received", signature_verified: true });
+      .insert({
+        provider: "mock",
+        provider_event_id: "x",
+        event_type: "payment.succeeded",
+        status: "received",
+        signature_verified: true,
+      });
     check("a member cannot append to the billing event ledger", memberWrite.error != null);
 
     const eventId = `evt_ledger_${stamp}`;
@@ -306,8 +354,11 @@ async function main() {
       status: "received",
       signature_verified: true,
     });
-    check("a duplicate provider event id is rejected by the database", duplicate.error?.code === "23505",
-      duplicate.error?.code);
+    check(
+      "a duplicate provider event id is rejected by the database",
+      duplicate.error?.code === "23505",
+      duplicate.error?.code,
+    );
 
     // Concurrency: five simultaneous deliveries of the same event id.
     const raceId = `evt_race_${stamp}`;
@@ -323,14 +374,21 @@ async function main() {
       ),
     );
     const accepted = results.filter((result) => result.error == null).length;
-    check("exactly one of five concurrent duplicate deliveries is accepted", accepted === 1, accepted);
+    check(
+      "exactly one of five concurrent duplicate deliveries is accepted",
+      accepted === 1,
+      accepted,
+    );
 
     const mutate = await admin
       .from("billing_events")
       .update({ event_type: "refund.issued" })
       .eq("provider_event_id", eventId);
-    check("the ledger event type is immutable even for the service role", mutate.error != null,
-      mutate.error?.message);
+    check(
+      "the ledger event type is immutable even for the service role",
+      mutate.error != null,
+      mutate.error?.message,
+    );
 
     const remove = await admin.from("billing_events").delete().eq("provider_event_id", eventId);
     check("ledger rows cannot be deleted", remove.error != null, remove.error?.message);
@@ -341,44 +399,63 @@ async function main() {
       .eq("provider_event_id", eventId)
       .maybeSingle();
     const summary = JSON.stringify(stored.data?.payload_summary ?? {});
-    check("the ledger stores no card or credential material",
-      !/card|cvv|pan|token|secret|signature/i.test(summary), summary.slice(0, 120));
+    check(
+      "the ledger stores no card or credential material",
+      !/card|cvv|pan|token|secret|signature/i.test(summary),
+      summary.slice(0, 120),
+    );
   }
 
   /* -------------------------------------------- 6. webhook signature & replay */
   {
     const body = eventBody();
 
-    const unsigned = await mockProvider.verifyWebhook({ rawBody: body, headers: new Headers(), secret });
-    check("a webhook without a signature is rejected",
-      !unsigned.ok && unsigned.reason === "MISSING_SIGNATURE");
+    const unsigned = await mockProvider.verifyWebhook({
+      rawBody: body,
+      headers: new Headers(),
+      secret,
+    });
+    check(
+      "a webhook without a signature is rejected",
+      !unsigned.ok && unsigned.reason === "MISSING_SIGNATURE",
+    );
 
     const noTimestamp = await mockProvider.verifyWebhook({
       rawBody: body,
       headers: new Headers({ [MOCK_SIGNATURE_HEADER]: "sha256=deadbeef" }),
       secret,
     });
-    check("a webhook without a timestamp is rejected",
-      !noTimestamp.ok && noTimestamp.reason === "MISSING_TIMESTAMP");
+    check(
+      "a webhook without a timestamp is rejected",
+      !noTimestamp.ok && noTimestamp.reason === "MISSING_TIMESTAMP",
+    );
 
     const wrongSignature = await mockProvider.verifyWebhook({
       rawBody: body,
       headers: new Headers({
         [MOCK_TIMESTAMP_HEADER]: String(Math.floor(Date.now() / 1000)),
-        [MOCK_SIGNATURE_HEADER]: signMockPayload("the-wrong-secret", Math.floor(Date.now() / 1000), body),
+        [MOCK_SIGNATURE_HEADER]: signMockPayload(
+          "the-wrong-secret",
+          Math.floor(Date.now() / 1000),
+          body,
+        ),
       }),
       secret,
     });
-    check("a signature made with the wrong secret is rejected",
-      !wrongSignature.ok && wrongSignature.reason === "INVALID_SIGNATURE");
+    check(
+      "a signature made with the wrong secret is rejected",
+      !wrongSignature.ok && wrongSignature.reason === "INVALID_SIGNATURE",
+    );
 
     const tampered = await mockProvider.verifyWebhook({
       rawBody: body.replace("premium_monthly", "premium_annual"),
       headers: headersFor(secret, body),
       secret,
     });
-    check("a body tampered with after signing is rejected",
-      !tampered.ok && tampered.reason === "INVALID_SIGNATURE");
+    check(
+      "a body tampered with after signing is rejected",
+      !tampered.ok && tampered.reason === "INVALID_SIGNATURE",
+    );
 
     const stale = Math.floor(Date.now() / 1000) - (MOCK_TIMESTAMP_TOLERANCE_SECONDS + 60);
     const replayed = await mockProvider.verifyWebhook({
@@ -386,14 +463,26 @@ async function main() {
       headers: headersFor(secret, body, stale),
       secret,
     });
-    check("a correctly signed but stale delivery is rejected as a replay",
-      !replayed.ok && replayed.reason === "STALE_TIMESTAMP");
+    check(
+      "a correctly signed but stale delivery is rejected as a replay",
+      !replayed.ok && replayed.reason === "STALE_TIMESTAMP",
+    );
 
-    const noSecret = await mockProvider.verifyWebhook({ rawBody: body, headers: headersFor(secret, body), secret: "" });
-    check("verification fails closed when no secret is configured",
-      !noSecret.ok && noSecret.reason === "NOT_CONFIGURED");
+    const noSecret = await mockProvider.verifyWebhook({
+      rawBody: body,
+      headers: headersFor(secret, body),
+      secret: "",
+    });
+    check(
+      "verification fails closed when no secret is configured",
+      !noSecret.ok && noSecret.reason === "NOT_CONFIGURED",
+    );
 
-    const valid = await mockProvider.verifyWebhook({ rawBody: body, headers: headersFor(secret, body), secret });
+    const valid = await mockProvider.verifyWebhook({
+      rawBody: body,
+      headers: headersFor(secret, body),
+      secret,
+    });
     check("a correctly signed, fresh delivery verifies", valid.ok);
 
     const malformed = await mockProvider.verifyWebhook({
@@ -401,7 +490,10 @@ async function main() {
       headers: headersFor(secret, "{not json"),
       secret,
     });
-    check("a malformed payload is rejected", !malformed.ok && malformed.reason === "MALFORMED_PAYLOAD");
+    check(
+      "a malformed payload is rejected",
+      !malformed.ok && malformed.reason === "MALFORMED_PAYLOAD",
+    );
 
     const unknownType = eventBody({ type: "subscription.gifted" });
     const unknown = await mockProvider.verifyWebhook({
@@ -419,8 +511,10 @@ async function main() {
     });
     check("a malformed user reference is rejected", !forged.ok);
 
-    check("normalisation drops unknown fields rather than coercing them",
-      normalizeMockPayload({ id: "x", type: "payment.succeeded" }) === null);
+    check(
+      "normalisation drops unknown fields rather than coercing them",
+      normalizeMockPayload({ id: "x", type: "payment.succeeded" }) === null,
+    );
   }
 
   /* ------------------------------------------------ 7. webhook route posture */
@@ -435,10 +529,16 @@ async function main() {
       });
       const json = (await response.json()) as { result?: string };
       // With BILLING_PROVIDER unset the endpoint must refuse, not accept.
-      check("the webhook endpoint never accepts an unsigned delivery",
-        response.status >= 400 || json.result !== "PROCESSED", { status: response.status, ...json });
-      check("the webhook response body leaks no signature or payload detail",
-        !/secret|signature=|sha256=/i.test(JSON.stringify(json)), json);
+      check(
+        "the webhook endpoint never accepts an unsigned delivery",
+        response.status >= 400 || json.result !== "PROCESSED",
+        { status: response.status, ...json },
+      );
+      check(
+        "the webhook response body leaks no signature or payload detail",
+        !/secret|signature=|sha256=/i.test(JSON.stringify(json)),
+        json,
+      );
     } catch {
       check("the webhook endpoint is reachable or the dev server is offline (skipped)", true);
     }
@@ -446,7 +546,10 @@ async function main() {
 
   /* --------------------------------------------- 8. lifecycle & entitlements */
   {
-    const sample = (type: string, extra: Partial<NormalizedBillingEvent> = {}): NormalizedBillingEvent => ({
+    const sample = (
+      type: string,
+      extra: Partial<NormalizedBillingEvent> = {},
+    ): NormalizedBillingEvent => ({
       id: "e",
       type: type as NormalizedBillingEvent["type"],
       createdAt: new Date().toISOString(),
@@ -462,25 +565,48 @@ async function main() {
       ...extra,
     });
 
-    check("every declared event type has a lifecycle mapping",
-      BILLING_EVENT_TYPES.every((type) => Boolean(mapEventToLifecycle(sample(type)))));
-    check("payment success maps to active",
+    check(
+      "every declared event type has a lifecycle mapping",
+      BILLING_EVENT_TYPES.every((type) => Boolean(mapEventToLifecycle(sample(type)))),
+    );
+    check(
+      "payment success maps to active",
       mapEventToLifecycle(sample("payment.succeeded")).action === "apply" &&
-        (mapEventToLifecycle(sample("payment.succeeded")) as { status: string }).status === "active");
-    check("payment failure maps to past_due",
-      (mapEventToLifecycle(sample("payment.failed")) as { status: string }).status === "past_due");
-    check("cancellation maps to canceled, not immediate removal",
-      (mapEventToLifecycle(sample("subscription.canceled")) as { status: string }).status === "canceled");
-    check("expiry maps to expired",
-      (mapEventToLifecycle(sample("subscription.expired")) as { status: string }).status === "expired");
-    check("a trial end date produces trialing, not active",
-      (mapEventToLifecycle(sample("subscription.created", { trialEndsAt: new Date().toISOString() })) as {
-        status: string;
-      }).status === "trialing");
-    check("a refund revokes rather than downgrades",
-      mapEventToLifecycle(sample("refund.issued")).action === "revoke");
-    check("a chargeback revokes rather than downgrades",
-      mapEventToLifecycle(sample("chargeback.created")).action === "revoke");
+        (mapEventToLifecycle(sample("payment.succeeded")) as { status: string }).status ===
+          "active",
+    );
+    check(
+      "payment failure maps to past_due",
+      (mapEventToLifecycle(sample("payment.failed")) as { status: string }).status === "past_due",
+    );
+    check(
+      "cancellation maps to canceled, not immediate removal",
+      (mapEventToLifecycle(sample("subscription.canceled")) as { status: string }).status ===
+        "canceled",
+    );
+    check(
+      "expiry maps to expired",
+      (mapEventToLifecycle(sample("subscription.expired")) as { status: string }).status ===
+        "expired",
+    );
+    check(
+      "a trial end date produces trialing, not active",
+      (
+        mapEventToLifecycle(
+          sample("subscription.created", { trialEndsAt: new Date().toISOString() }),
+        ) as {
+          status: string;
+        }
+      ).status === "trialing",
+    );
+    check(
+      "a refund revokes rather than downgrades",
+      mapEventToLifecycle(sample("refund.issued")).action === "revoke",
+    );
+    check(
+      "a chargeback revokes rather than downgrades",
+      mapEventToLifecycle(sample("chargeback.created")).action === "revoke",
+    );
 
     const future = new Date(Date.now() + 86_400_000).toISOString();
     const pastDate = new Date(Date.now() - 86_400_000).toISOString();
@@ -488,19 +614,38 @@ async function main() {
     check("cancelled access ends after period end", !statusGrantsAccess("canceled", pastDate));
     check("expired never grants access", !statusGrantsAccess("expired", future));
     check("incomplete never grants access", !statusGrantsAccess("incomplete", future));
-    check("no undocumented payment-failure grace period exists", PAYMENT_FAILURE_GRACE_DAYS === null);
+    check(
+      "no undocumented payment-failure grace period exists",
+      PAYMENT_FAILURE_GRACE_DAYS === null,
+    );
   }
 
   /* -------------------------------------- 9. database-side lifecycle effects */
   {
     // Expiry must remove Premium.
-    await applyAsProvider(paid.id, "expired", new Date(Date.now() - 86_400_000).toISOString(), paidRef);
-    const afterExpiry = await paid.client.rpc("has_entitlement", { _user: paid.id, _key: "premium" });
+    await applyAsProvider(
+      paid.id,
+      "expired",
+      new Date(Date.now() - 86_400_000).toISOString(),
+      paidRef,
+    );
+    const afterExpiry = await paid.client.rpc("has_entitlement", {
+      _user: paid.id,
+      _key: "premium",
+    });
     check("an expired subscription removes Premium", afterExpiry.data !== true);
 
     // Cancel-at-period-end keeps Premium until the period ends.
-    await applyAsProvider(paid.id, "canceled", new Date(Date.now() + 7 * 86_400_000).toISOString(), paidRef);
-    const afterCancel = await paid.client.rpc("has_entitlement", { _user: paid.id, _key: "premium" });
+    await applyAsProvider(
+      paid.id,
+      "canceled",
+      new Date(Date.now() + 7 * 86_400_000).toISOString(),
+      paidRef,
+    );
+    const afterCancel = await paid.client.rpc("has_entitlement", {
+      _user: paid.id,
+      _key: "premium",
+    });
     check("a cancellation keeps Premium until the period ends", afterCancel.data === true);
 
     // A refund revokes immediately, regardless of the period.
@@ -509,23 +654,39 @@ async function main() {
       p_provider_subscription_id: paidRef,
       p_reason: "refund",
     } as never);
-    const afterRefund = await paid.client.rpc("has_entitlement", { _user: paid.id, _key: "premium" });
+    const afterRefund = await paid.client.rpc("has_entitlement", {
+      _user: paid.id,
+      _key: "premium",
+    });
     check("a refund revokes Premium immediately", afterRefund.data !== true);
 
     // Restore the fixture to Premium for the gate tests below.
-    await applyAsProvider(paid.id, "active", new Date(Date.now() + 30 * 86_400_000).toISOString(), paidRef);
+    await applyAsProvider(
+      paid.id,
+      "active",
+      new Date(Date.now() + 30 * 86_400_000).toISOString(),
+      paidRef,
+    );
     const restored = await paid.client.rpc("has_entitlement", { _user: paid.id, _key: "premium" });
     check("a renewed subscription restores Premium", restored.data === true);
 
     // Account standing overrides paid status.
     await admin
       .from("profiles")
-      .update({ account_status: "suspended", suspended_until: new Date(Date.now() + 86_400_000).toISOString() })
+      .update({
+        account_status: "suspended",
+        suspended_until: new Date(Date.now() + 86_400_000).toISOString(),
+      })
       .eq("id", paid.id);
     const suspended = await paid.client.rpc("has_entitlement", { _user: paid.id, _key: "premium" });
-    check("a suspended account loses Premium capability despite an active subscription",
-      suspended.data !== true);
-    await admin.from("profiles").update({ account_status: "active", suspended_until: null }).eq("id", paid.id);
+    check(
+      "a suspended account loses Premium capability despite an active subscription",
+      suspended.data !== true,
+    );
+    await admin
+      .from("profiles")
+      .update({ account_status: "active", suspended_until: null })
+      .eq("id", paid.id);
   }
 
   /* -------------------------------------------------- 10. member RPC gating */
@@ -544,8 +705,11 @@ async function main() {
       p_entitlements: ["premium"],
       p_source: "web",
     } as never);
-    check("a member cannot call billing_apply_subscription", memberApply.error != null,
-      memberApply.error?.message);
+    check(
+      "a member cannot call billing_apply_subscription",
+      memberApply.error != null,
+      memberApply.error?.message,
+    );
 
     const anonApply = await anon.rpc("billing_apply_subscription", {} as never);
     check("anonymous cannot call billing_apply_subscription", anonApply.error != null);
@@ -598,7 +762,11 @@ async function main() {
       p_days: 30,
       p_reason: "",
     });
-    check("an admin cannot grant without a reason", noReason.error != null, noReason.error?.message);
+    check(
+      "an admin cannot grant without a reason",
+      noReason.error != null,
+      noReason.error?.message,
+    );
 
     const tooLong = await owner.client.rpc("admin_grant_entitlement", {
       p_target: free.id,
@@ -622,8 +790,11 @@ async function main() {
       p_days: 30,
       p_reason: "phase 5 audit fixture grant",
     });
-    check("a super admin with a reason and bounded duration can grant Premium", grant.error == null,
-      grant.error?.message);
+    check(
+      "a super admin with a reason and bounded duration can grant Premium",
+      grant.error == null,
+      grant.error?.message,
+    );
 
     const granted = await free.client.rpc("has_entitlement", { _user: free.id, _key: "premium" });
     check("an admin grant produces real Premium access", granted.data === true);
@@ -635,8 +806,11 @@ async function main() {
       .eq("source", "admin_grant")
       .maybeSingle();
 
-    check("the grant records the real actor, not a client-supplied one",
-      grantRow.data?.granted_by === owner.id, grantRow.data?.granted_by);
+    check(
+      "the grant records the real actor, not a client-supplied one",
+      grantRow.data?.granted_by === owner.id,
+      grantRow.data?.granted_by,
+    );
     check("the grant carries a bounded expiry", Boolean(grantRow.data?.expires_at));
     check("the grant stores the supplied reason", Boolean(grantRow.data?.reason));
 
@@ -673,7 +847,10 @@ async function main() {
     });
     check("a super admin can revoke a grant", revoke.error == null, revoke.error?.message);
 
-    const afterRevoke = await free.client.rpc("has_entitlement", { _user: free.id, _key: "premium" });
+    const afterRevoke = await free.client.rpc("has_entitlement", {
+      _user: free.id,
+      _key: "premium",
+    });
     check("revocation removes Premium access", afterRevoke.data !== true);
 
     const auditAfter = await admin
@@ -681,8 +858,10 @@ async function main() {
       .select("id")
       .eq("actor_id", owner.id)
       .ilike("action", "%entitlement%");
-    check("revoking Premium writes an audit entry",
-      (auditAfter.data ?? []).length > (auditBefore.data ?? []).length);
+    check(
+      "revoking Premium writes an audit entry",
+      (auditAfter.data ?? []).length > (auditBefore.data ?? []).length,
+    );
 
     const auditTamper = await admin
       .from("admin_audit_logs")
@@ -693,25 +872,46 @@ async function main() {
 
   /* ---------------------------------------------- 12. admin billing overview */
   {
-    const memberOverview = await free.client.rpc("admin_billing_overview", { p_profile: null } as never);
-    check("a member cannot read the admin billing overview", memberOverview.error != null,
-      memberOverview.error?.message);
+    const memberOverview = await free.client.rpc("admin_billing_overview", {
+      p_profile: null,
+    } as never);
+    check(
+      "a member cannot read the admin billing overview",
+      memberOverview.error != null,
+      memberOverview.error?.message,
+    );
 
-    const modOverview = await mod.client.rpc("admin_billing_overview", { p_profile: null } as never);
+    const modOverview = await mod.client.rpc("admin_billing_overview", {
+      p_profile: null,
+    } as never);
     const modRows = (modOverview.data ?? []) as Array<{ provider_subscription_id: string | null }>;
-    check("a moderator either sees nothing or a reference-free projection",
+    check(
+      "a moderator either sees nothing or a reference-free projection",
       modOverview.error != null || modRows.every((row) => row.provider_subscription_id === null),
-      modOverview.error?.message);
+      modOverview.error?.message,
+    );
 
-    const supportOverview = await support.client.rpc("admin_billing_overview", { p_profile: null } as never);
-    const supportRows = (supportOverview.data ?? []) as Array<{ provider_subscription_id: string | null }>;
-    check("a limited billing role never receives provider references",
-      supportOverview.error != null || supportRows.every((row) => row.provider_subscription_id === null),
-      supportOverview.error?.message);
+    const supportOverview = await support.client.rpc("admin_billing_overview", {
+      p_profile: null,
+    } as never);
+    const supportRows = (supportOverview.data ?? []) as Array<{
+      provider_subscription_id: string | null;
+    }>;
+    check(
+      "a limited billing role never receives provider references",
+      supportOverview.error != null ||
+        supportRows.every((row) => row.provider_subscription_id === null),
+      supportOverview.error?.message,
+    );
 
-    const ownerOverview = await owner.client.rpc("admin_billing_overview", { p_profile: null } as never);
-    check("a full billing admin can read the overview", ownerOverview.error == null,
-      ownerOverview.error?.message);
+    const ownerOverview = await owner.client.rpc("admin_billing_overview", {
+      p_profile: null,
+    } as never);
+    check(
+      "a full billing admin can read the overview",
+      ownerOverview.error == null,
+      ownerOverview.error?.message,
+    );
 
     const memberList = await free.client.rpc("admin_list_entitlements", { p_profile: paid.id });
     check("a member cannot list another member's entitlements", memberList.error != null);
@@ -735,14 +935,18 @@ async function main() {
     );
 
     const rpcLikes = await free.client.rpc("likes_received");
-    check("the likes_received RPC is the only route and stays server-gated",
-      rpcLikes.error != null || Array.isArray(rpcLikes.data));
+    check(
+      "the likes_received RPC is the only route and stays server-gated",
+      rpcLikes.error != null || Array.isArray(rpcLikes.data),
+    );
 
     const anonLikes = await anon.rpc("likes_received");
     check("anonymous cannot call likes_received", anonLikes.error != null);
 
     // Rewind ownership: a member's pass belongs to them alone.
-    const pass = await free.client.from("passes").insert({ passer_id: free.id, passed_id: other.id });
+    const pass = await free.client
+      .from("passes")
+      .insert({ passer_id: free.id, passed_id: other.id });
     check("fixture pass created", pass.error == null, pass.error?.message);
 
     const foreignRewind = await paid.client
@@ -750,8 +954,10 @@ async function main() {
       .delete()
       .eq("passer_id", free.id)
       .select("id");
-    check("a Premium member cannot rewind another member's pass",
-      foreignRewind.error != null || (foreignRewind.data ?? []).length === 0);
+    check(
+      "a Premium member cannot rewind another member's pass",
+      foreignRewind.error != null || (foreignRewind.data ?? []).length === 0,
+    );
 
     const insights = await free.client.rpc("has_entitlement", {
       _user: free.id,
@@ -785,15 +991,20 @@ async function main() {
     ];
     for (const file of sourceFiles) {
       const text = await Bun.file(file).text();
-      check(`${file} contains no hard-coded webhook secret`,
-        !/(secret|key)\s*=\s*["'][A-Za-z0-9+/_-]{16,}["']/.test(text));
+      check(
+        `${file} contains no hard-coded webhook secret`,
+        !/(secret|key)\s*=\s*["'][A-Za-z0-9+/_-]{16,}["']/.test(text),
+      );
     }
 
     const clientReachable = await Bun.file("src/hooks/useBilling.ts").text();
     check("the browser billing hook reads no process.env", !/process\.env/.test(clientReachable));
 
     const premiumPage = await Bun.file("src/routes/_authenticated/premium.tsx").text();
-    check("the Premium page hard-codes no price", !/\$\d|\d+\.\d{2}\s*(USD|AED|EUR)/.test(premiumPage));
+    check(
+      "the Premium page hard-codes no price",
+      !/\$\d|\d+\.\d{2}\s*(USD|AED|EUR)/.test(premiumPage),
+    );
   }
 
   /* ------------------------------------------------------------- teardown */

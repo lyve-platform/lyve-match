@@ -63,7 +63,10 @@ export function PhotoManager({ photos }: { photos: ProfilePhoto[] }) {
   return (
     <div className="space-y-4">
       {errorKey ? (
-        <p role="alert" className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm">
+        <p
+          role="alert"
+          className="rounded-lg border border-destructive/40 bg-destructive/10 p-3 text-sm"
+        >
           {t.auth.errors[errorKey]}
         </p>
       ) : null}
@@ -94,7 +97,9 @@ export function PhotoManager({ photos }: { photos: ProfilePhoto[] }) {
                   size="icon"
                   variant={photo.is_primary ? "default" : "outline"}
                   className="size-9 rounded-full"
-                  aria-label={photo.is_primary ? t.onboarding.photos.primary : t.onboarding.photos.makePrimary}
+                  aria-label={
+                    photo.is_primary ? t.onboarding.photos.primary : t.onboarding.photos.makePrimary
+                  }
                   aria-pressed={photo.is_primary}
                   disabled={busy}
                   onClick={() => run(() => setPrimaryPhoto(photo.id, photos))}

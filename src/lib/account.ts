@@ -42,10 +42,12 @@ export async function ensureAccountRows(user: {
   const dateOfBirth =
     typeof metadata["date_of_birth"] === "string" ? metadata["date_of_birth"] : null;
 
-  const { error: profileError } = await supabase.from("profiles").upsert(
-    { id: user.id, first_name: firstName, date_of_birth: dateOfBirth },
-    { onConflict: "id", ignoreDuplicates: true },
-  );
+  const { error: profileError } = await supabase
+    .from("profiles")
+    .upsert(
+      { id: user.id, first_name: firstName, date_of_birth: dateOfBirth },
+      { onConflict: "id", ignoreDuplicates: true },
+    );
   if (profileError) throw profileError;
 
   const results = await Promise.all([
@@ -161,11 +163,7 @@ export async function setInterests(userId: string, interestIds: string[]): Promi
 
 /* ---------------------------------------------------------------- photos */
 
-export async function uploadPhoto(
-  userId: string,
-  file: File,
-  currentCount: number,
-): Promise<void> {
+export async function uploadPhoto(userId: string, file: File, currentCount: number): Promise<void> {
   if (currentCount >= MAX_PHOTOS) throw new Error("upload: photo limit reached");
   if (!ACCEPTED_PHOTO_TYPES.includes(file.type)) throw new Error("upload: unsupported file type");
   if (file.size > MAX_PHOTO_BYTES) throw new Error("upload: payload too large");
@@ -238,9 +236,10 @@ export async function createSignedPhotoUrls(
   photos: ProfilePhoto[],
 ): Promise<Record<string, string>> {
   if (photos.length === 0) return {};
-  const { data, error } = await supabase.storage
-    .from("profile-photos")
-    .createSignedUrls(photos.map((photo) => photo.storage_path), 60 * 30);
+  const { data, error } = await supabase.storage.from("profile-photos").createSignedUrls(
+    photos.map((photo) => photo.storage_path),
+    60 * 30,
+  );
   if (error) throw error;
   const map: Record<string, string> = {};
   for (const item of data ?? []) {

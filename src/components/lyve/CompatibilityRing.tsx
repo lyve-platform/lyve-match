@@ -51,9 +51,7 @@ export function CompatibilityRing({
       </svg>
       <div className="absolute text-center" aria-hidden="true">
         <div className="font-display text-3xl font-semibold text-foreground">{value}%</div>
-        <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">
-          {label}
-        </div>
+        <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{label}</div>
       </div>
     </div>
   );

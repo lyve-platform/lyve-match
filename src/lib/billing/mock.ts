@@ -15,10 +15,7 @@
  * no fallback and no default: without a secret, verification fails closed.
  */
 import { createHmac, timingSafeEqual } from "node:crypto";
-import {
-  isBillingEventType,
-  type NormalizedBillingEvent,
-} from "@/lib/billing-core";
+import { isBillingEventType, type NormalizedBillingEvent } from "@/lib/billing-core";
 import type { BillingProvider, WebhookInput, WebhookVerification } from "./provider";
 
 export const MOCK_SIGNATURE_HEADER = "x-lyve-billing-signature";

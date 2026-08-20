@@ -26,8 +26,6 @@ Open-ended relationship discovery
 
 The user must choose their relationship intention instead of the platform assuming what they want.
 
-
-
 1. PRODUCT VISION
 
 LYVE helps people meet compatible adults and build meaningful connections.
@@ -58,8 +56,6 @@ Meet someone worth knowing.
 
 Where connections become something more.
 
-
-
 2. TARGET USERS
 
 All users must be adults aged 18+.
@@ -79,8 +75,6 @@ People who are open to discovering what type of connection develops naturally.
 LYVE must support global users.
 
 The architecture must support multiple countries, currencies, languages, and time zones.
-
-
 
 3. RELATIONSHIP INTENT
 
@@ -105,8 +99,6 @@ Users can select one or multiple options.
 Users can change this later from Settings.
 
 Relationship intention must be a major factor in the matching algorithm.
-
-
 
 4. USER PROFILE
 
@@ -174,8 +166,6 @@ Exact GPS coordinates
 
 Payment information
 
-
-
 5. ONBOARDING
 
 Create a premium multi-step onboarding experience.
@@ -228,8 +218,6 @@ Do not overwhelm the user.
 
 Allow users to skip optional questions and complete them later.
 
-
-
 6. DISCOVERY
 
 Create a modern discovery experience.
@@ -278,8 +266,6 @@ Previous interactions
 
 Compatibility
 
-
-
 7. MATCHING SYSTEM
 
 Create a Compatibility Engine.
@@ -322,8 +308,6 @@ Provide human-readable reasons such as:
 
 “You are within each other’s preferred age range.”
 
-
-
 8. AI FEATURES
 
 AI can assist with:
@@ -355,8 +339,6 @@ AI must not make irreversible account decisions alone.
 High-risk moderation decisions should support human review.
 
 AI must not discriminate based on protected characteristics.
-
-
 
 9. CHAT
 
@@ -408,8 +390,6 @@ Spam
 
 Users must be able to report messages.
 
-
-
 10. SAFETY
 
 Safety is a core product feature.
@@ -458,8 +438,6 @@ Other
 
 Create an emergency/safety information section appropriate for the user’s country without pretending LYVE provides emergency services.
 
-
-
 11. AGE SAFETY
 
 LYVE is strictly 18+.
@@ -480,8 +458,6 @@ Optional identity verification
 
 Do not allow users under 18.
 
-
-
 12. VERIFICATION
 
 Create verification levels:
@@ -499,8 +475,6 @@ Verification badge:
 Verification must never expose identity documents to other users.
 
 Store verification data securely.
-
-
 
 13. PRIVACY
 
@@ -533,8 +507,6 @@ or:
 “Within 10 km”
 
 depending on settings.
-
-
 
 14. PREMIUM
 
@@ -572,8 +544,6 @@ Do not hard-code pricing.
 
 Pricing must be configurable.
 
-
-
 15. BOOST
 
 Allow users to purchase a Boost.
@@ -596,8 +566,6 @@ Status
 
 Do not guarantee matches.
 
-
-
 16. SUPER LIKE
 
 Allow Premium or paid users to send Super Likes.
@@ -605,8 +573,6 @@ Allow Premium or paid users to send Super Likes.
 The recipient should clearly understand that the sender used a Super Like.
 
 Prevent abuse with configurable limits.
-
-
 
 17. PAYMENTS
 
@@ -646,8 +612,6 @@ Subscription cancellation
 
 For mobile digital goods, follow Apple and Google billing requirements.
 
-
-
 18. NOTIFICATIONS
 
 Implement:
@@ -677,8 +641,6 @@ Email
 In-app notifications
 
 Users must be able to control notification preferences.
-
-
 
 19. ADMIN DASHBOARD
 
@@ -774,8 +736,6 @@ Churn
 
 Report rate
 
-
-
 20. ADMIN ROLES
 
 Implement RBAC.
@@ -791,8 +751,6 @@ SUPER_ADMIN
 Never give every administrator full database access.
 
 All sensitive admin actions must create audit logs.
-
-
 
 21. DATABASE
 
@@ -844,8 +802,6 @@ Use constraints.
 
 Use soft deletion where appropriate.
 
-
-
 22. SECURITY
 
 Security must be designed from the beginning.
@@ -896,8 +852,6 @@ Secrets in environment variables only
 
 Never place API keys in frontend code.
 
-
-
 23. UX/UI
 
 Brand:
@@ -937,8 +891,6 @@ Arabic RTL
 
 Design localization from the beginning.
 
-
-
 24. INITIAL SCREENS
 
 Create:
@@ -970,8 +922,6 @@ Help
 Report
 Block
 Account Deletion
-
-
 
 25. LANDING PAGE
 
@@ -1009,8 +959,6 @@ Privacy
 
 Terms
 
-
-
 26. TECHNICAL PRINCIPLES
 
 Do not build the entire system in one file.
@@ -1034,8 +982,6 @@ Create error handling.
 Do not use fake production data.
 
 Do not expose secrets.
-
-
 
 27. DEVELOPMENT PROCESS
 
@@ -1090,8 +1036,6 @@ Fix errors.
 Document changes.
 
 Continue to the next phase only after the current phase is stable.
-
-
 
 28. FIRST TASK
 

@@ -27,7 +27,8 @@ export const Route = createFileRoute("/api/public/cron/store-reconcile")({
     handlers: {
       POST: async ({ request }) => {
         const expected = process.env["STORE_RECONCILE_SECRET"];
-        if (!expected || expected.length < 16) return json(503, { ok: false, result: "NOT_CONFIGURED" });
+        if (!expected || expected.length < 16)
+          return json(503, { ok: false, result: "NOT_CONFIGURED" });
 
         const presented = presentedSecret(request) ?? "";
         const a = Buffer.from(presented);

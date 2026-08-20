@@ -7,13 +7,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-export const SUPPORT_CATEGORIES = [
-  "account",
-  "safety",
-  "billing",
-  "technical",
-  "other",
-] as const;
+export const SUPPORT_CATEGORIES = ["account", "safety", "billing", "technical", "other"] as const;
 export type SupportCategory = (typeof SUPPORT_CATEGORIES)[number];
 
 export type SupportTicket = {
@@ -29,8 +23,12 @@ export const createSupportTicket = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((input: { category: SupportCategory; subject: string; body: string }) => {
     const category = SUPPORT_CATEGORIES.includes(input?.category) ? input.category : "other";
-    const subject = String(input?.subject ?? "").trim().slice(0, 140);
-    const body = String(input?.body ?? "").trim().slice(0, 4000);
+    const subject = String(input?.subject ?? "")
+      .trim()
+      .slice(0, 140);
+    const body = String(input?.body ?? "")
+      .trim()
+      .slice(0, 4000);
     if (subject.length < 3) throw new Error("INVALID_SUBJECT");
     if (body.length < 10) throw new Error("INVALID_BODY");
     return { category, subject, body };
@@ -101,7 +99,9 @@ export const replyToMyTicket = createServerFn({ method: "POST" })
   .inputValidator((input: { ticketId: string; body: string }) => {
     const ticketId = String(input?.ticketId ?? "");
     if (!/^[0-9a-f-]{36}$/i.test(ticketId)) throw new Error("INVALID_TICKET");
-    const body = String(input?.body ?? "").trim().slice(0, 4000);
+    const body = String(input?.body ?? "")
+      .trim()
+      .slice(0, 4000);
     if (body.length < 2) throw new Error("INVALID_BODY");
     return { ticketId, body };
   })

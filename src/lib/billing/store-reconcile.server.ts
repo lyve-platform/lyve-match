@@ -17,7 +17,12 @@
  */
 import { createHash } from "node:crypto";
 import type { Database } from "@/integrations/supabase/types";
-import { productFor, type StoreId, type StoreSnapshot, type VerifiedStoreEvent } from "./store-core";
+import {
+  productFor,
+  type StoreId,
+  type StoreSnapshot,
+  type VerifiedStoreEvent,
+} from "./store-core";
 import { appleRail, configuredStoreEnvironment, googleRail } from "./store-env.server";
 import { fetchAppleSubscriptionState } from "./apple-store.server";
 import { fetchGoogleSubscriptionState } from "./google-store.server";
@@ -51,7 +56,10 @@ export function reconciliationEventId(snapshot: StoreSnapshot): string {
   return `recon:${snapshot.store}:${digest}`;
 }
 
-export function snapshotToEvent(snapshot: StoreSnapshot, now = new Date()): VerifiedStoreEvent | null {
+export function snapshotToEvent(
+  snapshot: StoreSnapshot,
+  now = new Date(),
+): VerifiedStoreEvent | null {
   if (!productFor(snapshot.store, snapshot.productId)) return null;
   return {
     store: snapshot.store,
@@ -139,11 +147,15 @@ export async function reconcileStorePurchases(
     const snapshot = await readSnapshot(store, row.purchase_ref);
     if (!snapshot.ok) {
       summary.failed += 1;
-      await raiseStoreAlert("store_reconciliation_failure", `${store}:${refDigest(row.purchase_ref)}`, {
-        store,
-        reason: snapshot.reason,
-        ref_digest: refDigest(row.purchase_ref),
-      });
+      await raiseStoreAlert(
+        "store_reconciliation_failure",
+        `${store}:${refDigest(row.purchase_ref)}`,
+        {
+          store,
+          reason: snapshot.reason,
+          ref_digest: refDigest(row.purchase_ref),
+        },
+      );
       continue;
     }
 
@@ -167,12 +179,16 @@ export async function reconcileStorePurchases(
       if (result === "PROCESSED") {
         summary.corrected += 1;
         if (snapshot.snapshot.lifecycle.status !== row.status) {
-          await raiseStoreAlert("store_reconciliation_drift", `${store}:${refDigest(row.purchase_ref)}`, {
-            store,
-            reason: "status_drift",
-            status: snapshot.snapshot.lifecycle.status,
-            ref_digest: refDigest(row.purchase_ref),
-          });
+          await raiseStoreAlert(
+            "store_reconciliation_drift",
+            `${store}:${refDigest(row.purchase_ref)}`,
+            {
+              store,
+              reason: "status_drift",
+              status: snapshot.snapshot.lifecycle.status,
+              ref_digest: refDigest(row.purchase_ref),
+            },
+          );
         }
       } else {
         summary.unchanged += 1;
@@ -180,11 +196,15 @@ export async function reconcileStorePurchases(
       await touch(row.id);
     } catch {
       summary.failed += 1;
-      await raiseStoreAlert("store_reconciliation_failure", `${store}:${refDigest(row.purchase_ref)}`, {
-        store,
-        reason: "apply_failed",
-        ref_digest: refDigest(row.purchase_ref),
-      });
+      await raiseStoreAlert(
+        "store_reconciliation_failure",
+        `${store}:${refDigest(row.purchase_ref)}`,
+        {
+          store,
+          reason: "apply_failed",
+          ref_digest: refDigest(row.purchase_ref),
+        },
+      );
     }
   }
 

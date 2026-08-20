@@ -6,18 +6,17 @@ Status: **proposal only**. No production database change, no payment provider co
 
 ---
 
-
 ## 1. Target launch markets and country configuration
 
 Recommended launch shape: a small **Tier 1** set first, then widen.
 
-| Wave | Markets | Rationale |
-| --- | --- | --- |
-| Wave 1 (soft launch) | UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman | Core audience, EN + AR both first-class, single currency band (AED/SAR), one legal review |
-| Wave 2 | UK, Germany, France, Netherlands, Sweden | GDPR-mature, high dating ARPU, strong card + wallet coverage |
-| Wave 3 | US, Canada, Australia | Largest volume, but heaviest legal/consumer-protection surface (US state privacy laws) |
-| Deferred | India, Indonesia, Turkey, Brazil, Nigeria | Local payment rails and pricing require separate work |
-| Blocked | Sanctioned jurisdictions and any market where the product is legally unsafe to operate | Compliance |
+| Wave                 | Markets                                                                                | Rationale                                                                                 |
+| -------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Wave 1 (soft launch) | UAE, Saudi Arabia, Qatar, Kuwait, Bahrain, Oman                                        | Core audience, EN + AR both first-class, single currency band (AED/SAR), one legal review |
+| Wave 2               | UK, Germany, France, Netherlands, Sweden                                               | GDPR-mature, high dating ARPU, strong card + wallet coverage                              |
+| Wave 3               | US, Canada, Australia                                                                  | Largest volume, but heaviest legal/consumer-protection surface (US state privacy laws)    |
+| Deferred             | India, Indonesia, Turkey, Brazil, Nigeria                                              | Local payment rails and pricing require separate work                                     |
+| Blocked              | Sanctioned jurisdictions and any market where the product is legally unsafe to operate | Compliance                                                                                |
 
 **Country configuration** is data, not code. A `countries` config table drives, per ISO country code: availability (`live` / `waitlist` / `blocked`), default locale and text direction, currency, minimum age (18 global, higher where local law requires), tax treatment, active legal document versions, and which payment methods are offered. Client code never hard-codes a country rule; it reads the resolved config. Country is derived server-side (edge geo + account country of record), never from a client-supplied header alone.
 
@@ -41,6 +40,7 @@ Two live purchase channels at launch, one entitlement truth, with a third slot r
 ```
 
 Rules:
+
 - The Phase 5 provider abstraction gains `apple` and `google` adapters now; `stripe`/`paddle` remain unimplemented slots in the same registry. No feature gate ever learns which channel paid — adding web later is a new adapter, not a change to the authorization model.
 - **The client never grants Premium.** The app sends only an opaque receipt/purchase token; entitlement is written exclusively by the server after validation.
 - Apple: validate with the App Store Server API (JWS transaction/renewal info, signed-payload chain verified against Apple root certs), keyed by `originalTransactionId`. Google: validate with `purchases.subscriptionsv2.get` via a service account, keyed by the purchase token / linked purchase token chain, and acknowledge within the required window.
@@ -53,16 +53,15 @@ Rules:
 
 ## 3. Payment provider options and tradeoffs
 
-| Option | Strengths | Tradeoffs | Fit for LYVE |
-| --- | --- | --- | --- |
-| **Apple IAP** (launch) | Mandatory in-app; frictionless conversion; Apple handles tax, invoicing and refunds | 15–30% commission, minimal customer data, refunds decided by Apple | Required launch channel for iOS |
-| **Google Play Billing** (launch) | Same as above for Android; strong lifecycle notifications | 15–30% commission, refunds decided by Google | Required launch channel for Android |
-| Stripe (deferred) | Best-in-class subscription API, SCA/3DS, dispute tooling | You are merchant of record: you own VAT/sales-tax registration | Revisit when web launches |
-| Paddle (deferred) | Merchant of record — owns global VAT/GST, invoicing, chargebacks | Less flexible primitives, higher effective rate, stricter dating review | Revisit when web launches |
-| Regional (Tap, Checkout.com, Network Intl.) | Local GCC methods, better in-region auth rates | Extra integration, no global subscription model | Only relevant to a future web rail |
+| Option                                      | Strengths                                                                           | Tradeoffs                                                               | Fit for LYVE                        |
+| ------------------------------------------- | ----------------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------- |
+| **Apple IAP** (launch)                      | Mandatory in-app; frictionless conversion; Apple handles tax, invoicing and refunds | 15–30% commission, minimal customer data, refunds decided by Apple      | Required launch channel for iOS     |
+| **Google Play Billing** (launch)            | Same as above for Android; strong lifecycle notifications                           | 15–30% commission, refunds decided by Google                            | Required launch channel for Android |
+| Stripe (deferred)                           | Best-in-class subscription API, SCA/3DS, dispute tooling                            | You are merchant of record: you own VAT/sales-tax registration          | Revisit when web launches           |
+| Paddle (deferred)                           | Merchant of record — owns global VAT/GST, invoicing, chargebacks                    | Less flexible primitives, higher effective rate, stricter dating review | Revisit when web launches           |
+| Regional (Tap, Checkout.com, Network Intl.) | Local GCC methods, better in-region auth rates                                      | Extra integration, no global subscription model                         | Only relevant to a future web rail  |
 
 **Decision:** Apple + Google only for the initial production launch. The merchant-of-record question (Paddle vs Stripe) is explicitly **not decided now** and does not block launch, because Phase 5's abstraction makes it a later, additive choice.
-
 
 ## 4. Subscription plans and entitlement strategy
 
@@ -98,6 +97,7 @@ Billing periods: monthly, 3-month, 12-month, published as App Store / Play subsc
 ## 7. App Store and Google Play considerations
 
 Dating apps get elevated review scrutiny. Prepare before submitting:
+
 - Age rating 18+, and an actual enforced age gate (already implemented).
 - In-app reporting and blocking reachable within two taps (already implemented) — reviewers check this.
 - Account deletion available **in-app**, self-service, mandatory for both stores (already implemented; verify the flow end-to-end).
@@ -119,10 +119,10 @@ Dating apps get elevated review scrutiny. Prepare before submitting:
 - Admin console behind role checks already in place, plus IP-allowlist option and separate staff accounts (never a member account with a role bolted on). Admin remains web-only and is not part of the store builds.
 - Recovery flows are single-use, short-expiry, and never reveal whether an address exists.
 
-
 ## 9. Rate limiting and anti-abuse controls
 
 Layered, all server-enforced:
+
 - Edge: per-IP request ceilings, bot filtering, ASN reputation on auth and signup endpoints.
 - Application: per-account quotas on likes, messages, reports, profile edits, photo uploads, password resets, checkout attempts; sliding-window counters in the database with a shared helper.
 - Behavioural: velocity heuristics (mass-liking, copy-paste messaging, rapid re-registration), device fingerprint reuse, disposable-email blocking.
@@ -200,6 +200,7 @@ Terms of Service (with subscription and auto-renewal terms), Privacy Policy, Com
 ## 18. Launch checklist and rollback plan
 
 **Go/no-go checklist**
+
 - [ ] Legal documents published, versioned and accepted in-app
 - [ ] Apple + Google IAP products live, server-side validation verified end-to-end in sandbox and production, real purchase completed on both platforms
 - [ ] Restore-purchases and cross-device entitlement verified on both platforms
@@ -221,7 +222,7 @@ Terms of Service (with subscription and auto-renewal terms), Privacy Policy, Com
 
 ## Recommended sequencing for Phase 6 implementation
 
-1. **Provider-independent production hardening** (current step): auth and mobile session hardening, rate limiting and anti-abuse, monitoring/logging/alerting, backups and disaster recovery, email security and verification, account protection, secrets and config tables — plus the mobile billing *architecture* (adapter interfaces, product→plan mapping, notification route skeletons) with **no production Apple/Google credentials connected**.
+1. **Provider-independent production hardening** (current step): auth and mobile session hardening, rate limiting and anti-abuse, monitoring/logging/alerting, backups and disaster recovery, email security and verification, account protection, secrets and config tables — plus the mobile billing _architecture_ (adapter interfaces, product→plan mapping, notification route skeletons) with **no production Apple/Google credentials connected**.
 2. Legal and policy content, versioned acceptance, retention jobs.
 3. Apple IAP + Google Play Billing integration with server-side validation, in sandbox/test only, behind a flag.
 4. Store submission preparation and review.
@@ -242,4 +243,3 @@ Terms of Service (with subscription and auto-renewal terms), Privacy Policy, Com
 (The merchant-of-record question is intentionally deferred with the web channel.)
 
 **Nothing here is built yet.** Approve the hardening step and I will implement item 1 above, keeping the security baseline at 488/488, and stop for review before any billing integration.
-

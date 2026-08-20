@@ -69,14 +69,14 @@ export const enAuth = {
     },
     ageGate: {
       title: "LYVE is an 18+ platform",
-      body:
-        "You must be at least 18 years old to create an account. We cannot register this date of birth.",
+      body: "You must be at least 18 years old to create an account. We cannot register this date of birth.",
     },
     errors: {
       invalidCredentials: "That email and password combination is not correct.",
       emailNotConfirmed: "Please verify your email address first, then sign in.",
       emailTaken: "An account already exists with this email address.",
-      weakPassword: "Please choose a stronger password: at least 8 characters with a letter and a number.",
+      weakPassword:
+        "Please choose a stronger password: at least 8 characters with a letter and a number.",
       passwordMismatch: "The two passwords do not match.",
       invalidEmail: "Please enter a valid email address.",
       invalidDob: "Please enter a valid date of birth.",
@@ -103,19 +103,67 @@ export const enAuth = {
       goToProfile: "Go to my profile",
     },
     steps: {
-      date_of_birth: { label: "Date of birth", title: "When were you born?", body: "LYVE is strictly 18+." },
-      name: { label: "Nickname", title: "What should we call you?", body: "Your nickname is shown on your profile." },
+      date_of_birth: {
+        label: "Date of birth",
+        title: "When were you born?",
+        body: "LYVE is strictly 18+.",
+      },
+      name: {
+        label: "Nickname",
+        title: "What should we call you?",
+        body: "Your nickname is shown on your profile.",
+      },
       gender: { label: "Gender", title: "How do you identify?", body: "You choose what is shown." },
-      interested_in: { label: "Interested in", title: "Who would you like to meet?", body: "Select all that apply." },
-      intent: { label: "Relationship intent", title: "What are you looking for?", body: "You choose your intent — we never assume it." },
-      location: { label: "Location", title: "Where are you based?", body: "We only ever show your city and country." },
-      interests: { label: "Interests", title: "What do you enjoy?", body: "Pick the things that describe you." },
-      lifestyle: { label: "Lifestyle", title: "Work and study", body: "Optional details that help people know you." },
-      photos: { label: "Photos", title: "Add your photos", body: "Your photos stay private until you choose to be discoverable." },
-      bio: { label: "About you", title: "Tell people about you", body: "A short, honest introduction works best." },
-      preferences: { label: "Preferences", title: "Who should we suggest?", body: "Stored now, used in a later phase." },
-      privacy: { label: "Privacy", title: "Your privacy controls", body: "Safe defaults are already applied." },
-      completion: { label: "Done", title: "Your profile is ready", body: "You can refine anything later from your profile." },
+      interested_in: {
+        label: "Interested in",
+        title: "Who would you like to meet?",
+        body: "Select all that apply.",
+      },
+      intent: {
+        label: "Relationship intent",
+        title: "What are you looking for?",
+        body: "You choose your intent — we never assume it.",
+      },
+      location: {
+        label: "Location",
+        title: "Where are you based?",
+        body: "We only ever show your city and country.",
+      },
+      interests: {
+        label: "Interests",
+        title: "What do you enjoy?",
+        body: "Pick the things that describe you.",
+      },
+      lifestyle: {
+        label: "Lifestyle",
+        title: "Work and study",
+        body: "Optional details that help people know you.",
+      },
+      photos: {
+        label: "Photos",
+        title: "Add your photos",
+        body: "Your photos stay private until you choose to be discoverable.",
+      },
+      bio: {
+        label: "About you",
+        title: "Tell people about you",
+        body: "A short, honest introduction works best.",
+      },
+      preferences: {
+        label: "Preferences",
+        title: "Who should we suggest?",
+        body: "Stored now, used in a later phase.",
+      },
+      privacy: {
+        label: "Privacy",
+        title: "Your privacy controls",
+        body: "Safe defaults are already applied.",
+      },
+      completion: {
+        label: "Done",
+        title: "Your profile is ready",
+        body: "You can refine anything later from your profile.",
+      },
     },
     photos: {
       upload: "Upload photo",
@@ -177,8 +225,7 @@ export const enAuth = {
     },
     deletion: {
       title: "Delete my account",
-      body:
-        "Requesting deletion signs you out and hides your profile immediately. Your account is scheduled for permanent removal after 30 days, during which you can contact support to restore it. Limited records may be retained where the law requires it — for example fraud, safety and payment records.",
+      body: "Requesting deletion signs you out and hides your profile immediately. Your account is scheduled for permanent removal after 30 days, during which you can contact support to restore it. Limited records may be retained where the law requires it — for example fraud, safety and payment records.",
       whatHappensTitle: "What happens when you confirm",
       whatHappens: [
         "Your profile is hidden from LYVE straight away.",

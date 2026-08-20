@@ -146,7 +146,11 @@ export async function handleBillingWebhook(
     });
     await supabaseAdmin
       .from("billing_events")
-      .update({ status: "failed", error: "PROCESSING_FAILED", processed_at: new Date().toISOString() })
+      .update({
+        status: "failed",
+        error: "PROCESSING_FAILED",
+        processed_at: new Date().toISOString(),
+      })
       .eq("id", eventRowId);
     void error;
     return respond(500, "PROCESSING_FAILED");

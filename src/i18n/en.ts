@@ -73,8 +73,7 @@ export const en = {
   },
   compatibility: {
     title: "Compatibility, explained",
-    subtitle:
-      "LYVE shows why someone may suit you — never a black box, never a promise.",
+    subtitle: "LYVE shows why someone may suit you — never a black box, never a promise.",
     exampleBadge: "UI example",
     scoreLabel: "Match",
     reasonsTitle: "Why this could work",
@@ -89,8 +88,7 @@ export const en = {
   },
   intent: {
     title: "You define what you are looking for",
-    subtitle:
-      "Intent is set by you and can be changed at any time in your settings.",
+    subtitle: "Intent is set by you and can be changed at any time in your settings.",
     items: [
       { title: "Dating", body: "Meet people, enjoy the moment, see where it goes." },
       {
@@ -254,7 +252,7 @@ export const en = {
         },
         contact: {
           title: "Deletion requests and privacy contact",
-          body: "You can delete your account at any time from Settings, which starts a scheduled purge of your data. To request access, correction, export, or deletion in writing, open a support ticket inside the app with the category \"Account\"; that ticket is our official channel for privacy requests and is answered by the LYVE privacy team. Include the email address on your account so we can verify the request.",
+          body: 'You can delete your account at any time from Settings, which starts a scheduled purge of your data. To request access, correction, export, or deletion in writing, open a support ticket inside the app with the category "Account"; that ticket is our official channel for privacy requests and is answered by the LYVE privacy team. Include the email address on your account so we can verify the request.',
         },
         sections: [
           {
@@ -342,7 +340,7 @@ export const en = {
           },
           {
             title: "Disclaimers and limits",
-            body: "LYVE does not run background checks on members and cannot guarantee any member's identity, conduct, or intentions. You are responsible for your own safety when interacting with or meeting other members. The service is provided \"as is\" to the maximum extent permitted by law.",
+            body: 'LYVE does not run background checks on members and cannot guarantee any member\'s identity, conduct, or intentions. You are responsible for your own safety when interacting with or meeting other members. The service is provided "as is" to the maximum extent permitted by law.',
           },
           {
             title: "Governing law",
@@ -356,8 +354,7 @@ export const en = {
       },
       guidelines: {
         title: "Community Guidelines",
-        description:
-          "Draft outline of the behaviour LYVE expects and what is not tolerated.",
+        description: "Draft outline of the behaviour LYVE expects and what is not tolerated.",
         intro:
           "These guidelines will describe the tone of the community: respectful, honest, and free from pressure.",
         sections: [

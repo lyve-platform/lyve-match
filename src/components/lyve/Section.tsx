@@ -36,10 +36,7 @@ export function Section({
               {eyebrow}
             </p>
           ) : null}
-          <h2
-            id={headingId}
-            className="mt-3 text-balance text-3xl font-semibold md:text-4xl"
-          >
+          <h2 id={headingId} className="mt-3 text-balance text-3xl font-semibold md:text-4xl">
             {title}
           </h2>
           {subtitle ? (

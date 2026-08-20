@@ -112,10 +112,16 @@ export function mapEventToLifecycle(event: NormalizedBillingEvent): LifecycleOut
  * `billing_apply_subscription`; the database remains the authority.
  */
 export function statusGrantsAccess(status: SubscriptionStatus, periodEnd: string | null): boolean {
-  if (status === "trialing" || status === "active" || status === "past_due" || status === "paused") {
+  if (
+    status === "trialing" ||
+    status === "active" ||
+    status === "past_due" ||
+    status === "paused"
+  ) {
     return true;
   }
-  if (status === "canceled") return Boolean(periodEnd && new Date(periodEnd).getTime() > Date.now());
+  if (status === "canceled")
+    return Boolean(periodEnd && new Date(periodEnd).getTime() > Date.now());
   return false;
 }
 
@@ -173,11 +179,7 @@ export type CheckoutOutcome = {
 
 export type BillingActionResult = {
   code:
-    | "OK"
-    | "NOT_SUPPORTED"
-    | "NO_SUBSCRIPTION"
-    | "CHECKOUT_NOT_CONNECTED"
-    | "PROVIDER_UNAVAILABLE";
+    "OK" | "NOT_SUPPORTED" | "NO_SUBSCRIPTION" | "CHECKOUT_NOT_CONNECTED" | "PROVIDER_UNAVAILABLE";
   /** Portal URL when the provider supports self-service management. */
   url?: string | null;
 };

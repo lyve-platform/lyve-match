@@ -10,7 +10,8 @@ export const arBilling = {
     notConnectedTitle: "الدفع غير متصل",
     notConnectedBody: "لا تقبل LYVE المدفوعات بعد. سيُعلن عن الباقات والأسعار قبل فتح الدفع.",
     testModeTitle: "وضع الاختبار",
-    testModeBody: "الدفع يعمل عبر مزوّد اختباري. لا تُحوَّل أي أموال ولا يُعد أي إجراء هنا شراءً حقيقيًا.",
+    testModeBody:
+      "الدفع يعمل عبر مزوّد اختباري. لا تُحوَّل أي أموال ولا يُعد أي إجراء هنا شراءً حقيقيًا.",
     testOnlyBadge: "اختبار فقط",
     priceUnavailable: "سيُعلن عن السعر",
     perMonth: "شهريًا",
