@@ -14,11 +14,13 @@ import {
 import type { BillingProvider } from "./provider";
 import { noneProvider } from "./none";
 import { mockProvider } from "./mock";
+import { appleProvider } from "./apple";
 
-/** Adapters that actually exist today. Future: stripe/paddle (web), apple, google. */
+/** Adapters that actually exist today. */
 const IMPLEMENTED: Partial<Record<BillingProviderId, BillingProvider>> = {
   none: noneProvider,
   mock: mockProvider,
+  apple: appleProvider,
 };
 
 export function configuredProviderId(): BillingProviderId {
