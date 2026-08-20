@@ -735,15 +735,13 @@ async function main() {
   } as never);
   check("members cannot apply store lifecycle events", Boolean(memberApply.error));
 
-  const memberInsert = await alice.client
-    .from("store_purchases")
-    .insert({
-      provider: "apple",
-      purchase_ref: `self-${stamp}`,
-      profile_id: alice.id,
-      product_id: APPLE_PRODUCT,
-      plan_code: "premium_monthly",
-    } as never);
+  const memberInsert = await alice.client.from("store_purchases").insert({
+    provider: "apple",
+    purchase_ref: `self-${stamp}`,
+    profile_id: alice.id,
+    product_id: APPLE_PRODUCT,
+    plan_code: "premium_monthly",
+  } as never);
   check("members cannot insert store purchase rows", Boolean(memberInsert.error));
   const memberUpdate = await alice.client
     .from("store_purchases")

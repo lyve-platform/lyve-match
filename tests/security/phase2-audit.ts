@@ -677,24 +677,20 @@ async function main() {
         .insert({ reporter_id: a.id, reported_id: b.id, category: "not_a_category" as never });
       check("unexpected report category is rejected", Boolean(badCategory.error));
 
-      const preStatus = await a.client
-        .from("reports")
-        .insert({
-          reporter_id: a.id,
-          reported_id: b.id,
-          category: "spam",
-          status: "resolved" as never,
-        });
+      const preStatus = await a.client.from("reports").insert({
+        reporter_id: a.id,
+        reported_id: b.id,
+        category: "spam",
+        status: "resolved" as never,
+      });
       check("a member cannot create a pre-resolved report", Boolean(preStatus.error));
 
-      const oversized = await a.client
-        .from("reports")
-        .insert({
-          reporter_id: a.id,
-          reported_id: b.id,
-          category: "spam",
-          description: "x".repeat(2500),
-        });
+      const oversized = await a.client.from("reports").insert({
+        reporter_id: a.id,
+        reported_id: b.id,
+        category: "spam",
+        description: "x".repeat(2500),
+      });
       check("oversized report description is rejected", Boolean(oversized.error));
 
       const report = await a.client

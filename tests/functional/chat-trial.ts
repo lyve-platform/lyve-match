@@ -142,21 +142,19 @@ async function main() {
 
     /* ---------------------------------------------------------- realtime */
     const received: string[] = [];
-    const channel = daniel.client
-      .channel(`trial:${conversationId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "messages",
-          filter: `conversation_id=eq.${conversationId}`,
-        },
-        (payload) => {
-          const body = (payload.new as Record<string, unknown>)["body"];
-          if (typeof body === "string") received.push(body);
-        },
-      );
+    const channel = daniel.client.channel(`trial:${conversationId}`).on(
+      "postgres_changes",
+      {
+        event: "INSERT",
+        schema: "public",
+        table: "messages",
+        filter: `conversation_id=eq.${conversationId}`,
+      },
+      (payload) => {
+        const body = (payload.new as Record<string, unknown>)["body"];
+        if (typeof body === "string") received.push(body);
+      },
+    );
     await new Promise<void>((resolve) => {
       channel.subscribe((status) => {
         if (status === "SUBSCRIBED") resolve();

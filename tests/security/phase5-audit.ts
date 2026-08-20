@@ -326,15 +326,13 @@ async function main() {
     const memberRead = await paid.client.from("billing_events").select("id").limit(1);
     check("a member cannot read the billing event ledger", (memberRead.data ?? []).length === 0);
 
-    const memberWrite = await paid.client
-      .from("billing_events")
-      .insert({
-        provider: "mock",
-        provider_event_id: "x",
-        event_type: "payment.succeeded",
-        status: "received",
-        signature_verified: true,
-      });
+    const memberWrite = await paid.client.from("billing_events").insert({
+      provider: "mock",
+      provider_event_id: "x",
+      event_type: "payment.succeeded",
+      status: "received",
+      signature_verified: true,
+    });
     check("a member cannot append to the billing event ledger", memberWrite.error != null);
 
     const eventId = `evt_ledger_${stamp}`;
