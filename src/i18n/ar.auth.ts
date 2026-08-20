@@ -44,6 +44,13 @@ export const arAuth: typeof enAuth = {
       optional: "اختياري",
       required: "مطلوب",
     },
+    social: {
+      google: "المتابعة عبر Google",
+      apple: "المتابعة عبر Apple",
+      divider: "أو",
+      fastHint: "التفعيل خلال أقل من دقيقتين — بدون نماذج طويلة.",
+      error: "تعذّر إكمال تسجيل الدخول. حاول مرة أخرى.",
+    },
     actions: {
       rememberMe: "تذكّر بريدي الإلكتروني",
       signIn: "تسجيل الدخول",
