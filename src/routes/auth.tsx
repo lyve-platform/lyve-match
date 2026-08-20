@@ -86,6 +86,7 @@ function AuthPage() {
     setErrorKey(null);
     setUnderage(false);
     setNotice(null);
+    setSocialError(null);
   }
 
   async function handleSignIn(event: FormEvent) {
