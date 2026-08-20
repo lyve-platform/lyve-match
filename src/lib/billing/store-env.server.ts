@@ -50,6 +50,10 @@ const APPLE_SANDBOX_VARS = [
   "APPLE_IAP_SANDBOX_BUNDLE_ID",
 ] as const;
 const APPLE_PRODUCTION_VARS = [
+  "APPSTORE_ISSUER_ID",
+  "APPSTORE_KEY_ID",
+  "APPSTORE_PRIVATE_KEY",
+  "APPSTORE_BUNDLE_ID",
   "APPLE_IAP_ISSUER_ID",
   "APPLE_IAP_KEY_ID",
   "APPLE_IAP_PRIVATE_KEY",
@@ -106,8 +110,24 @@ export function appleTrustedRoots(): readonly string[] {
 export function appleConfig(): ConfigResult<AppleConfig> {
   if (hasMisplacedAppleCredentials()) return { ok: false, reason: "CREDENTIAL_MISPLACED" };
   const environment = configuredStoreEnvironment();
-  const names = environment === "sandbox" ? APPLE_SANDBOX_VARS : APPLE_PRODUCTION_VARS;
-  const [issuerId, keyId, privateKeyPem, bundleId] = names.map((name) => env(name));
+
+  const issuerId =
+    environment === "production"
+      ? (env("APPSTORE_ISSUER_ID") ?? env("APPLE_IAP_ISSUER_ID"))
+      : env("APPLE_IAP_SANDBOX_ISSUER_ID");
+  const keyId =
+    environment === "production"
+      ? (env("APPSTORE_KEY_ID") ?? env("APPLE_IAP_KEY_ID"))
+      : env("APPLE_IAP_SANDBOX_KEY_ID");
+  const privateKeyPem =
+    environment === "production"
+      ? (env("APPSTORE_PRIVATE_KEY") ?? env("APPLE_IAP_PRIVATE_KEY"))
+      : env("APPLE_IAP_SANDBOX_PRIVATE_KEY");
+  const bundleId =
+    environment === "production"
+      ? (env("APPSTORE_BUNDLE_ID") ?? env("APPLE_IAP_BUNDLE_ID"))
+      : env("APPLE_IAP_SANDBOX_BUNDLE_ID");
+
   if (!issuerId && !keyId && !privateKeyPem && !bundleId)
     return { ok: false, reason: "NOT_CONFIGURED" };
   if (!issuerId || !keyId || !privateKeyPem || !bundleId)
