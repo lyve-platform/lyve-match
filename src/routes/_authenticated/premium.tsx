@@ -163,6 +163,9 @@ function PremiumPage() {
         <div className="grid gap-4 md:grid-cols-2">
           {BILLING_PLANS.map((plan) => {
             const price = priceFor(plan, data.currency);
+            const productId = productIdForPlan(plan.code);
+            const storePrice = productId ? storePrices[productId] : undefined;
+            const pending = buying === plan.code || (!storeReady && actions.checkout.isPending);
             return (
               <article key={plan.code} className="surface-panel space-y-3 p-6">
                 <div className="flex items-center justify-between gap-3">
@@ -176,28 +179,31 @@ function PremiumPage() {
                   ) : null}
                 </div>
                 <p className="text-2xl font-semibold">
-                  {formatPrice(
-                    price?.amountMinor ?? null,
-                    price?.currency ?? data.currency,
-                    locale,
-                    copy.priceUnavailable,
-                  )}
+                  {storePrice
+                    ? storePrice.displayPrice
+                    : formatPrice(
+                        price?.amountMinor ?? null,
+                        price?.currency ?? data.currency,
+                        locale,
+                        copy.priceUnavailable,
+                      )}
                 </p>
                 <p className="text-sm text-muted-foreground">
                   {plan.interval === "month" ? copy.perMonth : copy.perYear}
                 </p>
                 <Button
                   className="min-h-11 w-full rounded-full"
-                  disabled={!data.checkoutOffered || actions.checkout.isPending}
+                  disabled={(!storeReady && !data.checkoutOffered) || pending}
                   onClick={() => void subscribe(plan.code)}
                 >
-                  {actions.checkout.isPending ? (
+                  {pending ? (
                     <Loader2 aria-hidden="true" className="animate-spin" />
                   ) : (
                     <Crown aria-hidden="true" />
                   )}
                   {copy.actions.subscribe}
                 </Button>
+
               </article>
             );
           })}
