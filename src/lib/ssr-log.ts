@@ -59,7 +59,8 @@ const ABORT_ALERT_THRESHOLD = 3;
 let abortWindowStart = 0;
 let abortCount = 0;
 
-export function recordAbort(fields: Omit<SsrLogFields, "event">): void {
+export function recordAbort(fields: SsrLogFields | Omit<SsrLogFields, "event">): void {
+  const base = fields as SsrLogFields;
   const now = Date.now();
   if (now - abortWindowStart > ABORT_WINDOW_MS) {
     abortWindowStart = now;
