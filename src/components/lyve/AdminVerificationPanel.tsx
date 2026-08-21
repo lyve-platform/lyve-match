@@ -43,7 +43,7 @@ export function AdminVerificationPanel() {
   });
 
   const formatDate = (value: string) =>
-    new Date(value).toLocaleDateString(locale === "ar" ? "ar" : "en", { dateStyle: "medium" });
+    new Date(value).toLocaleDateString("en", { dateStyle: "medium" });
 
   return (
     <Card>

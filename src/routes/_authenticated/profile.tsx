@@ -296,7 +296,7 @@ function ProfilePage() {
             <Chip
               key={interest.id}
               selected={form.interestIds.includes(interest.id)}
-              label={locale === "ar" ? interest.label_ar : interest.label_en}
+              label={interest.label_en}
               onClick={() => update({ interestIds: toggle(form.interestIds, interest.id) })}
             />
           ))}

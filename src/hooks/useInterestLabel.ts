@@ -11,7 +11,7 @@ export function useInterestLabel() {
     (slug: string) => {
       const match = (data ?? []).find((interest) => interest.slug === slug);
       if (!match) return slug.replace(/_/g, " ");
-      return locale === "ar" ? match.label_ar : match.label_en;
+      return match.label_en;
     },
     [data, locale],
   );

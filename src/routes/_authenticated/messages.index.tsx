@@ -28,11 +28,11 @@ function MessagesPage() {
   const { t, locale } = useI18n();
   const { data, isLoading, isError, refetch } = useConversations();
 
-  const dayFormatter = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
+  const dayFormatter = new Intl.DateTimeFormat("en", {
     day: "numeric",
     month: "short",
   });
-  const timeFormatter = new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
+  const timeFormatter = new Intl.DateTimeFormat("en", {
     hour: "numeric",
     minute: "2-digit",
   });

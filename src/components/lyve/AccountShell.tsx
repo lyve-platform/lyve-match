@@ -129,7 +129,7 @@ export function AccountShell({
                   <span>
                     {fill(t.standing.until, {
                       date: new Date(standing.data.suspendedUntil).toLocaleDateString(
-                        locale === "ar" ? "ar" : "en",
+                        "en",
                         { dateStyle: "medium" },
                       ),
                     })}

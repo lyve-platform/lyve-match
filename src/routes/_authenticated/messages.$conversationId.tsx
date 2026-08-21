@@ -54,7 +54,7 @@ function ConversationPage() {
 
   const other = header.data;
   const name = other?.firstName ?? "—";
-  const BackIcon = locale === "ar" ? ArrowRight : ArrowLeft;
+  const BackIcon = ArrowLeft;
 
   async function handleSend(event: React.FormEvent) {
     event.preventDefault();

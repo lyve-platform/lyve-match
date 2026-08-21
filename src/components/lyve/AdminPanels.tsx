@@ -36,7 +36,7 @@ function useDate() {
   const { locale } = useI18n();
   return (value: string | null | undefined) =>
     value
-      ? new Date(value).toLocaleDateString(locale === "ar" ? "ar" : "en", { dateStyle: "medium" })
+      ? new Date(value).toLocaleDateString("en", { dateStyle: "medium" })
       : "—";
 }
 
@@ -467,7 +467,7 @@ export function AuditPanel({ enabled }: { enabled: boolean }) {
             <div className="flex flex-wrap items-center gap-2">
               <code className="font-medium">{entry.action}</code>
               <span className="text-muted-foreground">
-                {new Date(entry.createdAt).toLocaleString(locale === "ar" ? "ar" : "en")}
+                {new Date(entry.createdAt).toLocaleString("en")}
               </span>
             </div>
             <p className="mt-1 text-muted-foreground">

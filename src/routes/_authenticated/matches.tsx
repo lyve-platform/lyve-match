@@ -98,7 +98,7 @@ function MatchesPage() {
                   </p>
                   <p className="mt-1 text-xs text-muted-foreground">
                     {fill(t.matchesPage.matchedOn, {
-                      date: new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", {
+                      date: new Intl.DateTimeFormat("en", {
                         dateStyle: "medium",
                       }).format(new Date(match.matchedAt)),
                     })}

@@ -39,7 +39,7 @@ function AppealPage() {
   const [body, setBody] = useState("");
 
   const formatDate = (value: string) =>
-    new Date(value).toLocaleDateString(locale === "ar" ? "ar" : "en", { dateStyle: "medium" });
+    new Date(value).toLocaleDateString("en", { dateStyle: "medium" });
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();

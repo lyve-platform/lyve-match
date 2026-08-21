@@ -325,7 +325,7 @@ export function SubscriptionState({ snapshot }: { snapshot: BillingSnapshot }) {
 
   const date = (value: string | null) =>
     value
-      ? new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", { dateStyle: "long" }).format(
+      ? new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(
           new Date(value),
         )
       : "—";
