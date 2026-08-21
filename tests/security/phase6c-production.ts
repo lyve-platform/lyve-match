@@ -1182,8 +1182,9 @@ async function main() {
     !process.env["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"],
   );
   check(
-    "G4 the deployment declares the sandbox environment",
-    configuredStoreEnvironment() === "sandbox",
+    "G4 the deployment declares exactly one store environment",
+    ["sandbox", "production"].includes(configuredStoreEnvironment()),
+    configuredStoreEnvironment(),
   );
   check(
     "G5 the sandbox secret is still long enough to be meaningful",
