@@ -30,26 +30,6 @@ export const enVerification = {
     noteLabel: "Reviewer note",
     error: "We couldn't submit your verification. Please try again.",
   },
-  phoneVerification: {
-    title: "Verify your phone number",
-    subtitle:
-      "A verified phone number ties one account to one real person and makes fake profiles far harder to create.",
-    phoneLabel: "Phone number",
-    phoneHelp: "Include the country code, for example +971500000000.",
-    sendCode: "Send code",
-    codeLabel: "Verification code",
-    codeHelp: "Enter the 6-digit code we sent to",
-    confirm: "Confirm code",
-    changeNumber: "Use a different number",
-    verified: "Phone verified",
-    verifiedBody:
-      "This number is now linked to your account and cannot be used to create another one.",
-    invalidPhone: "Enter a valid number in international format, starting with +.",
-    sendFailed: "We couldn't send the code. Check the number and try again.",
-    confirmFailed: "That code didn't work. Request a new one and try again.",
-    privacy:
-      "Your phone number is never shown on your profile or shared with other members. It is used only for verification and account security.",
-  },
 
   trust: {
     title: "Real people, calmer conversations",
@@ -58,7 +38,6 @@ export const enVerification = {
     catfishTitle: "Protection against catfishing",
     catfishItems: [
       "Photo verification: a reviewer compares a live selfie with the profile photos before the Verified badge is granted.",
-      "Phone verification by SMS code ties one account to one number.",
       "One account per person, adults only, with date of birth required at signup.",
       "Report any profile in a few taps; high-risk reports go to human review.",
       "Repeated impersonation leads to removal, and every decision is logged.",
