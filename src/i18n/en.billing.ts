@@ -16,6 +16,9 @@ export const enBilling = {
     testModeBody:
       "Checkout is running against a test provider. No money moves and nothing here is a real purchase.",
     testOnlyBadge: "Test only",
+    iosOnlyTitle: "Premium is purchased in the LYVE iOS app",
+    iosOnlyBody:
+      "Subscriptions are handled by the App Store. Open LYVE on your iPhone to subscribe, then use Restore purchase here to sync your account.",
     priceUnavailable: "Price to be announced",
     perMonth: "per month",
     perYear: "per year",
@@ -49,6 +52,7 @@ export const enBilling = {
     cancelNotice: "Cancelled — Premium stays active until the end of the current period.",
     actions: {
       subscribe: "Get Premium",
+      iosOnly: "Available in the iOS app",
       cancel: "Cancel subscription",
       resume: "Resume subscription",
       manage: "Manage subscription",
