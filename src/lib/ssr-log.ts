@@ -70,7 +70,7 @@ export function recordAbort(fields: Omit<SsrLogFields, "event">): void {
 
   const burst = abortCount >= ABORT_ALERT_THRESHOLD;
   ssrLog(burst ? "alert" : "warn", {
-    ...fields,
+    ...base,
     event: burst ? "ssr_request_aborted_burst" : "ssr_request_aborted",
     abortsInWindow: abortCount,
     windowMs: ABORT_WINDOW_MS,
