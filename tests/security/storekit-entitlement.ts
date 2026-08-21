@@ -141,10 +141,10 @@ async function main() {
 
   const { data: sub } = await admin
     .from("subscriptions")
-    .select("status, source, plan_code")
+    .select("status, purchase_source, plan_code")
     .eq("profile_id", member.id)
     .maybeSingle();
-  check("subscription records the iOS source", sub?.source === "ios", sub);
+  check("subscription records the iOS source", sub?.purchase_source === "ios", sub);
   check("subscription is active", sub?.status === "active", sub);
 
   /* ---------- 2. Restore is idempotent, never a second grant ---------- */
