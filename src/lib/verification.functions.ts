@@ -103,7 +103,7 @@ export const reviewVerificationRequest = createServerFn({ method: "POST" })
     const { data: result, error } = await context.supabase.rpc("admin_review_verification", {
       p_request: data.requestId,
       p_approve: data.approve,
-      p_note: data.note || null,
+      p_note: data.note || undefined,
     });
     if (error) throw error;
     return { status: result as string };
