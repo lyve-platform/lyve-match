@@ -97,15 +97,37 @@ jobs:
       - name: Install dependencies
         run: bun install
 
-      - name: Select newest Xcode (26+)
+      - name: Select Xcode with iOS SDK 26+
         run: |
-          XCODE=$(find /Applications -maxdepth 1 -name 'Xcode*.app' | sort -V | tail -1)
-          if [ -z "$XCODE" ]; then
-            echo "No Xcode found; using default"
-            exit 0
+          selected_developer_dir=""
+          selected_sdk_major=0
+
+          while IFS= read -r xcode_app; do
+            developer_dir="$xcode_app/Contents/Developer"
+            sdk_version=$(DEVELOPER_DIR="$developer_dir" xcrun --sdk iphoneos --show-sdk-version 2>/dev/null || true)
+            sdk_major=${sdk_version%%.*}
+
+            if [[ "$sdk_major" =~ ^[0-9]+$ ]]; then
+              echo "Found $(basename "$xcode_app") with iOS SDK $sdk_version"
+              if [ "$sdk_major" -ge 26 ] && [ "$sdk_major" -gt "$selected_sdk_major" ]; then
+                selected_developer_dir="$developer_dir"
+                selected_sdk_major="$sdk_major"
+              fi
+            fi
+          done < <(find /Applications -maxdepth 1 -type d -name 'Xcode*.app' | sort)
+
+          if [ -z "$selected_developer_dir" ]; then
+            echo "::error::This runner has no Xcode installation containing iOS SDK 26 or later."
+            echo "Installed Xcode applications:"
+            find /Applications -maxdepth 1 -type d -name 'Xcode*.app' -print
+            exit 1
           fi
-          sudo xcode-select -s "$XCODE/Contents/Developer"
+
+          sudo xcode-select -s "$selected_developer_dir"
+          echo "DEVELOPER_DIR=$selected_developer_dir" >> "$GITHUB_ENV"
+          echo "Selected $selected_developer_dir"
           xcodebuild -version
+          xcrun --sdk iphoneos --show-sdk-version
 
       - name: Build web assets
         run: bun run build
@@ -120,7 +142,7 @@ jobs:
           SDK_MAJOR=${SDK_VERSION%%.*}
           echo "Using iOS SDK $SDK_VERSION"
           if [ "$SDK_MAJOR" -lt 26 ]; then
-            echo "::error::App Store Connect requires iOS SDK 26 or later; runner provides $SDK_VERSION."
+            echo "::error::Xcode selection failed: App Store Connect requires iOS SDK 26 or later, but the active SDK is $SDK_VERSION."
             exit 1
           fi
 
