@@ -1353,6 +1353,45 @@ export type Database = {
           },
         ]
       }
+      security_alerts: {
+        Row: {
+          acknowledged_at: string | null
+          acknowledged_by: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          metadata: Json
+          severity: string
+          summary: string
+          target_id: string | null
+        }
+        Insert: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind: string
+          metadata?: Json
+          severity?: string
+          summary: string
+          target_id?: string | null
+        }
+        Update: {
+          acknowledged_at?: string | null
+          acknowledged_by?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          metadata?: Json
+          severity?: string
+          summary?: string
+          target_id?: string | null
+        }
+        Relationships: []
+      }
       store_alerts: {
         Row: {
           breached: boolean
@@ -1800,6 +1839,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_acknowledge_security_alert: {
+        Args: { p_alert: string }
+        Returns: boolean
+      }
       admin_billing_overview: {
         Args: { p_profile: string }
         Returns: {
@@ -1862,6 +1905,17 @@ export type Database = {
       admin_delete_support_ticket: {
         Args: { p_ticket: string }
         Returns: undefined
+      }
+      admin_function_privilege_report: {
+        Args: never
+        Returns: {
+          anon_execute: boolean
+          arguments: string
+          authenticated_execute: boolean
+          function_name: string
+          security_type: string
+          service_role_execute: boolean
+        }[]
       }
       admin_grant_entitlement: {
         Args: {
@@ -1935,6 +1989,27 @@ export type Database = {
           revoked_at: string
           source: Database["public"]["Enums"]["entitlement_source"]
           starts_at: string
+        }[]
+      }
+      admin_list_security_alerts: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_severity?: string
+          p_unacknowledged_only?: boolean
+        }
+        Returns: {
+          acknowledged_at: string
+          acknowledged_by: string
+          actor_id: string
+          actor_name: string
+          created_at: string
+          id: string
+          kind: string
+          metadata: Json
+          severity: string
+          summary: string
+          target_id: string
         }[]
       }
       admin_list_staff: {
@@ -2279,6 +2354,17 @@ export type Database = {
           purged_profile_id: string
         }[]
       }
+      record_security_alert: {
+        Args: {
+          p_actor: string
+          p_kind: string
+          p_metadata?: Json
+          p_severity: string
+          p_summary: string
+          p_target: string
+        }
+        Returns: string
+      }
       request_photo_verification: {
         Args: { p_path: string }
         Returns: Database["public"]["Enums"]["verification_status"]
@@ -2290,6 +2376,17 @@ export type Database = {
           command: string
           jobname: string
           schedule: string
+        }[]
+      }
+      security_privilege_audit: {
+        Args: never
+        Returns: {
+          anon_execute: boolean
+          arguments: string
+          authenticated_execute: boolean
+          function_name: string
+          security_type: string
+          service_role_execute: boolean
         }[]
       }
       set_account_purge_secret: {

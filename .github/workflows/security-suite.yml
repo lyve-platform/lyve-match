@@ -8,6 +8,10 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Continuous posture check: the database can drift without a code change
+  # (a manual grant, a new routine), so the gate also runs on a schedule.
+  schedule:
+    - cron: "17 3 * * *"
 
 concurrency:
   group: security-${{ github.ref }}
@@ -46,6 +50,19 @@ jobs:
           # credentials must never be present in CI.
           LYVE_STORE_ENVIRONMENT: sandbox
         run: bun run test:security
+
+      # Continuous least-privilege check over every database routine:
+      # fails the build if any elevated routine becomes reachable by anon,
+      # or if an internal writer becomes reachable by signed-in users.
+      - name: Least-privilege audit (database routine grants)
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: bun run test:privileges
+
+      - name: Dependency vulnerability audit
+        run: bun audit --audit-level=high || (echo "Vulnerable dependencies detected" && exit 1)
 
       - name: Refuse production store credentials in CI
         run: |

@@ -39,6 +39,10 @@ const suites = [
     file: "tests/security/phase6c-production.ts",
   },
   {
+    label: "Least privilege (database routine grants, security monitoring)",
+    file: "tests/security/function-privileges.ts",
+  },
+  {
     label: "Maintenance (30-day purge scheduling, ledger guard privileges)",
     file: "tests/security/purge-audit.ts",
   },

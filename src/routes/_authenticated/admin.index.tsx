@@ -17,6 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AdminVerificationPanel } from "@/components/lyve/AdminVerificationPanel";
+import { SecurityPanel } from "@/components/lyve/SecurityPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -70,6 +71,8 @@ function AdminPage() {
   const canSeeCases = permissions.includes("cases.view");
   const canSeeAppeals = permissions.includes("appeals.view");
   const canSeeAudit = permissions.includes("audit.view");
+  const canSeeSecurity = permissions.includes("security.view");
+  const canAckSecurity = permissions.includes("security.ack");
   const canSeeMetrics = permissions.includes("metrics.view");
   const canManageRoles = permissions.includes("roles.manage");
   const canSeeSupport = permissions.includes("support.tickets.view");
@@ -107,6 +110,7 @@ function AdminPage() {
           {canSeeBilling ? <TabsTrigger value="billing">{t.adminBilling.tab}</TabsTrigger> : null}
           {canSeeSupport ? <TabsTrigger value="support">{t.adminSupport.title}</TabsTrigger> : null}
           {canSeeAudit ? <TabsTrigger value="audit">{t.admin.tabs.audit}</TabsTrigger> : null}
+          {canSeeSecurity ? <TabsTrigger value="security">Security</TabsTrigger> : null}
           {canManageRoles ? <TabsTrigger value="staff">{t.admin.tabs.staff}</TabsTrigger> : null}
         </TabsList>
 
@@ -139,6 +143,9 @@ function AdminPage() {
         </TabsContent>
         <TabsContent value="audit" className="mt-6">
           <AuditPanel enabled={canSeeAudit && tab === "audit"} />
+        </TabsContent>
+        <TabsContent value="security" className="mt-6">
+          <SecurityPanel enabled={canSeeSecurity && tab === "security"} canAck={canAckSecurity} />
         </TabsContent>
         <TabsContent value="staff" className="mt-6">
           <AdminStaffPanel enabled={canManageRoles && tab === "staff"} />

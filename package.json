@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "format": "prettier --write .",
     "test:security": "bun run tests/security/run-all.ts",
-    "test:smoke": "bun run tests/functional/smoke-ssr.ts"
+    "test:smoke": "bun run tests/functional/smoke-ssr.ts",
+    "test:privileges": "bun run tests/security/function-privileges.ts"
   },
   "dependencies": {
     "@capacitor/core": "^8.5.0",
