@@ -274,12 +274,12 @@ async function cleanup() {
 async function main() {
   /* ================= 1. Store configuration posture ================= */
   check(
-    "store mode is sandbox — no production store credentials connected",
+    "suite runs pinned to the sandbox store rail",
     storeMode() === "sandbox",
     storeMode(),
   );
-  check("no Apple production credentials present", !process.env["APPLE_IAP_PRIVATE_KEY"]);
-  check("no Google Play service account present", !process.env["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"]);
+  check("no Apple production credentials leak into the sandbox rail", !process.env["APPLE_IAP_PRIVATE_KEY"]);
+  check("no Google Play service account leaks into the sandbox rail", !process.env["GOOGLE_PLAY_SERVICE_ACCOUNT_JSON"]);
   check(
     "sandbox verification secret is configured and long enough",
     Boolean(secret && secret.length >= 16),
