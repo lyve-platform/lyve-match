@@ -16,7 +16,7 @@ type Filter = "pending" | "verified" | "rejected";
 
 /** Staff review queue. Every action is authorised inside the database. */
 export function AdminVerificationPanel() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<Filter>("pending");
   const [notes, setNotes] = useState<Record<string, string>>({});

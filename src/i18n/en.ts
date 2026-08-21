@@ -28,7 +28,6 @@ export const en = {
     signIn: "Sign in",
     getStarted: "Create Your Profile",
     languageLabel: "Language",
-    changeLanguage: "Change language",
   },
   hero: {
     eyebrow: "Global 18+ dating, relationships & marriage",

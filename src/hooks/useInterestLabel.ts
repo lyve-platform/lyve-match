@@ -4,7 +4,6 @@ import { useInterests } from "@/hooks/useAccount";
 
 /** Maps an interest slug to its localized label, falling back to the slug. */
 export function useInterestLabel() {
-  const { locale } = useI18n();
   const { data } = useInterests();
 
   return useCallback(
@@ -13,6 +12,6 @@ export function useInterestLabel() {
       if (!match) return slug.replace(/_/g, " ");
       return match.label_en;
     },
-    [data, locale],
+    [data],
   );
 }

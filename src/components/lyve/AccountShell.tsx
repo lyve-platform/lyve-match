@@ -23,7 +23,7 @@ export function AccountShell({
   wide?: boolean;
   children: ReactNode;
 }) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const session = useAdminSession();
   const standing = useMyStanding();
   const { user } = useAuth();

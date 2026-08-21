@@ -51,7 +51,7 @@ export function MessageBubble({
   otherLastReadAt: string | null;
   onWithdraw: (messageId: string) => Promise<unknown>;
 }) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const report = useReportMessage();
   const [confirmWithdraw, setConfirmWithdraw] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);

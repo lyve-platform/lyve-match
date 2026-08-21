@@ -31,7 +31,7 @@ export function AdminBillingPanel({
   enabled: boolean;
   permissions: string[];
 }) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const copy = t.adminBilling;
   const queryClient = useQueryClient();
 

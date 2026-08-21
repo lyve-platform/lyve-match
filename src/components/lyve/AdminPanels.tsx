@@ -33,7 +33,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 
 function useDate() {
-  const { locale } = useI18n();
   return (value: string | null | undefined) =>
     value
       ? new Date(value).toLocaleDateString("en", { dateStyle: "medium" })
@@ -451,7 +450,6 @@ export function AppealsPanel({
 /* --------------------------------------------------------------------- audit */
 export function AuditPanel({ enabled }: { enabled: boolean }) {
   const { t } = useI18n();
-  const { locale } = useI18n();
   const query = useAuditLog(enabled);
 
   if (query.isPending) return <Pending label={t.admin.loading} />;
