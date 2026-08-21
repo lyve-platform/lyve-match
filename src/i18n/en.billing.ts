@@ -20,6 +20,7 @@ export const enBilling = {
     iosOnlyBody:
       "Subscriptions are handled by the App Store. Open LYVE on your iPhone to subscribe, then use Restore purchase here to sync your account.",
     priceUnavailable: "Price to be announced",
+    priceInStore: "Shown in the App Store",
     perMonth: "per month",
     perYear: "per year",
     monthly: "Monthly",

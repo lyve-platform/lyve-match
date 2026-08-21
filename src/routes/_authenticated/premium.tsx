@@ -186,7 +186,7 @@ function PremiumPage() {
                         price?.amountMinor ?? null,
                         price?.currency ?? data.currency,
                         locale,
-                        copy.priceUnavailable,
+                        storeOnly ? copy.priceInStore : copy.priceUnavailable,
                       )}
                 </p>
                 <p className="text-sm text-muted-foreground">
