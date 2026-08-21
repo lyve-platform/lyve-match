@@ -198,18 +198,18 @@ not only in the notes).
 
 ## 6. Screenshot captions
 
-Use with the captured sets (6.9", 6.5", iPad 13").
+Captured sets live in `/mnt/documents/appstore-screenshots/` (6.9" 1290x2796,
+6.5" 1242x2688, iPad 13" 2048x2732). Upload in this order:
 
-| # | Screen | Caption |
+| # | File | Caption |
 | --- | --- | --- |
-| 1 | Home / hero | Meet. Match. Belong. |
-| 2 | Intention selection | You choose what you're looking for |
-| 3 | Discovery card | Matched on values, not just photos |
-| 4 | Compatibility insight | See why you're compatible |
-| 5 | Verified badge | Verified members, fewer fakes |
-| 6 | Messages | Conversations start only after a mutual match |
-| 7 | Safety | Block, report and unmatch in one tap |
-| 8 | Premium | Premium is optional — LYVE works free |
+| 1 | `01-hero.png` | Meet. Match. Belong. |
+| 2 | `02-how-it-works.png` | A calm, deliberate path to something real |
+| 3 | `03-compatibility.png` | See why you could work |
+| 4 | `04-intent.png` | You define what you are looking for |
+| 5 | `05-safety.png` | Safety built into the product |
+| 6 | `06-trust.png` | Fewer fakes, calmer conversations |
+| 7 | `07-premium.png` | Premium is optional — LYVE works free |
 
 ---
 
