@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AccountShell } from "@/components/lyve/AccountShell";
+import { VerifiedBadge } from "@/components/lyve/VerifiedBadge";
 import { SafetyMenu } from "@/components/lyve/SafetyMenu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -88,6 +89,7 @@ function MatchesPage() {
                       {match.age ? (
                         <span className="text-muted-foreground">, {match.age}</span>
                       ) : null}
+                      <VerifiedBadge verified={match.verified} className="ms-2 align-middle" />
                     </h2>
                     <SafetyMenu profileId={match.profileId} name={match.firstName || "—"} />
                   </div>

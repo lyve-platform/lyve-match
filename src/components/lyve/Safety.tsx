@@ -6,7 +6,7 @@ import { Section } from "./Section";
 
 const icons: LucideIcon[] = [UserCheck, Flag, Ban, BadgeCheck, EyeOff, ShieldAlert, Gavel];
 /** Indices of protections not yet operational — must stay clearly marked. */
-const plannedIndices = new Set([3, 5, 6]);
+const plannedIndices = new Set([5, 6]);
 
 export function Safety() {
   const { t } = useI18n();

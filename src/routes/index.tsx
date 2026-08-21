@@ -6,6 +6,7 @@ import { HowItWorks } from "@/components/lyve/HowItWorks";
 import { Compatibility } from "@/components/lyve/Compatibility";
 import { Intent } from "@/components/lyve/Intent";
 import { Safety } from "@/components/lyve/Safety";
+import { Trust } from "@/components/lyve/Trust";
 import { Premium } from "@/components/lyve/Premium";
 import { Testimonials } from "@/components/lyve/Testimonials";
 import { Faq } from "@/components/lyve/Faq";
@@ -55,6 +56,7 @@ function Index() {
         <Compatibility />
         <Intent />
         <Safety />
+        <Trust />
         <Premium />
         <Testimonials />
         <Faq />
