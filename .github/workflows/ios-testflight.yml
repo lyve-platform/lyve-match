@@ -1,5 +1,5 @@
 name: iOS TestFlight Build
-# workflow revision: sdk26-r3 (2026-08-21)
+# workflow revision: sdk26-r4 (2026-08-21)
 
 # Builds the LYVE iOS shell (Capacitor) on a hosted macOS runner and uploads
 # it to TestFlight. Runs automatically on pull requests that touch iOS or
@@ -30,7 +30,7 @@ jobs:
       SCHEME: App
       PROJECT: ios/App/App.xcodeproj
       BUNDLE_ID: app.lyve.ios
-      WORKFLOW_REVISION: sdk26-r3
+      WORKFLOW_REVISION: sdk26-r4
 
     steps:
       - name: Confirm workflow revision
