@@ -4,6 +4,7 @@ import { enMessages } from "./en.messages";
 import { enAdmin } from "./en.admin";
 import { enBilling } from "./en.billing";
 import { enSupport } from "./en.support";
+import { enVerification } from "./en.verification";
 
 export const en = {
   meta: {
@@ -418,6 +419,7 @@ export const en = {
   ...enAdmin,
   ...enBilling,
   ...enSupport,
+  ...enVerification,
 };
 
 export type Dictionary = typeof en;
