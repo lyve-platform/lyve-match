@@ -109,19 +109,25 @@ jobs:
         run: |
           echo "Workflow revision: $WORKFLOW_REVISION"
           selected_developer_dir=""
-          selected_sdk_major=0
+          selected_sdk_key=0
+          selected_sdk_version=""
 
           while IFS= read -r xcode_app; do
             developer_dir="$xcode_app/Contents/Developer"
             sdk_version=$(DEVELOPER_DIR="$developer_dir" xcrun --sdk iphoneos --show-sdk-version 2>/dev/null || true)
+            [ -n "$sdk_version" ] || continue
             sdk_major=${sdk_version%%.*}
+            sdk_minor=${sdk_version#*.}
+            sdk_minor=${sdk_minor%%.*}
+            [[ "$sdk_major" =~ ^[0-9]+$ ]] || continue
+            [[ "$sdk_minor" =~ ^[0-9]+$ ]] || sdk_minor=0
+            sdk_key=$((sdk_major * 1000 + sdk_minor))
 
-            if [[ "$sdk_major" =~ ^[0-9]+$ ]]; then
-              echo "Found $(basename "$xcode_app") with iOS SDK $sdk_version"
-              if [ "$sdk_major" -ge 26 ] && [ "$sdk_major" -gt "$selected_sdk_major" ]; then
-                selected_developer_dir="$developer_dir"
-                selected_sdk_major="$sdk_major"
-              fi
+            echo "Found $(basename "$xcode_app") with iOS SDK $sdk_version"
+            if [ "$sdk_major" -ge 26 ] && [ "$sdk_key" -gt "$selected_sdk_key" ]; then
+              selected_developer_dir="$developer_dir"
+              selected_sdk_key="$sdk_key"
+              selected_sdk_version="$sdk_version"
             fi
           done < <(find /Applications -maxdepth 1 -type d -name 'Xcode*.app' | sort)
 
@@ -134,9 +140,10 @@ jobs:
 
           sudo xcode-select -s "$selected_developer_dir"
           echo "DEVELOPER_DIR=$selected_developer_dir" >> "$GITHUB_ENV"
-          echo "Selected $selected_developer_dir"
-          xcodebuild -version
-          xcrun --sdk iphoneos --show-sdk-version
+          echo "Selected $selected_developer_dir (iOS SDK $selected_sdk_version)"
+          DEVELOPER_DIR="$selected_developer_dir" xcodebuild -version
+          DEVELOPER_DIR="$selected_developer_dir" xcrun --sdk iphoneos --show-sdk-version
+
 
       - name: Runner toolchain diagnostics
         run: |
