@@ -1144,6 +1144,7 @@ export type Database = {
           id: string
           last_active_at: string
           occupation: string | null
+          phone_verified_at: string | null
           relationship_intent:
             | Database["public"]["Enums"]["relationship_intent"]
             | null
@@ -1178,6 +1179,7 @@ export type Database = {
           id: string
           last_active_at?: string
           occupation?: string | null
+          phone_verified_at?: string | null
           relationship_intent?:
             | Database["public"]["Enums"]["relationship_intent"]
             | null
@@ -1212,6 +1214,7 @@ export type Database = {
           id?: string
           last_active_at?: string
           occupation?: string | null
+          phone_verified_at?: string | null
           relationship_intent?:
             | Database["public"]["Enums"]["relationship_intent"]
             | null
@@ -2307,6 +2310,14 @@ export type Database = {
       store_rate_limit_hit: {
         Args: { p_bucket: string; p_limit: number; p_window_seconds: number }
         Returns: Json
+      }
+      sync_phone_verification: {
+        Args: never
+        Returns: {
+          phone_hint: string
+          phone_verified: boolean
+          verified_at: string
+        }[]
       }
       trigger_account_purge_http: { Args: never; Returns: number }
       write_audit: {
