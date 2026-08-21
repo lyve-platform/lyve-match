@@ -234,7 +234,7 @@ const transactionPayload = (overrides: Record<string, unknown> = {}) => ({
 
 function clearStoreEnv() {
   for (const key of Object.keys(process.env)) {
-    if (/^(APPLE_IAP|GOOGLE_PLAY|GOOGLE_RTDN|LYVE_STORE|APPLE_SANDBOX)/.test(key))
+    if (/^(APPLE_IAP|APPSTORE_|GOOGLE_PLAY|GOOGLE_RTDN|LYVE_STORE|APPLE_SANDBOX)/.test(key))
       delete process.env[key];
   }
 }
