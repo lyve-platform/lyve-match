@@ -44,6 +44,30 @@ if (!url || !publishableKey || !serviceKey) {
   process.exit(1);
 }
 
+/**
+ * This suite exercises the SANDBOX rail. The deployment itself may now declare
+ * the production store environment (real Apple credentials are connected), so
+ * we pin this process to sandbox and strip production store credentials from
+ * the process env. The deployment's real production posture is asserted
+ * separately in tests/security/phase6c-production.ts.
+ */
+const PRODUCTION_STORE_VARS = [
+  "APPSTORE_ISSUER_ID",
+  "APPSTORE_KEY_ID",
+  "APPSTORE_PRIVATE_KEY",
+  "APPSTORE_BUNDLE_ID",
+  "APPLE_IAP_ISSUER_ID",
+  "APPLE_IAP_KEY_ID",
+  "APPLE_IAP_PRIVATE_KEY",
+  "APPLE_IAP_BUNDLE_ID",
+  "GOOGLE_PLAY_SERVICE_ACCOUNT_JSON",
+  "GOOGLE_PLAY_PACKAGE_NAME",
+  "GOOGLE_RTDN_AUDIENCE",
+  "GOOGLE_RTDN_SERVICE_ACCOUNT_EMAIL",
+] as const;
+for (const name of PRODUCTION_STORE_VARS) delete process.env[name];
+process.env["LYVE_STORE_ENVIRONMENT"] = "sandbox";
+
 const admin = createClient(url, serviceKey, { auth: { persistSession: false } });
 const anon = createClient(url, publishableKey, { auth: { persistSession: false } });
 
