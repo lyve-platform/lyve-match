@@ -21,9 +21,9 @@ on:
 
 jobs:
   build:
-    # App Store Connect requires builds produced with the iOS 26 SDK.
-    # macos-15 runners ship with Xcode 16 and the iOS 26 SDK by default.
-    runs-on: macos-15
+    # App Store Connect requires builds produced with the iOS 26 SDK,
+    # which ships with Xcode 26 on the macos-26 runner image.
+    runs-on: macos-26
     timeout-minutes: 60
 
     env:
