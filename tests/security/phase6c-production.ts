@@ -84,6 +84,10 @@ function check(name: string, ok: boolean, evidence: unknown = "") {
 
 const STORE_VARS = [
   "LYVE_STORE_ENVIRONMENT",
+  "APPSTORE_ISSUER_ID",
+  "APPSTORE_KEY_ID",
+  "APPSTORE_PRIVATE_KEY",
+  "APPSTORE_BUNDLE_ID",
   "APPLE_IAP_ISSUER_ID",
   "APPLE_IAP_KEY_ID",
   "APPLE_IAP_PRIVATE_KEY",
