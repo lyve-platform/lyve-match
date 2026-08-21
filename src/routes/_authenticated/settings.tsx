@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { BillingSettings } from "@/components/lyve/BillingSettings";
 import { BlockedMembers } from "@/components/lyve/BlockedMembers";
+import { PhoneVisibilityCard } from "@/components/lyve/PhoneVisibilityCard";
+
 
 import { PrivacyFields } from "@/routes/_authenticated/onboarding";
 import { Button } from "@/components/ui/button";
