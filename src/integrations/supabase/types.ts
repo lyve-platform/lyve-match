@@ -2196,6 +2196,7 @@ export type Database = {
           status_code: number
         }[]
       }
+      is_blocked_pair: { Args: { a: string; b: string }; Returns: boolean }
       likes_received: {
         Args: never
         Returns: {
