@@ -1,7 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useI18n } from "@/i18n";
 import { useAdminSession } from "@/hooks/useAdmin";
-import { useLocalizationSetting, useSetArabicEnabled } from "@/hooks/useLocalizationAdmin";
 import { usePaymentsSetting, useSetPaymentsEnabled } from "@/hooks/usePaymentsAdmin";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { Badge } from "@/components/ui/badge";
@@ -16,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/admin/settings")({
       { title: "Platform settings — LYVE staff console" },
       {
         name: "description",
-        content: "Internal LYVE platform configuration, including language availability.",
+        content: "Internal LYVE platform configuration and feature flags.",
       },
       { name: "robots", content: "noindex, nofollow" },
       { property: "og:title", content: "Platform settings — LYVE staff console" },
@@ -33,12 +32,8 @@ function AdminSettingsPage() {
   const session = useAdminSession();
   const isStaff = session.data?.isStaff === true;
   const permissions = session.data?.permissions ?? [];
-  const canEdit = permissions.includes("settings.localization");
-
   const canEditPayments = permissions.includes("settings.billing");
 
-  const setting = useLocalizationSetting(isStaff);
-  const toggle = useSetArabicEnabled();
   const payments = usePaymentsSetting(isStaff);
   const togglePayments = useSetPaymentsEnabled();
 
@@ -60,8 +55,6 @@ function AdminSettingsPage() {
     );
   }
 
-  const enabled = setting.data?.arabicEnabled === true;
-  const updatedAt = setting.data?.updatedAt;
   const paymentsOn = payments.data?.paymentsEnabled === true;
 
   return (
@@ -69,74 +62,6 @@ function AdminSettingsPage() {
       <Button asChild variant="ghost" size="sm" className="w-fit rounded-full">
         <Link to="/admin">{t.adminSettings.back}</Link>
       </Button>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>{t.adminSettings.localization}</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          {setting.isPending ? (
-            <p className="text-sm text-muted-foreground">{t.adminSettings.loading}</p>
-          ) : (
-            <>
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <Label htmlFor="arabic-toggle" className="text-base">
-                    {t.adminSettings.arabicLabel}
-                  </Label>
-                  <p className="max-w-prose text-sm text-muted-foreground">
-                    {t.adminSettings.arabicHelp}
-                  </p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant={enabled ? "default" : "secondary"}>
-                    {enabled ? t.adminSettings.enabled : t.adminSettings.disabled}
-                  </Badge>
-                  <Switch
-                    id="arabic-toggle"
-                    checked={enabled}
-                    disabled={!canEdit || toggle.isPending}
-                    onCheckedChange={(next) => toggle.mutate(next)}
-                  />
-                </div>
-              </div>
-
-              <dl className="grid gap-2 text-sm sm:grid-cols-2">
-                <div>
-                  <dt className="text-muted-foreground">{t.adminSettings.status}</dt>
-                  <dd>{enabled ? t.adminSettings.enabled : t.adminSettings.disabled}</dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground">{t.adminSettings.lastChanged}</dt>
-                  <dd>
-                    {updatedAt && setting.data?.updatedBy
-                      ? new Date(updatedAt).toLocaleString()
-                      : t.adminSettings.never}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="text-muted-foreground">{t.adminSettings.changedBy}</dt>
-                  <dd>
-                    {setting.data?.updatedBy
-                      ? (setting.data.updatedByName ?? setting.data.updatedBy)
-                      : t.adminSettings.system}
-                  </dd>
-                </div>
-              </dl>
-
-              {!canEdit ? (
-                <p className="text-sm text-muted-foreground">{t.adminSettings.denied}</p>
-              ) : null}
-              {toggle.isError ? (
-                <p className="text-sm text-destructive">{t.adminSettings.failed}</p>
-              ) : null}
-              {toggle.isSuccess ? (
-                <p className="text-sm text-muted-foreground">{t.adminSettings.saved}</p>
-              ) : null}
-            </>
-          )}
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader>
