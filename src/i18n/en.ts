@@ -4,6 +4,7 @@ import { enMessages } from "./en.messages";
 import { enAdmin } from "./en.admin";
 import { enBilling } from "./en.billing";
 import { enSupport } from "./en.support";
+import { enVerification } from "./en.verification";
 
 export const en = {
   meta: {
@@ -27,7 +28,6 @@ export const en = {
     signIn: "Sign in",
     getStarted: "Create Your Profile",
     languageLabel: "Language",
-    changeLanguage: "Change language",
   },
   hero: {
     eyebrow: "Global 18+ dating, relationships & marriage",
@@ -418,6 +418,7 @@ export const en = {
   ...enAdmin,
   ...enBilling,
   ...enSupport,
+  ...enVerification,
 };
 
 export type Dictionary = typeof en;

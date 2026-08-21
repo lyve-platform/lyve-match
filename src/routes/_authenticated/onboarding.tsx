@@ -347,7 +347,7 @@ function OnboardingPage() {
               <ChoiceChip
                 key={interest.id}
                 selected={(value("interestIds") as string[]).includes(interest.id)}
-                label={locale === "ar" ? interest.label_ar : interest.label_en}
+                label={interest.label_en}
                 onClick={() =>
                   set("interestIds", toggleIn(value("interestIds") as string[], interest.id))
                 }

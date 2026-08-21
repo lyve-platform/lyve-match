@@ -46,8 +46,8 @@ export function PhotoManager({ photos }: { photos: ProfilePhoto[] }) {
     }
   }
 
-  const Previous = dir === "rtl" ? ArrowRight : ArrowLeft;
-  const Next = dir === "rtl" ? ArrowLeft : ArrowRight;
+  const Previous = ArrowLeft;
+  const Next = ArrowRight;
 
   function move(index: number, delta: number) {
     const next = [...photos];

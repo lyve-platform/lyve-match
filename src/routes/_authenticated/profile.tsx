@@ -5,6 +5,8 @@ import { Loader2 } from "lucide-react";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { ProfileCompletion } from "@/components/lyve/ProfileCompletion";
 import { PhotoManager } from "@/components/lyve/PhotoManager";
+import { VerificationCard } from "@/components/lyve/VerificationCard";
+import { PhoneVerificationCard } from "@/components/lyve/PhoneVerificationCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -173,6 +175,10 @@ function ProfilePage() {
     <AccountShell title={t.profilePage.title} subtitle={t.profilePage.subtitle}>
       <ProfileCompletion account={account} />
 
+      <VerificationCard />
+
+      <PhoneVerificationCard />
+
       {!account.onboarding.is_complete ? (
         <Button asChild variant="outline" className="min-h-11 rounded-full">
           <Link to="/onboarding">{t.profilePage.continueOnboarding}</Link>
@@ -293,7 +299,7 @@ function ProfilePage() {
             <Chip
               key={interest.id}
               selected={form.interestIds.includes(interest.id)}
-              label={locale === "ar" ? interest.label_ar : interest.label_en}
+              label={interest.label_en}
               onClick={() => update({ interestIds: toggle(form.interestIds, interest.id) })}
             />
           ))}

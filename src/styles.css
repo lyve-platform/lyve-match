@@ -70,8 +70,8 @@
   --radius: 1rem;
 
   /* Typography */
-  --font-family-display: "Fraunces", "Noto Kufi Arabic", Georgia, serif;
-  --font-family-sans: "Manrope", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  --font-family-display: "Fraunces", Georgia, serif;
+  --font-family-sans: "Manrope", ui-sans-serif, system-ui, sans-serif;
 
   /* Brand surfaces — warm ivory, ember, plum, gold */
   --background: oklch(0.985 0.008 80);

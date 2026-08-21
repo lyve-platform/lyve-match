@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import { Menu, MessageCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Logo } from "./Logo";
-import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { NotificationBell } from "./NotificationBell";
 import { useI18n } from "@/i18n";
@@ -45,8 +44,6 @@ export function Header() {
               ))}
             </ul>
           </nav>
-
-          <LanguageSwitcher className="hidden md:inline-flex" />
 
           <ThemeToggle />
           {isAuthenticated ? (
@@ -103,7 +100,6 @@ export function Header() {
             ))}
           </ul>
           <div className="mt-4 flex flex-wrap items-center gap-3">
-            <LanguageSwitcher />
             <Button asChild className="rounded-full">
               <Link to={isAuthenticated ? "/profile" : "/auth"} onClick={() => setOpen(false)}>
                 {isAuthenticated ? t.authNav.profile : t.nav.getStarted}

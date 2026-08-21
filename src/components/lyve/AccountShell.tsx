@@ -4,7 +4,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { LogOut } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { Logo } from "./Logo";
-import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
@@ -24,7 +23,7 @@ export function AccountShell({
   wide?: boolean;
   children: ReactNode;
 }) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const session = useAdminSession();
   const standing = useMyStanding();
   const { user } = useAuth();
@@ -90,7 +89,6 @@ export function AccountShell({
                 <Link to="/admin">{t.adminNav.admin}</Link>
               </Button>
             ) : null}
-            <LanguageSwitcher className="hidden sm:inline-flex" />
             <ThemeToggle />
             <Button
               variant="outline"
@@ -131,7 +129,7 @@ export function AccountShell({
                   <span>
                     {fill(t.standing.until, {
                       date: new Date(standing.data.suspendedUntil).toLocaleDateString(
-                        locale === "ar" ? "ar" : "en",
+                        "en",
                         { dateStyle: "medium" },
                       ),
                     })}

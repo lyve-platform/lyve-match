@@ -31,7 +31,7 @@ export function AdminBillingPanel({
   enabled: boolean;
   permissions: string[];
 }) {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const copy = t.adminBilling;
   const queryClient = useQueryClient();
 
@@ -89,7 +89,7 @@ export function AdminBillingPanel({
 
   const date = (value: string | null) =>
     value
-      ? new Date(value).toLocaleDateString(locale === "ar" ? "ar" : "en", { dateStyle: "medium" })
+      ? new Date(value).toLocaleDateString("en", { dateStyle: "medium" })
       : "—";
 
   return (

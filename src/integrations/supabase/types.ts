@@ -1144,6 +1144,7 @@ export type Database = {
           id: string
           last_active_at: string
           occupation: string | null
+          phone_verified_at: string | null
           relationship_intent:
             | Database["public"]["Enums"]["relationship_intent"]
             | null
@@ -1153,6 +1154,8 @@ export type Database = {
           status_reason: string | null
           suspended_until: string | null
           updated_at: string
+          verification_status: Database["public"]["Enums"]["verification_status"]
+          verified_at: string | null
         }
         Insert: {
           account_status?: Database["public"]["Enums"]["account_status"]
@@ -1176,6 +1179,7 @@ export type Database = {
           id: string
           last_active_at?: string
           occupation?: string | null
+          phone_verified_at?: string | null
           relationship_intent?:
             | Database["public"]["Enums"]["relationship_intent"]
             | null
@@ -1185,6 +1189,8 @@ export type Database = {
           status_reason?: string | null
           suspended_until?: string | null
           updated_at?: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
         }
         Update: {
           account_status?: Database["public"]["Enums"]["account_status"]
@@ -1208,6 +1214,7 @@ export type Database = {
           id?: string
           last_active_at?: string
           occupation?: string | null
+          phone_verified_at?: string | null
           relationship_intent?:
             | Database["public"]["Enums"]["relationship_intent"]
             | null
@@ -1217,6 +1224,8 @@ export type Database = {
           status_reason?: string | null
           suspended_until?: string | null
           updated_at?: string
+          verification_status?: Database["public"]["Enums"]["verification_status"]
+          verified_at?: string | null
         }
         Relationships: []
       }
@@ -1745,6 +1754,47 @@ export type Database = {
         }
         Relationships: []
       }
+      verification_requests: {
+        Row: {
+          created_at: string
+          id: string
+          note: string | null
+          profile_id: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          selfie_path: string
+          status: Database["public"]["Enums"]["verification_status"]
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          profile_id: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path: string
+          status?: Database["public"]["Enums"]["verification_status"]
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          note?: string | null
+          profile_id?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          selfie_path?: string
+          status?: Database["public"]["Enums"]["verification_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "verification_requests_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -1936,6 +1986,23 @@ export type Database = {
           suspended_until: string
         }[]
       }
+      admin_list_verification_requests: {
+        Args: {
+          p_limit?: number
+          p_offset?: number
+          p_status?: Database["public"]["Enums"]["verification_status"]
+        }
+        Returns: {
+          created_at: string
+          nickname: string
+          note: string
+          profile_id: string
+          request_id: string
+          reviewed_at: string
+          selfie_path: string
+          status: Database["public"]["Enums"]["verification_status"]
+        }[]
+      }
       admin_localization_setting: {
         Args: never
         Returns: {
@@ -1979,6 +2046,10 @@ export type Database = {
       admin_reply_support_ticket: {
         Args: { p_body?: string; p_status?: string; p_ticket: string }
         Returns: undefined
+      }
+      admin_review_verification: {
+        Args: { p_approve: boolean; p_note?: string; p_request: string }
+        Returns: Database["public"]["Enums"]["verification_status"]
       }
       admin_revoke_entitlement: {
         Args: { p_entitlement: string; p_reason: string }
@@ -2098,6 +2169,7 @@ export type Database = {
           exercise: Database["public"]["Enums"]["exercise_habit"]
           first_name: string
           interest_slugs: string[]
+          is_verified: boolean
           last_active_at: string
           photo_paths: string[]
           profile_id: string
@@ -2133,6 +2205,7 @@ export type Database = {
           country: string
           first_name: string
           interest_slugs: string[]
+          is_verified: boolean
           liked_at: string
           photo_paths: string[]
           profile_id: string
@@ -2179,11 +2252,21 @@ export type Database = {
           country: string
           first_name: string
           interest_slugs: string[]
+          is_verified: boolean
           match_id: string
           matched_at: string
           photo_paths: string[]
           profile_id: string
           relationship_intent: Database["public"]["Enums"]["relationship_intent"]
+        }[]
+      }
+      my_verification: {
+        Args: never
+        Returns: {
+          note: string
+          status: Database["public"]["Enums"]["verification_status"]
+          submitted_at: string
+          verified_at: string
         }[]
       }
       nickname_available: { Args: { _nickname: string }; Returns: boolean }
@@ -2194,6 +2277,10 @@ export type Database = {
         Returns: {
           purged_profile_id: string
         }[]
+      }
+      request_photo_verification: {
+        Args: { p_path: string }
+        Returns: Database["public"]["Enums"]["verification_status"]
       }
       scheduled_job_status: {
         Args: { p_jobname: string }
@@ -2223,6 +2310,14 @@ export type Database = {
       store_rate_limit_hit: {
         Args: { p_bucket: string; p_limit: number; p_window_seconds: number }
         Returns: Json
+      }
+      sync_phone_verification: {
+        Args: never
+        Returns: {
+          phone_hint: string
+          phone_verified: boolean
+          verified_at: string
+        }[]
       }
       trigger_account_purge_http: { Args: never; Returns: number }
       write_audit: {
@@ -2345,6 +2440,7 @@ export type Database = {
         | "canceled"
         | "expired"
         | "incomplete"
+      verification_status: "unverified" | "pending" | "verified" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2586,6 +2682,7 @@ export const Constants = {
         "expired",
         "incomplete",
       ],
+      verification_status: ["unverified", "pending", "verified", "rejected"],
     },
   },
 } as const

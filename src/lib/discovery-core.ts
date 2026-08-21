@@ -43,6 +43,7 @@ export type CandidateRow = {
   they_want_my_intent: boolean | null;
   completeness: number | null;
   last_active_at: string | null;
+  is_verified?: boolean | null;
 };
 
 /** Everything — and only what — the browser receives about another member. */
@@ -59,6 +60,8 @@ export type DiscoveryCard = {
   interestSlugs: string[];
   bio: string | null;
   photoUrls: string[];
+  /** True only when a reviewer approved this member's verification selfie. */
+  verified: boolean;
   compatibility: CompatibilityResult | null;
 };
 
@@ -158,6 +161,7 @@ export function toDiscoveryCard(
     interestSlugs: (row.interest_slugs ?? []).slice(0, 6),
     bio: row.bio,
     photoUrls,
+    verified: row.is_verified === true,
     compatibility,
   };
 }

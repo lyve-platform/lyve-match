@@ -20,7 +20,7 @@ export function LegalPage({ page }: { page: keyof ReturnType<typeof usePages> })
   const { t, dir } = useI18n();
   const pages = usePages();
   const content: LegalContent = pages[page];
-  const BackIcon = dir === "rtl" ? ArrowRight : ArrowLeft;
+  const BackIcon = ArrowLeft;
   const noticeTitle = content.notice?.title ?? t.legal.draftTitle;
   const noticeBody = content.notice?.body ?? t.legal.draftBody;
   const questionsTitle = content.contact?.title ?? t.legal.questionsTitle;

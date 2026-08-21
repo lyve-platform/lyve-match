@@ -16,6 +16,7 @@ import { AdminSupportPanel } from "@/components/lyve/AdminSupportPanel";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AdminVerificationPanel } from "@/components/lyve/AdminVerificationPanel";
 
 export const Route = createFileRoute("/_authenticated/admin/")({
   head: () => ({
@@ -99,6 +100,9 @@ function AdminPage() {
           ) : null}
           {canSeeCases ? <TabsTrigger value="cases">{t.admin.tabs.cases}</TabsTrigger> : null}
           {canSeeUsers ? <TabsTrigger value="users">{t.admin.tabs.users}</TabsTrigger> : null}
+          {canSeeCases ? (
+            <TabsTrigger value="verification">{t.adminVerification.tab}</TabsTrigger>
+          ) : null}
           {canSeeAppeals ? <TabsTrigger value="appeals">{t.admin.tabs.appeals}</TabsTrigger> : null}
           {canSeeBilling ? <TabsTrigger value="billing">{t.adminBilling.tab}</TabsTrigger> : null}
           {canSeeSupport ? <TabsTrigger value="support">{t.adminSupport.title}</TabsTrigger> : null}
@@ -111,6 +115,9 @@ function AdminPage() {
         </TabsContent>
         <TabsContent value="cases" className="mt-6">
           <CasesPanel enabled={canSeeCases && tab === "cases"} permissions={permissions} />
+        </TabsContent>
+        <TabsContent value="verification" className="mt-6">
+          {tab === "verification" ? <AdminVerificationPanel /> : null}
         </TabsContent>
         <TabsContent value="users" className="mt-6">
           <UsersPanel enabled={canSeeUsers && tab === "users"} />

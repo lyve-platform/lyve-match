@@ -136,7 +136,7 @@ function SettingsPage() {
 
   const pending = account.deletionRequest;
   const scheduledDate = pending
-    ? new Intl.DateTimeFormat(locale === "ar" ? "ar" : "en", { dateStyle: "long" }).format(
+    ? new Intl.DateTimeFormat("en", { dateStyle: "long" }).format(
         new Date(new Date(pending.created_at).getTime() + DELETION_GRACE_DAYS * 86_400_000),
       )
     : null;

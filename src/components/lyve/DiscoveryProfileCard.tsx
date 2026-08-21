@@ -4,6 +4,7 @@ import { useI18n } from "@/i18n";
 import { fill } from "@/lib/format";
 import type { DiscoveryCard } from "@/lib/discovery-core";
 import { CompatibilityInsight } from "./CompatibilityInsight";
+import { VerifiedBadge } from "./VerifiedBadge";
 import { SafetyMenu } from "./SafetyMenu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -85,6 +86,7 @@ export function DiscoveryProfileCard({
           <h2 className="text-xl font-semibold">
             {name}
             {card.age ? <span className="text-muted-foreground">, {card.age}</span> : null}
+            <VerifiedBadge verified={card.verified} className="ms-2 align-middle" />
           </h2>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
             <MapPin className="size-4" aria-hidden="true" />
