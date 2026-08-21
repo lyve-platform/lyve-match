@@ -50,6 +50,31 @@ export const enVerification = {
     privacy:
       "Your phone number is never shown on your profile or shared with other members. It is used only for verification and account security.",
   },
+  phoneVisibility: {
+    title: "Phone number visibility",
+    subtitle:
+      "Your phone number is stored inside the authentication system, not on your public profile. Everywhere in the app it appears masked, so only the last digits are ever rendered.",
+    storedLabel: "Stored on your account",
+    notVerified: "No verified number yet",
+    verifiedTag: "Verified",
+    maskExplainer:
+      "Masking example: +971 50 123 4567 is shown as ••••4567. The full number is never sent to the browser, never included in profile or match data, and never appears in messages.",
+    canSeeTitle: "Who can see it",
+    canSee: [
+      "You — masked as ••••1234 here in Settings.",
+      "The authentication service, to deliver your SMS code.",
+      "Trust & Safety staff, only when investigating a report or appeal tied to your account, and every access is written to the admin audit log.",
+    ],
+    cannotSeeTitle: "Who can never see it",
+    cannotSee: [
+      "Other members, including your matches — no full or partial number is exposed.",
+      "Discovery, likes, matches and chat screens.",
+      "Search engines, shared links, and any exported or public data.",
+    ],
+    footnote:
+      "Removing your number: request account deletion below, or contact support to unlink it. Deleting your account removes the number with the rest of your data.",
+  },
+
   trust: {
     title: "Real people, calmer conversations",
     subtitle:
