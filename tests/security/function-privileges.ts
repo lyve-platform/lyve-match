@@ -38,13 +38,9 @@ function check(name: string, ok: boolean, evidence: unknown = "") {
 
 // The report routine itself is permission-gated, so the audit reads the
 // catalog through the service role.
-const { data: rows, error } = await admin.rpc("admin_function_privilege_report");
+const { data: rows, error } = await admin.rpc("security_privilege_audit");
 
-if (error) {
-  // Service role has no auth.uid(), so the permission check refuses it. Fall
-  // back to a direct catalog read through a dedicated maintenance query.
-  console.log(`NOTE  privilege report RPC refused for service role: ${error.message}`);
-}
+check("privilege catalog is readable by the service role", !error, error?.message);
 
 const catalog: FunctionPrivilege[] = ((rows ?? []) as Array<Record<string, unknown>>).map((r) => ({
   functionName: String(r["function_name"]),
@@ -55,7 +51,7 @@ const catalog: FunctionPrivilege[] = ((rows ?? []) as Array<Record<string, unkno
   serviceRoleExecute: Boolean(r["service_role_execute"]),
 }));
 
-if (catalog.length > 0) {
+{
   const violations = privilegeViolations(catalog);
   check("no least-privilege violations across public routines", violations.length === 0, violations);
   check("catalog is non-trivial", catalog.length > 20, catalog.length);
@@ -65,6 +61,7 @@ if (catalog.length > 0) {
 // catalog says.
 const anonProbes: Array<[string, Record<string, unknown>]> = [
   ["admin_function_privilege_report", {}],
+  ["security_privilege_audit", {}],
   ["admin_list_security_alerts", { p_limit: 1 }],
   ["admin_acknowledge_security_alert", { p_alert: "00000000-0000-0000-0000-000000000000" }],
   ["admin_list_audit", { p_limit: 1 }],
