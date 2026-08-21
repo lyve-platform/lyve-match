@@ -129,6 +129,42 @@ jobs:
           xcodebuild -version
           xcrun --sdk iphoneos --show-sdk-version
 
+      - name: Runner toolchain diagnostics
+        run: |
+          log="$RUNNER_TEMP/toolchain-diagnostics.log"
+          {
+            echo "=== Runner image ==="
+            sw_vers || true
+            uname -a || true
+            echo
+            echo "=== Installed Xcode apps ==="
+            for app in /Applications/Xcode*.app; do
+              [ -d "$app" ] || continue
+              ver=$(DEVELOPER_DIR="$app/Contents/Developer" xcodebuild -version 2>/dev/null | tr '\n' ' ')
+              sdk=$(DEVELOPER_DIR="$app/Contents/Developer" xcrun --sdk iphoneos --show-sdk-version 2>/dev/null)
+              echo "$app | $ver | iOS SDK ${sdk:-unknown}"
+            done
+            echo
+            echo "=== Active toolchain ==="
+            xcode-select -p || true
+            xcodebuild -version || true
+            echo "Active iOS SDK: $(xcrun --sdk iphoneos --show-sdk-version 2>/dev/null)"
+            echo
+            echo "=== Available SDKs ==="
+            xcodebuild -showsdks || true
+            echo
+            echo "=== Signing identities (names only) ==="
+            security find-identity -v -p codesigning | sed 's/[0-9A-F]\{40\}/<hash>/g' || true
+          } 2>&1 | tee "$log"
+
+          {
+            echo "### iOS toolchain"
+            echo '```'
+            grep -E 'Xcode|iOS SDK|Active' "$log" | head -n 40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+
       - name: Build web assets
         run: bun run build
 
