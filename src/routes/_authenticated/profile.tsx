@@ -6,7 +6,6 @@ import { AccountShell } from "@/components/lyve/AccountShell";
 import { ProfileCompletion } from "@/components/lyve/ProfileCompletion";
 import { PhotoManager } from "@/components/lyve/PhotoManager";
 import { VerificationCard } from "@/components/lyve/VerificationCard";
-import { PhoneVerificationCard } from "@/components/lyve/PhoneVerificationCard";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -177,7 +176,6 @@ function ProfilePage() {
 
       <VerificationCard />
 
-      <PhoneVerificationCard />
 
       {!account.onboarding.is_complete ? (
         <Button asChild variant="outline" className="min-h-11 rounded-full">
