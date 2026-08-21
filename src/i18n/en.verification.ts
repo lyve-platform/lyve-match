@@ -57,6 +57,7 @@ export const enVerification = {
     catfishTitle: "Protection against catfishing",
     catfishItems: [
       "Photo verification: a reviewer compares a live selfie with the profile photos before the Verified badge is granted.",
+      "Phone verification by SMS code ties one account to one number.",
       "One account per person, adults only, with date of birth required at signup.",
       "Report any profile in a few taps; high-risk reports go to human review.",
       "Repeated impersonation leads to removal, and every decision is logged.",
