@@ -176,6 +176,15 @@ function SettingsPage() {
         </div>
       </section>
 
+      <section aria-labelledby="phone-visibility-heading" className="surface-panel space-y-3 p-5">
+        <h2 id="phone-visibility-heading" className="text-base font-semibold">
+          {t.phoneVisibility.title}
+        </h2>
+        <PhoneVisibilityCard />
+      </section>
+
+
+
       <section aria-labelledby="billing-heading" className="surface-panel space-y-3 p-5">
         <h2 id="billing-heading" className="text-base font-semibold">
           {t.billingSettings.title}
