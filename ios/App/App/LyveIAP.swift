@@ -61,8 +61,19 @@ public class LyveIAP: CAPPlugin {
     }
   }
 
+  /// Restore purchases.
+  ///
+  /// `AppStore.sync()` re-authenticates with the App Store so a reinstall or a
+  /// new device sees the Apple ID's transactions, then every current
+  /// entitlement is returned as a signed transaction for server verification.
   @objc func restore(_ call: CAPPluginCall) {
     Task {
+      do {
+        try await AppStore.sync()
+      } catch {
+        // A cancelled or failed sync must not hide entitlements already cached.
+        print("[LyveIAP] AppStore.sync failed: \(error.localizedDescription)")
+      }
       var payloads: [String] = []
       for await result in Transaction.currentEntitlements {
         payloads.append(result.jwsRepresentation)
@@ -70,4 +81,5 @@ public class LyveIAP: CAPPlugin {
       call.resolve(["jws": payloads])
     }
   }
+
 }
