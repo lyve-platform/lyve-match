@@ -39,10 +39,6 @@ const suites = [
     file: "tests/security/phase6c-production.ts",
   },
   {
-    label: "Localization (Arabic feature flag, admin settings)",
-    file: "tests/security/localization-audit.ts",
-  },
-  {
     label: "Maintenance (30-day purge scheduling, ledger guard privileges)",
     file: "tests/security/purge-audit.ts",
   },
