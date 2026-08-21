@@ -39,6 +39,10 @@ const suites = [
     file: "tests/security/phase6c-production.ts",
   },
   {
+    label: "StoreKit entitlement activation (purchase, restore, revocation)",
+    file: "tests/security/storekit-entitlement.ts",
+  },
+  {
     label: "Least privilege (database routine grants, security monitoring)",
     file: "tests/security/function-privileges.ts",
   },
