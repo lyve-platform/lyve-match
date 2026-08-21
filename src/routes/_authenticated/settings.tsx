@@ -6,7 +6,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { BillingSettings } from "@/components/lyve/BillingSettings";
 import { BlockedMembers } from "@/components/lyve/BlockedMembers";
-import { PhoneVisibilityCard } from "@/components/lyve/PhoneVisibilityCard";
 
 
 import { PrivacyFields } from "@/routes/_authenticated/onboarding";
@@ -178,12 +177,6 @@ function SettingsPage() {
         </div>
       </section>
 
-      <section aria-labelledby="phone-visibility-heading" className="surface-panel space-y-3 p-5">
-        <h2 id="phone-visibility-heading" className="text-base font-semibold">
-          {t.phoneVisibility.title}
-        </h2>
-        <PhoneVisibilityCard />
-      </section>
 
 
 
