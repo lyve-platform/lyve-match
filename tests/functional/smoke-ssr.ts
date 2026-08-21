@@ -10,7 +10,7 @@
  */
 
 const BASE_URL = (process.env["SMOKE_BASE_URL"] ?? "http://localhost:8080").replace(/\/$/, "");
-const ROUTES = (process.env["SMOKE_ROUTES"] ?? "/,/auth,/legal/privacy").split(",");
+const ROUTES = (process.env["SMOKE_ROUTES"] ?? "/,/auth,/privacy,/terms").split(",");
 const ATTEMPTS = Number(process.env["SMOKE_ATTEMPTS"] ?? 5);
 const RETRY_DELAY_MS = 2_000;
 
