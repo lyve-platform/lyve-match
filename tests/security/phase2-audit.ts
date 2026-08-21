@@ -132,6 +132,7 @@ const CANDIDATE_ALLOWLIST = new Set([
   "they_want_my_intent",
   "completeness",
   "last_active_at",
+  "is_verified",
   "liked_at",
   "match_id",
   "matched_at",
