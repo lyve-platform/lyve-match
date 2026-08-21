@@ -1,6 +1,5 @@
 import { Link } from "@tanstack/react-router";
 import { Logo } from "./Logo";
-import { LanguageSwitcher } from "./LanguageSwitcher";
 import { ThemeToggle } from "./ThemeToggle";
 import { useI18n } from "@/i18n";
 
@@ -37,7 +36,6 @@ export function Footer() {
             <Logo />
             <p className="mt-4 max-w-xs text-sm text-muted-foreground">{t.footer.description}</p>
             <div className="mt-5 flex flex-wrap items-center gap-3">
-              <LanguageSwitcher />
               <ThemeToggle />
             </div>
           </div>

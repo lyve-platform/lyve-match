@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { Logo } from "@/components/lyve/Logo";
-import { LanguageSwitcher } from "@/components/lyve/LanguageSwitcher";
 import { ThemeToggle } from "@/components/lyve/ThemeToggle";
 import { useI18n } from "@/i18n";
 
@@ -29,7 +28,6 @@ export function AuthShell({
           <Logo />
         </Link>
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <ThemeToggle />
         </div>
       </header>
