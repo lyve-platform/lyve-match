@@ -20,11 +20,15 @@ import { useBilling, useBillingActions } from "@/hooks/useBilling";
 import { BILLING_PLANS, FEATURE_MATRIX, priceFor } from "@/config/billing";
 import {
   fetchProducts,
-  iapAvailable,
+  iapAvailability,
   productIdForPlan,
   purchaseAndLink,
+  restoreAndLink,
+  type IapAvailability,
   type IapProduct,
 } from "@/lib/native/iap";
+import { PremiumDiagnostics } from "@/components/lyve/PremiumDiagnostics";
+import { iapLog } from "@/lib/native/iap-log";
 import { linkStorePurchase } from "@/lib/billing-store.functions";
 import type { BillingSnapshot } from "@/lib/billing-core";
 
@@ -66,13 +70,22 @@ function PremiumPage() {
   const copy = t.premiumPage;
 
   // StoreKit purchases only exist inside the iOS shell; the web build is untouched.
-  const [storeReady, setStoreReady] = useState(false);
+  const [availability, setAvailability] = useState<IapAvailability>({
+    available: false,
+    reason: "not_native",
+  });
+  const storeReady = availability.available;
   const [storePrices, setStorePrices] = useState<Record<string, IapProduct>>({});
   const [buying, setBuying] = useState<string | null>(null);
+  const [restoring, setRestoring] = useState(false);
 
   useEffect(() => {
-    if (!iapAvailable()) return;
-    setStoreReady(true);
+    const state = iapAvailability();
+    setAvailability(state);
+    if (!state.available) {
+      iapLog("info", "storekit.unavailable", { reason: state.reason });
+      return;
+    }
     const ids = BILLING_PLANS.map((plan) => productIdForPlan(plan.code)).filter(
       (id): id is NonNullable<ReturnType<typeof productIdForPlan>> => id !== undefined,
     );
@@ -132,11 +145,40 @@ function PremiumPage() {
   }
 
 
+  /**
+   * Restore purchases.
+   *
+   * Inside the iOS shell this replays StoreKit's signed transactions through
+   * server verification first, then refreshes the snapshot, so entitlement
+   * state updates immediately. On the web it is a pure server refresh.
+   */
+  async function restorePurchases() {
+    setRestoring(true);
+    try {
+      if (storeReady) {
+        const summary = await restoreAndLink(link);
+        const snapshot = await actions.restore.mutateAsync();
+        if (summary.linked > 0 && snapshot.isPremium) toast.success(copy.restore.linked);
+        else if (summary.failures.length > 0) {
+          toast.error(copy.storeErrors[summary.failures[0]!] ?? copy.restore.failed);
+        } else if (summary.found === 0) toast.message(copy.restore.none);
+        else toast.success(copy.actions.restored);
+        return;
+      }
+      await actions.restore.mutateAsync();
+      toast.success(copy.actions.restored);
+    } catch (error) {
+      iapLog("error", "restore.failed", { message: String((error as Error)?.message ?? error) });
+      toast.error(copy.errors.GENERIC);
+    } finally {
+      setRestoring(false);
+    }
+  }
+
   async function run(action: "cancel" | "resume" | "manage" | "restore") {
     try {
       if (action === "restore") {
-        await actions.restore.mutateAsync();
-        toast.success(copy.actions.restored);
+        await restorePurchases();
         return;
       }
       const result = await actions[action].mutateAsync();
@@ -155,6 +197,12 @@ function PremiumPage() {
       <ProviderNotice snapshot={data} storeReady={storeReady} />
 
       <SubscriptionState snapshot={data} />
+
+      <PremiumDiagnostics
+        snapshot={data}
+        availability={availability}
+        productsLoaded={Object.keys(storePrices).length}
+      />
 
       <section aria-labelledby="plans-heading" className="space-y-4">
         <h2 id="plans-heading" className="font-display text-xl font-semibold">
@@ -248,8 +296,10 @@ function PremiumPage() {
         <Button
           variant="outline"
           className="min-h-11 rounded-full"
+          disabled={restoring}
           onClick={() => void run("restore")}
         >
+          {restoring ? <Loader2 aria-hidden="true" className="animate-spin" /> : null}
           {copy.actions.restore}
         </Button>
         {data.portalSupported ? (
