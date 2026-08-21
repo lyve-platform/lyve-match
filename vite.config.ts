@@ -12,4 +12,44 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    optimizeDeps: {
+      // Pre-bundle the dependencies the first render pulls in. Discovering them
+      // lazily is what triggers a mid-request "optimized dependencies changed"
+      // reload, which aborts in-flight SSR requests and shows a blank screen.
+      include: [
+        "react",
+        "react-dom",
+        "react-dom/client",
+        "react/jsx-runtime",
+        "react/jsx-dev-runtime",
+        "@tanstack/react-router",
+        "@tanstack/react-start",
+        "@tanstack/react-query",
+        "@tanstack/history",
+        "@tanstack/router-core",
+        "@supabase/supabase-js",
+        "lucide-react",
+        "sonner",
+        "zod",
+        "clsx",
+        "tailwind-merge",
+        "class-variance-authority",
+        "date-fns",
+        "react-hook-form",
+        "@hookform/resolvers/zod",
+      ],
+      // Finish crawling the whole entry graph before serving, so the optimizer
+      // does not discover new deps (and restart) after requests start.
+      holdUntilCrawlEnd: true,
+    },
+    server: {
+      // Warm the SSR + client entries at startup so the first real request never
+      // races the optimizer.
+      warmup: {
+        clientFiles: ["./src/router.tsx", "./src/routes/__root.tsx", "./src/routes/index.tsx"],
+        ssrFiles: ["./src/server.ts", "./src/start.ts", "./src/routes/__root.tsx"],
+      },
+    },
+  },
 });

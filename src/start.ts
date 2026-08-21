@@ -1,35 +1,45 @@
 import { createStart, createCsrfMiddleware, createMiddleware } from "@tanstack/react-start";
 
 import { renderErrorPage } from "./lib/error-page";
+import { isAbortError, newRequestId, recordAbort, ssrLog } from "./lib/ssr-log";
 import { attachSupabaseAuth } from "@/integrations/supabase/auth-attacher";
 
-// A client that navigates away / cancels mid-render aborts the socket. That is
-// not an application error: don't log it and don't render the error page.
-const isAbortError = (error: unknown) => {
-  if (error == null || typeof error !== "object") return false;
-  const err = error as { name?: string; message?: string; code?: string };
-  return (
-    err.name === "AbortError" ||
-    err.message === "aborted" ||
-    err.code === "ECONNRESET" ||
-    err.code === "ABORT_ERR"
-  );
-};
-
 const errorMiddleware = createMiddleware().server(async ({ next }) => {
+  const requestId = newRequestId();
   try {
     return await next();
   } catch (error) {
     if (error != null && typeof error === "object" && "statusCode" in error) {
       throw error;
     }
+
+    // A client that navigates away / cancels mid-render aborts the socket, and
+    // so does a dev-server restart. Serve the friendly auto-retrying page
+    // rather than a blank document, and alert when aborts come in bursts.
     if (isAbortError(error)) {
-      return new Response(null, { status: 499 });
+      recordAbort({ requestId, source: "request_middleware" });
+      return new Response(
+        renderErrorPage({ variant: "aborted", requestId, retryAfterSeconds: 3 }),
+        {
+          status: 503,
+          headers: {
+            "content-type": "text/html; charset=utf-8",
+            "retry-after": "2",
+            "cache-control": "no-store",
+            "x-request-id": requestId,
+          },
+        },
+      );
     }
-    console.error(error);
-    return new Response(renderErrorPage(), {
+
+    ssrLog("error", { requestId, event: "request_middleware_error" }, error);
+    return new Response(renderErrorPage({ variant: "error", requestId }), {
       status: 500,
-      headers: { "content-type": "text/html; charset=utf-8" },
+      headers: {
+        "content-type": "text/html; charset=utf-8",
+        "cache-control": "no-store",
+        "x-request-id": requestId,
+      },
     });
   }
 });
