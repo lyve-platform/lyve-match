@@ -1,5 +1,6 @@
-import { Crown } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { Check, Crown } from "lucide-react";
+import { Link } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n";
 import { Section } from "./Section";
 
@@ -17,16 +18,17 @@ export function Premium() {
           {t.premium.items.map((item) => (
             <li
               key={item}
-              className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-background px-4 py-3"
+              className="flex items-center gap-3 rounded-2xl border border-border bg-background px-4 py-3"
             >
+              <Check aria-hidden="true" className="size-4 shrink-0 text-primary" />
               <span className="min-w-0 text-sm font-medium">{item}</span>
-              <Badge variant="outline" className="shrink-0 rounded-full text-xs">
-                {t.premium.plannedBadge}
-              </Badge>
             </li>
           ))}
         </ul>
-        <div className="border-t border-border px-6 py-6 text-center md:px-8">
+        <div className="space-y-4 border-t border-border px-6 py-6 text-center md:px-8">
+          <Button asChild className="min-h-11 rounded-full px-8">
+            <Link to="/premium">{t.premium.cta}</Link>
+          </Button>
           <p className="text-sm text-muted-foreground">{t.premium.note}</p>
         </div>
       </div>

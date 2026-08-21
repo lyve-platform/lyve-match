@@ -152,7 +152,7 @@ function PremiumPage() {
 
   return (
     <AccountShell title={copy.title} subtitle={copy.subtitle} wide>
-      <ProviderNotice snapshot={data} />
+      <ProviderNotice snapshot={data} storeReady={storeReady} />
 
       <SubscriptionState snapshot={data} />
 
@@ -166,6 +166,7 @@ function PremiumPage() {
             const productId = productIdForPlan(plan.code);
             const storePrice = productId ? storePrices[productId] : undefined;
             const pending = buying === plan.code || (!storeReady && actions.checkout.isPending);
+            const storeOnly = data.provider === "apple" && !storeReady;
             return (
               <article key={plan.code} className="surface-panel space-y-3 p-6">
                 <div className="flex items-center justify-between gap-3">
@@ -185,7 +186,7 @@ function PremiumPage() {
                         price?.amountMinor ?? null,
                         price?.currency ?? data.currency,
                         locale,
-                        copy.priceUnavailable,
+                        storeOnly ? copy.priceInStore : copy.priceUnavailable,
                       )}
                 </p>
                 <p className="text-sm text-muted-foreground">
@@ -193,7 +194,7 @@ function PremiumPage() {
                 </p>
                 <Button
                   className="min-h-11 w-full rounded-full"
-                  disabled={(!storeReady && !data.checkoutOffered) || pending}
+                  disabled={storeOnly || (!storeReady && !data.checkoutOffered) || pending}
                   onClick={() => void subscribe(plan.code)}
                 >
                   {pending ? (
@@ -201,7 +202,7 @@ function PremiumPage() {
                   ) : (
                     <Crown aria-hidden="true" />
                   )}
-                  {copy.actions.subscribe}
+                  {storeOnly ? copy.actions.iosOnly : copy.actions.subscribe}
                 </Button>
 
               </article>
@@ -295,9 +296,25 @@ function Cell({ on, yes, no }: { on: boolean; yes: string; no: string }) {
   );
 }
 
-function ProviderNotice({ snapshot }: { snapshot: BillingSnapshot }) {
+function ProviderNotice({
+  snapshot,
+  storeReady,
+}: {
+  snapshot: BillingSnapshot;
+  storeReady: boolean;
+}) {
   const { t } = useI18n();
   const copy = t.premiumPage;
+
+  // Apple billing exists only inside the iOS shell; on the web we say so plainly.
+  if (snapshot.provider === "apple" && !storeReady) {
+    return (
+      <div role="note" className="rounded-2xl border border-primary/40 bg-primary/5 p-5">
+        <p className="font-semibold">{copy.iosOnlyTitle}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{copy.iosOnlyBody}</p>
+      </div>
+    );
+  }
 
   if (!snapshot.checkoutOffered) {
     return (
