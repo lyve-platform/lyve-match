@@ -12,9 +12,14 @@ import StoreKit
 public class LyveIAP: CAPPlugin {
 
   /// Localized display prices, straight from the App Store. No price is hard-coded in the app.
+  ///
+  /// Also reports the storefront and any ids the App Store did not return, so
+  /// the diagnostics panel can distinguish "wrong id" from "store returned
+  /// nothing" (typically an inactive Paid Applications agreement).
   @objc func products(_ call: CAPPluginCall) {
     let ids = call.getArray("productIds", String.self) ?? []
     Task {
+      let storefront = await Storefront.current?.countryCode ?? "unknown"
       do {
         let storeProducts = try await Product.products(for: Set(ids))
         let payload: [[String: Any]] = storeProducts.map { product in
@@ -25,12 +30,18 @@ public class LyveIAP: CAPPlugin {
             "title": product.displayName,
           ]
         }
-        call.resolve(["products": payload])
+        let returned = Set(storeProducts.map(\.id))
+        call.resolve([
+          "products": payload,
+          "storefront": storefront,
+          "missing": ids.filter { !returned.contains($0) },
+        ])
       } catch {
-        call.reject(error.localizedDescription)
+        call.reject(error.localizedDescription, nil, error, ["storefront": storefront])
       }
     }
   }
+
 
   @objc func purchase(_ call: CAPPluginCall) {
     guard let productId = call.getString("productId") else {
