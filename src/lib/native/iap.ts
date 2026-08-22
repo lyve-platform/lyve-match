@@ -21,7 +21,9 @@ export type IapProduct = {
 };
 
 type LyveIapPlugin = {
-  products(options: { productIds: string[] }): Promise<{ products?: IapProduct[] }>;
+  products(options: {
+    productIds: string[];
+  }): Promise<{ products?: IapProduct[]; storefront?: string; missing?: string[] }>;
   purchase(options: {
     productId: string;
   }): Promise<{ jws?: string; cancelled?: boolean; pending?: boolean }>;
@@ -77,9 +79,14 @@ export async function fetchProducts(productIds: IapProductId[]): Promise<IapProd
       iapLog("warn", "products.incomplete", {
         requested: productIds.length,
         returned: products.length,
+        storefront: result?.storefront ?? "unknown",
+        missing: (result?.missing ?? []).join(",") || "unknown",
       });
     } else {
-      iapLog("info", "products.loaded", { count: products.length });
+      iapLog("info", "products.loaded", {
+        count: products.length,
+        storefront: result?.storefront ?? "unknown",
+      });
     }
     return products;
   } catch (error) {
