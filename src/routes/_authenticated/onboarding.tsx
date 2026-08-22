@@ -494,7 +494,7 @@ function OnboardingPage() {
             ? t.onboarding.actions.finish
             : t.onboarding.actions.continue}
         </Button>
-        {!step.required && stepIndex < ONBOARDING_STEPS.length - 1 ? (
+        {stepIndex < ONBOARDING_STEPS.length - 1 ? (
           <Button
             variant="ghost"
             className="min-h-11 rounded-full"
@@ -508,6 +508,15 @@ function OnboardingPage() {
             {t.onboarding.actions.skip}
           </Button>
         ) : null}
+        <Button
+          variant="outline"
+          className="min-h-11 rounded-full"
+          disabled={busy}
+          onClick={finishNow}
+        >
+          {busy ? <Loader2 aria-hidden="true" className="animate-spin" /> : null}
+          Explore now
+        </Button>
       </div>
     </AccountShell>
   );
