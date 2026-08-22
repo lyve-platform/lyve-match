@@ -7,7 +7,9 @@ android {
         applicationId "app.lyve.android"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode (System.getenv("ANDROID_VERSION_CODE") ?: "1").toInteger()
+        // Parenthesised inline would parse as versionCode(...).toInteger() and fail
+        // with "Value is null", so resolve the integer before assigning it.
+        versionCode = ((System.getenv("ANDROID_VERSION_CODE") ?: "1") as String).toInteger()
         versionName System.getenv("ANDROID_VERSION_NAME") ?: "1.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
