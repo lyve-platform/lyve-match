@@ -85,7 +85,6 @@ export function DiscoveryProfileCard({
           <h2 className="text-xl font-semibold">
             {name}
             {card.age ? <span className="text-muted-foreground">, {card.age}</span> : null}
-            <VerifiedBadge verified={card.verified} className="ms-2 align-middle" />
           </h2>
           <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
             <MapPin className="size-4" aria-hidden="true" />
