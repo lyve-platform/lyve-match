@@ -82,10 +82,15 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
-            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set — building an unsigned AAB (cannot be uploaded to Play)."
-            echo "signed=false" >> "$GITHUB_OUTPUT"
-            exit 0
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "::warning::ANDROID_KEYSTORE_BASE64 is not set — PR smoke build only (unsigned)."
+              echo "signed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set. Play rejects unsigned bundles ('All uploaded bundles must be signed'). Add the base64 of upload.jks in GitHub → Settings → Secrets and variables → Actions."
+            exit 1
           fi
+
           if [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ]; then
             echo "::error::ANDROID_KEYSTORE_PASSWORD is missing. Add it in GitHub Actions secrets."
             exit 1
@@ -109,10 +114,20 @@ jobs:
           chmod +x ./gradlew
           ./gradlew bundleRelease --no-daemon --stacktrace
 
+      - name: Verify the AAB is signed
+        if: steps.keystore.outputs.signed == 'true'
+        run: |
+          aab=$(ls android/app/build/outputs/bundle/release/*.aab | head -1)
+          if ! unzip -l "$aab" | grep -qi "META-INF/.*\.\(RSA\|EC\|DSA\)"; then
+            echo "::error::The produced AAB is not signed. Check the keystore secrets."
+            exit 1
+          fi
+          echo "Signed AAB: $aab"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: lyve-android-aab
+
           path: android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
