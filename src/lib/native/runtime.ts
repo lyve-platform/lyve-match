@@ -11,11 +11,18 @@ export type NativePlatform = "ios" | "android" | "web";
 export function nativePlatform(): NativePlatform {
   if (typeof window === "undefined") return "web";
   const platform = Capacitor.getPlatform();
-  return platform === "ios" || platform === "android" ? platform : "web";
+  if (platform === "ios" || platform === "android") return platform;
+
+  // The marker is added only by the signed iOS shell. It also lets diagnostics
+  // distinguish the app WebView from Safari if bridge injection is damaged.
+  return navigator.userAgent.includes("LYVE-iOS/") ? "ios" : "web";
 }
 
 export function isNativeApp(): boolean {
-  return typeof window !== "undefined" && Capacitor.isNativePlatform();
+  return (
+    typeof window !== "undefined" &&
+    (Capacitor.isNativePlatform() || navigator.userAgent.includes("LYVE-iOS/"))
+  );
 }
 
 /** True only inside the iOS shell, where StoreKit purchases are available. */
