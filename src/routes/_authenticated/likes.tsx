@@ -2,7 +2,6 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AccountShell } from "@/components/lyve/AccountShell";
-import { VerifiedBadge } from "@/components/lyve/VerifiedBadge";
 import { SafetyMenu } from "@/components/lyve/SafetyMenu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
