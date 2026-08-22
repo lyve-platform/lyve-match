@@ -22,6 +22,14 @@ android {
         release {
             def storeFilePath = System.getenv("ANDROID_KEYSTORE_PATH")
             if (storeFilePath) {
+                def missingSigningValues = [
+                    "ANDROID_KEYSTORE_PASSWORD": System.getenv("ANDROID_KEYSTORE_PASSWORD"),
+                    "ANDROID_KEY_ALIAS": System.getenv("ANDROID_KEY_ALIAS"),
+                    "ANDROID_KEY_PASSWORD": System.getenv("ANDROID_KEY_PASSWORD")
+                ].findAll { name, value -> !value }.keySet()
+                if (!missingSigningValues.isEmpty()) {
+                    throw new GradleException("Incomplete Android signing configuration. Missing: ${missingSigningValues.join(', ')}")
+                }
                 storeFile file(storeFilePath)
                 storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
                 keyAlias System.getenv("ANDROID_KEY_ALIAS")
