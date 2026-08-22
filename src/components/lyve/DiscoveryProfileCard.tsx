@@ -4,7 +4,6 @@ import { useI18n } from "@/i18n";
 import { fill } from "@/lib/format";
 import type { DiscoveryCard } from "@/lib/discovery-core";
 import { CompatibilityInsight } from "./CompatibilityInsight";
-import { VerifiedBadge } from "./VerifiedBadge";
 import { SafetyMenu } from "./SafetyMenu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
