@@ -16,12 +16,16 @@ const config: CapacitorConfig = {
   webDir: "dist/client",
   ios: {
     contentInset: "always",
-    limitsNavigationsToAppBoundDomains: true,
+    // Must stay false: app-bound domains make WKWebView hand every navigation
+    // to Safari unless the host is listed in WKAppBoundDomains, which broke the
+    // TestFlight shell (the site opened in Safari, so StoreKit was unavailable).
+    limitsNavigationsToAppBoundDomains: false,
   },
   server: {
     url: "https://lyve-match.lovable.app",
     cleartext: false,
     androidScheme: "https",
+    allowNavigation: ["lyve-match.lovable.app", "*.supabase.co", "appleid.apple.com", "accounts.google.com"],
   },
 };
 
