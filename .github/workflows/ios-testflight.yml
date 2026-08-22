@@ -198,6 +198,18 @@ jobs:
             echo "::error::The LyveIAP Capacitor plugin registration is missing."
             exit 1
           fi
+          if ! grep -q 'registerPluginInstance(LyveIAP())' ios/App/App/SceneDelegate.swift; then
+            echo "::error::LyveIAP is compiled but not registered with the Capacitor bridge."
+            exit 1
+          fi
+          if ! grep -q 'LyveBridgeViewController' ios/App/App/Base.lproj/Main.storyboard; then
+            echo "::error::The launch storyboard does not use the LYVE bridge controller."
+            exit 1
+          fi
+          if ! grep -q 'LYVE-iOS/1' ios/App/App/capacitor.config.json; then
+            echo "::error::The iOS WebView identity marker is missing from the synced config."
+            exit 1
+          fi
           echo "Native StoreKit bridge is registered and included in the iOS target."
 
       - name: Verify Xcode and iOS SDK
@@ -254,6 +266,25 @@ jobs:
           echo "::endgroup::"
           bash .github/scripts/report-ios-log.sh "$RUNNER_TEMP/xcodebuild-archive.log" "Archive"
           exit $status
+
+      - name: Verify archived native bridge
+        run: |
+          app="$RUNNER_TEMP/LYVE.xcarchive/Products/Applications/App.app"
+          executable="$app/App"
+          config="$app/capacitor.config.json"
+          if [ ! -x "$executable" ]; then
+            echo "::error::The archived app executable is missing."
+            exit 1
+          fi
+          if ! strings "$executable" | grep -q 'LyveIAP'; then
+            echo "::error::LyveIAP is absent from the archived app executable."
+            exit 1
+          fi
+          if [ ! -f "$config" ] || ! grep -q 'LYVE-iOS/1' "$config"; then
+            echo "::error::The archived app does not contain the native WebView configuration."
+            exit 1
+          fi
+          echo "Archived app contains the registered StoreKit bridge and WebView marker."
 
       - name: Export IPA
         run: |

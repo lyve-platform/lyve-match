@@ -9,7 +9,7 @@
 import { isIosApp } from "@/lib/native/runtime";
 import { iapLog } from "@/lib/native/iap-log";
 import type { StoreLinkResult } from "@/lib/billing/store-core";
-import { registerPlugin } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 
 export type IapProductId = `app.lyve.ios.premium.${"monthly" | "annual"}`;
 
@@ -31,7 +31,7 @@ type LyveIapPlugin = {
 const nativeIap = registerPlugin<LyveIapPlugin>("LyveIAP");
 
 function plugin(): LyveIapPlugin | undefined {
-  return isIosApp() ? nativeIap : undefined;
+  return isIosApp() && Capacitor.isPluginAvailable("LyveIAP") ? nativeIap : undefined;
 }
 
 /** Purchases are only offered where StoreKit actually exists. */
