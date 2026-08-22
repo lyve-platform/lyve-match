@@ -9,7 +9,7 @@
 import { isIosApp } from "@/lib/native/runtime";
 import { iapLog } from "@/lib/native/iap-log";
 import type { StoreLinkResult } from "@/lib/billing/store-core";
-import { registerPlugin } from "@capacitor/core";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 
 export type IapProductId = `app.lyve.ios.premium.${"monthly" | "annual"}`;
 
