@@ -114,10 +114,20 @@ jobs:
           chmod +x ./gradlew
           ./gradlew bundleRelease --no-daemon --stacktrace
 
+      - name: Verify the AAB is signed
+        if: steps.keystore.outputs.signed == 'true'
+        run: |
+          aab=$(ls android/app/build/outputs/bundle/release/*.aab | head -1)
+          if ! unzip -l "$aab" | grep -qi "META-INF/.*\.\(RSA\|EC\|DSA\)"; then
+            echo "::error::The produced AAB is not signed. Check the keystore secrets."
+            exit 1
+          fi
+          echo "Signed AAB: $aab"
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
           name: lyve-android-aab
+
           path: android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
