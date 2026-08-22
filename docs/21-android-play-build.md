@@ -35,9 +35,11 @@ Keep `upload.jks` safe — Play ties the upload key to the app forever
 
 ## Notes
 
-- Google Play Billing is **not** wired into the shell yet; the Premium page
-  works on iOS via StoreKit 2. Android purchases require adding a Play Billing
-  plugin plus server-side receipt verification before subscriptions can be sold
-  on Android.
+- Google Play Billing **is** wired into the shell (`LyveBilling.java`, Billing
+  Client v7) and the server verifies purchase tokens before granting Premium.
+- Live subscriptions in Play Console: `premium_monthly` (base plan
+  `monthly-auto`, 29.99 USD) and `premium_annual` (base plan `annual-auto`,
+  99.99 USD). Both must stay **Active** or the paywall shows no prices.
+
 - Local build: `bun run build && bunx cap sync android && cd android && ./gradlew bundleRelease`
   (requires JDK 21 and the Android SDK).
