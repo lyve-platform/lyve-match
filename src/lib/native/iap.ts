@@ -31,7 +31,7 @@ type LyveIapPlugin = {
 const nativeIap = registerPlugin<LyveIapPlugin>("LyveIAP");
 
 function plugin(): LyveIapPlugin | undefined {
-  return isIosApp() ? nativeIap : undefined;
+  return isIosApp() && Capacitor.isPluginAvailable("LyveIAP") ? nativeIap : undefined;
 }
 
 /** Purchases are only offered where StoreKit actually exists. */
