@@ -40,10 +40,12 @@ export function iapAvailable(): boolean {
 }
 
 /** Why StoreKit is (not) usable — surfaced by the Premium diagnostics panel. */
-export type IapAvailability = { available: true } | {
-  available: false;
-  reason: "not_native" | "plugin_missing";
-};
+export type IapAvailability =
+  | { available: true }
+  | {
+      available: false;
+      reason: "not_native" | "plugin_missing";
+    };
 
 export function iapAvailability(): IapAvailability {
   if (!isIosApp()) return { available: false, reason: "not_native" };
