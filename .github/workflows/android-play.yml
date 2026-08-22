@@ -75,13 +75,21 @@ jobs:
         id: keystore
         env:
           ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
             echo "::warning::ANDROID_KEYSTORE_BASE64 is not set — building an unsigned AAB (cannot be uploaded to Play)."
             echo "signed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '\n' | base64 -d > "$RUNNER_TEMP/upload.jks"
+          if [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ]; then
+            echo "::error::ANDROID_KEYSTORE_PASSWORD is missing. Add it in GitHub Actions secrets."
+            exit 1
+          fi
+          if ! printf '%s' "$ANDROID_KEYSTORE_BASE64" | tr -d '\n\r ' | base64 -d > "$RUNNER_TEMP/upload.jks"; then
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not valid base64. Replace it with the complete value."
+            exit 1
+          fi
           echo "signed=true" >> "$GITHUB_OUTPUT"
 
       - name: Build AAB
@@ -90,8 +98,8 @@ jobs:
           ANDROID_VERSION_CODE: ${{ github.event.inputs.version_code || github.run_number }}
           ANDROID_KEYSTORE_PATH: ${{ steps.keystore.outputs.signed == 'true' && format('{0}/upload.jks', runner.temp) || '' }}
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
-          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS || 'lyve-upload' }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD || secrets.ANDROID_KEYSTORE_PASSWORD }}
         working-directory: android
         run: |
           chmod +x ./gradlew
