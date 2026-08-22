@@ -58,7 +58,11 @@ jobs:
         run: bun run build
 
       - name: Sync Capacitor Android
-        run: bunx cap sync android
+        run: |
+          # Capacitor writes generated JSON files here. Git ignores those files,
+          # so a fresh GitHub runner must recreate the directory before syncing.
+          mkdir -p android/app/src/main/assets
+          bunx cap sync android
 
       - name: Verify native Play Billing bridge is present
         run: |
