@@ -28,6 +28,7 @@ const config: CapacitorConfig = {
     androidScheme: "https",
     allowNavigation: [
       "lyve-match.lovable.app",
+      "*.lovable.app",
       "oauth.lovable.app",
       "lovable.dev",
       "*.supabase.co",
