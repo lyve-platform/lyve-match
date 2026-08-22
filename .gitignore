@@ -33,3 +33,7 @@ dist-ssr
 
 # iOS signing material (never commit)
 ios-certs/
+
+android-signing/
+android/app/build/
+android/.gradle/
