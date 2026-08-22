@@ -187,6 +187,21 @@ jobs:
       - name: Sync Capacitor iOS project
         run: bunx cap sync ios
 
+      - name: Verify native StoreKit bridge is compiled
+        run: |
+          project="$PROJECT/project.pbxproj"
+          for source in LyveIAP.swift LyveIAP.m; do
+            if ! grep -q "$source in Sources" "$project"; then
+              echo "::error::$source is not included in the iOS target Compile Sources phase."
+              exit 1
+            fi
+          done
+          if ! grep -q 'CAP_PLUGIN(LyveIAP, "LyveIAP"' ios/App/App/LyveIAP.m; then
+            echo "::error::The LyveIAP Capacitor plugin registration is missing."
+            exit 1
+          fi
+          echo "Native StoreKit bridge is registered and included in the iOS target."
+
       - name: Verify Xcode and iOS SDK
         run: |
           xcodebuild -version
