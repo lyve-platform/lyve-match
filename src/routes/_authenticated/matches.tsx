@@ -88,7 +88,6 @@ function MatchesPage() {
                       {match.age ? (
                         <span className="text-muted-foreground">, {match.age}</span>
                       ) : null}
-                      <VerifiedBadge verified={match.verified} className="ms-2 align-middle" />
                     </h2>
                     <SafetyMenu profileId={match.profileId} name={match.firstName || "—"} />
                   </div>
