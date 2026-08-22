@@ -42,7 +42,10 @@ export function iapAvailable(): boolean {
 /** Why StoreKit is (not) usable — surfaced by the Premium diagnostics panel. */
 export type IapAvailability =
   | { available: true }
-  | { available: false; reason: "not_native" | "plugin_missing" };
+  | {
+      available: false;
+      reason: "not_native" | "plugin_missing";
+    };
 
 export function iapAvailability(): IapAvailability {
   if (!isIosApp()) return { available: false, reason: "not_native" };
@@ -67,7 +70,8 @@ export async function fetchProducts(productIds: IapProductId[]): Promise<IapProd
   try {
     const result = await iap.products({ productIds });
     const products = (result?.products ?? []).filter(
-      (product) => typeof product?.productId === "string" && typeof product?.displayPrice === "string",
+      (product) =>
+        typeof product?.productId === "string" && typeof product?.displayPrice === "string",
     );
     if (products.length < productIds.length) {
       iapLog("warn", "products.incomplete", {
@@ -83,7 +87,6 @@ export async function fetchProducts(productIds: IapProductId[]): Promise<IapProd
     return [];
   }
 }
-
 
 export type IapOutcome =
   | { kind: "unavailable" }
@@ -155,11 +158,9 @@ export async function purchaseAndLink(
   if (outcome.kind !== "receipt") return { outcome };
   try {
     const { result } = await link({ data: { store: "apple", receipt: outcome.receipt } });
-    iapLog(
-      result === "LINKED" || result === "ALREADY_OWNED" ? "info" : "error",
-      "link.result",
-      { result },
-    );
+    iapLog(result === "LINKED" || result === "ALREADY_OWNED" ? "info" : "error", "link.result", {
+      result,
+    });
     return { outcome, result };
   } catch (error) {
     iapLog("error", "link.threw", { message: String((error as Error)?.message ?? error) });

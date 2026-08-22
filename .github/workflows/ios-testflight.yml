@@ -144,7 +144,6 @@ jobs:
           DEVELOPER_DIR="$selected_developer_dir" xcodebuild -version
           DEVELOPER_DIR="$selected_developer_dir" xcrun --sdk iphoneos --show-sdk-version
 
-
       - name: Runner toolchain diagnostics
         run: |
           log="$RUNNER_TEMP/toolchain-diagnostics.log"
@@ -179,7 +178,6 @@ jobs:
             grep -E 'Xcode|iOS SDK|Active' "$log" | head -n 40
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
-
 
       - name: Build web assets
         run: bun run build
@@ -237,7 +235,6 @@ jobs:
           echo "uuid=$uuid" >> "$GITHUB_OUTPUT"
           echo "name=$name" >> "$GITHUB_OUTPUT"
 
-
       - name: Archive
         run: |
           set -o pipefail
@@ -257,8 +254,6 @@ jobs:
           echo "::endgroup::"
           bash .github/scripts/report-ios-log.sh "$RUNNER_TEMP/xcodebuild-archive.log" "Archive"
           exit $status
-
-
 
       - name: Export IPA
         run: |
@@ -318,7 +313,6 @@ jobs:
             ios/App/build.log
           if-no-files-found: ignore
 
-
       - name: Upload IPA artifact
         if: always()
         uses: actions/upload-artifact@v5
@@ -326,7 +320,6 @@ jobs:
           name: lyve-ios-ipa
           path: ${{ runner.temp }}/export/*.ipa
           if-no-files-found: ignore
-
 
   # Required status check that branch protection can gate on before merging.
   # It mirrors the build result so that the overall workflow outcome is visible
