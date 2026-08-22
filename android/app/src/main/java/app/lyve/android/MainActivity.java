@@ -1,4 +1,4 @@
-package app.lyve.ios;
+package app.lyve.android;
 
 import com.getcapacitor.BridgeActivity;
 
