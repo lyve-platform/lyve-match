@@ -82,10 +82,15 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
         run: |
           if [ -z "${ANDROID_KEYSTORE_BASE64:-}" ]; then
-            echo "::warning::ANDROID_KEYSTORE_BASE64 is not set — building an unsigned AAB (cannot be uploaded to Play)."
-            echo "signed=false" >> "$GITHUB_OUTPUT"
-            exit 0
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              echo "::warning::ANDROID_KEYSTORE_BASE64 is not set — PR smoke build only (unsigned)."
+              echo "signed=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "::error::ANDROID_KEYSTORE_BASE64 is not set. Play rejects unsigned bundles ('All uploaded bundles must be signed'). Add the base64 of upload.jks in GitHub → Settings → Secrets and variables → Actions."
+            exit 1
           fi
+
           if [ -z "${ANDROID_KEYSTORE_PASSWORD:-}" ]; then
             echo "::error::ANDROID_KEYSTORE_PASSWORD is missing. Add it in GitHub Actions secrets."
             exit 1
