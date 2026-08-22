@@ -228,3 +228,85 @@ Captured sets live in `/mnt/documents/appstore-screenshots/` (6.9" 1290x2796,
 - [ ] Age rating set to 18+.
 - [ ] Build selected in the version's Build section.
 - [ ] Review Notes and sign-in credentials filled in.
+
+---
+
+## 8. Reply to Guideline 2.1 — Information Needed (Aug 2026)
+
+Paste this into **Reply to App Review**, and also into the version's
+**App Review Information → Notes** for future submissions. Attach the screen
+recording described in item 1.
+
+```text
+Thank you for the review. Below is all requested information.
+
+1. SCREEN RECORDING
+A screen recording captured on a physical iPhone running the latest iOS is
+attached. It starts from app launch and covers: account registration, email
+sign-in, onboarding (nickname, date of birth, relationship intent, photos),
+Discover with like/pass, a match, an in-app conversation, reporting and
+blocking a member, the Premium page with subscription title/length/price and
+the StoreKit purchase sheet, Restore Purchases, and account deletion from
+Settings. The app requests no location, contacts, camera-roll-wide, or App
+Tracking Transparency permissions beyond the standard photo picker used for
+profile photos.
+
+2. DEVICES AND OS TESTED
+- iPhone 15 Pro — iOS 26 (physical device, TestFlight build 17)
+- iPhone 13 — iOS 26 (physical device, TestFlight build 17)
+- iPad (10th gen) — iPadOS 26 (compatibility run)
+
+3. APP FUNCTION AND TARGET AUDIENCE
+LYVE is an 18+ dating and relationships app for adults worldwide who want
+serious, intent-led connections. Members state their own relationship intent
+(dating, long-term relationship, or marriage); the app never assumes it. A
+compatibility engine explains why two people may fit, so members spend less
+time swiping and more time in meaningful conversation. Problem solved: shallow,
+high-volume swiping and unsafe or fake profiles. Value: clarity of intent,
+verified members, and calm, moderated messaging.
+
+4. SETUP AND ACCESS INSTRUCTIONS
+Demo account (already onboarded, has photos, candidates, a match and a
+conversation):
+  Email: appreview@lyve.app
+  Password: LyveReview!2026
+There is a single account type (member). Administrative tools are internal and
+not reachable by member accounts. No sample files are required.
+To reach the main features after signing in: Discover (bottom navigation) for
+candidates, Matches for mutual likes, Messages for conversations, Profile for
+photos and verification, Settings for privacy, blocking and account deletion.
+
+5. EXTERNAL SERVICES USED
+- Supabase (managed via Lovable Cloud): authentication, PostgreSQL database,
+  private object storage, and realtime messaging transport.
+- Sign in with Apple and Google Sign-In: optional authentication providers.
+- Apple In-App Purchase / App Store Server API: the only payment path in the
+  iOS app. No third-party payment processor is used in the app.
+- No advertising SDK, no analytics SDK that tracks users across apps, and no
+  third-party AI provider receives member messages.
+
+6. REGIONAL DIFFERENCES
+None. The app functions identically in all regions, is English-only, and all
+features (Discover, matching, messaging, safety tools, Premium) are available
+in every territory where the app is offered.
+
+7. REGULATED INDUSTRY / THIRD-PARTY MATERIAL
+Not applicable. LYVE does not operate in a regulated industry and contains no
+protected third-party material. All imagery and copy are owned by the
+developer; all profile content is created by members and is moderated with
+reporting, blocking and account-level enforcement.
+
+8. IN-APP PURCHASE SUMMARY
+Two auto-renewable subscriptions in the group "LYVE Premium":
+- LYVE Premium Monthly (app.lyve.ios.premium.monthly) — 1 month
+- LYVE Premium Annual (app.lyve.ios.premium.annual) — 1 year
+They unlock: seeing who liked you, unlimited likes, advanced discovery filters,
+priority visibility, and full compatibility insights. Core use of the app —
+profiles, matching and messaging — remains free.
+How to reach the purchase: sign in → tap "Premium" in the bottom navigation
+(or Profile → Premium). The Premium screen shows each plan's title, duration
+and localized StoreKit price, a Restore Purchases button, and links to the
+Terms of Use and Privacy Policy. Purchases are completed with StoreKit 2, and
+the signed transaction is verified server-side with the App Store Server API
+before the entitlement is granted.
+```
