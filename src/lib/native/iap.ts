@@ -1,17 +1,21 @@
 /**
- * StoreKit 2 bridge — browser-safe.
+ * Native store purchase bridge — browser-safe.
  *
- * The native shell exposes a minimal `LyveIAP` plugin that performs the
- * purchase with StoreKit 2 and hands back the signed transaction (JWS).
- * The client NEVER grants entitlements: the JWS is posted to the server,
- * which verifies it against the App Store Server API and links it.
+ * iOS  → `LyveIAP` (StoreKit 2), receipt = signed transaction (JWS).
+ * Android → `LyveBilling` (Google Play Billing), receipt = purchase token.
+ *
+ * The client NEVER grants entitlements: the receipt is posted to the server,
+ * which verifies it against the App Store Server API / Play Developer API and
+ * links it to the signed-in account.
  */
-import { isIosApp } from "@/lib/native/runtime";
+import { isAndroidApp, isIosApp } from "@/lib/native/runtime";
 import { iapLog } from "@/lib/native/iap-log";
-import type { StoreLinkResult } from "@/lib/billing/store-core";
+import type { StoreId, StoreLinkResult } from "@/lib/billing/store-core";
 import { Capacitor, registerPlugin } from "@capacitor/core";
 
-export type IapProductId = `app.lyve.ios.premium.${"monthly" | "annual"}`;
+export type IapProductId =
+  | `app.lyve.ios.premium.${"monthly" | "annual"}`
+  | `premium_${"monthly" | "annual"}`;
 
 export type IapProduct = {
   productId: string;
@@ -28,20 +32,40 @@ type LyveIapPlugin = {
     productId: string;
   }): Promise<{ jws?: string; cancelled?: boolean; pending?: boolean }>;
   restore(): Promise<{ jws?: string[] }>;
+  /** Play only: confirms a purchase the server already verified. */
+  acknowledge?(options: { purchaseToken: string }): Promise<{ acknowledged?: boolean }>;
 };
 
 const nativeIap = registerPlugin<LyveIapPlugin>("LyveIAP");
+const nativeBilling = registerPlugin<LyveIapPlugin>("LyveBilling");
+
+type Bridge = { api: LyveIapPlugin; store: StoreId };
+
+function bridge(): Bridge | undefined {
+  if (isIosApp() && Capacitor.isPluginAvailable("LyveIAP")) {
+    return { api: nativeIap, store: "apple" };
+  }
+  if (isAndroidApp() && Capacitor.isPluginAvailable("LyveBilling")) {
+    return { api: nativeBilling, store: "google" };
+  }
+  return undefined;
+}
 
 function plugin(): LyveIapPlugin | undefined {
-  return isIosApp() && Capacitor.isPluginAvailable("LyveIAP") ? nativeIap : undefined;
+  return bridge()?.api;
 }
 
-/** Purchases are only offered where StoreKit actually exists. */
+/** The store backing in-app purchases on this device, if any. */
+export function activeStore(): StoreId | undefined {
+  return bridge()?.store;
+}
+
+/** Purchases are only offered where a native store bridge actually exists. */
 export function iapAvailable(): boolean {
-  return isIosApp() && plugin() !== undefined;
+  return plugin() !== undefined;
 }
 
-/** Why StoreKit is (not) usable — surfaced by the Premium diagnostics panel. */
+/** Why the store is (not) usable — surfaced by the Premium diagnostics panel. */
 export type IapAvailability =
   | { available: true }
   | {
@@ -50,21 +74,27 @@ export type IapAvailability =
     };
 
 export function iapAvailability(): IapAvailability {
-  if (!isIosApp()) return { available: false, reason: "not_native" };
+  if (!isIosApp() && !isAndroidApp()) return { available: false, reason: "not_native" };
   if (!plugin()) return { available: false, reason: "plugin_missing" };
   return { available: true };
 }
 
-/** Apple product id for a LYVE plan code. */
+/** Store product id for a LYVE plan code, per platform. */
 export function productIdForPlan(planCode: string): IapProductId | undefined {
+  const store = activeStore() ?? (isAndroidApp() ? "google" : "apple");
+  if (store === "google") {
+    if (planCode === "premium_monthly") return "premium_monthly";
+    if (planCode === "premium_annual") return "premium_annual";
+    return undefined;
+  }
   if (planCode === "premium_monthly") return "app.lyve.ios.premium.monthly";
   if (planCode === "premium_annual") return "app.lyve.ios.premium.annual";
   return undefined;
 }
 
 /**
- * App Store localized prices. LYVE never hard-codes a price: what the member
- * sees is exactly what StoreKit reports for their storefront.
+ * Store-localized prices. LYVE never hard-codes a price: what the member sees
+ * is exactly what StoreKit / Play reports for their storefront.
  */
 export async function fetchProducts(productIds: IapProductId[]): Promise<IapProduct[]> {
   const iap = plugin();
@@ -101,7 +131,7 @@ export type IapOutcome =
   | { kind: "failed" }
   | { kind: "receipt"; receipt: string };
 
-/** Runs the StoreKit purchase sheet and returns the signed transaction. */
+/** Runs the native purchase sheet and returns the store receipt. */
 export async function purchaseProduct(productId: IapProductId): Promise<IapOutcome> {
   const iap = plugin();
   if (!iap) {
@@ -130,7 +160,7 @@ export async function purchaseProduct(productId: IapProductId): Promise<IapOutco
   }
 }
 
-/** Returns signed transactions StoreKit already knows about for this Apple ID. */
+/** Returns receipts the store already knows about for this account. */
 export async function restoreReceipts(): Promise<string[]> {
   const iap = plugin();
   if (!iap) {
@@ -152,6 +182,23 @@ export async function restoreReceipts(): Promise<string[]> {
 }
 
 /**
+ * Play requires acknowledging a purchase within three days or it is refunded.
+ * It runs only AFTER the server verified and linked the purchase.
+ */
+async function acknowledgeIfPlay(receipt: string): Promise<void> {
+  const active = bridge();
+  if (!active || active.store !== "google" || !active.api.acknowledge) return;
+  try {
+    const result = await active.api.acknowledge({ purchaseToken: receipt });
+    iapLog(result?.acknowledged ? "info" : "warn", "acknowledge.result", {
+      acknowledged: result?.acknowledged === true,
+    });
+  } catch (error) {
+    iapLog("error", "acknowledge.threw", { message: String((error as Error)?.message ?? error) });
+  }
+}
+
+/**
  * Convenience flow: buy, then hand the receipt to the caller-supplied link
  * function (the authenticated `linkStorePurchase` server function).
  */
@@ -161,13 +208,14 @@ export async function purchaseAndLink(
     data: { store: string; receipt: string };
   }) => Promise<{ result: StoreLinkResult }>,
 ): Promise<{ outcome: IapOutcome; result?: StoreLinkResult }> {
+  const store = activeStore() ?? "apple";
   const outcome = await purchaseProduct(productId);
   if (outcome.kind !== "receipt") return { outcome };
   try {
-    const { result } = await link({ data: { store: "apple", receipt: outcome.receipt } });
-    iapLog(result === "LINKED" || result === "ALREADY_OWNED" ? "info" : "error", "link.result", {
-      result,
-    });
+    const { result } = await link({ data: { store, receipt: outcome.receipt } });
+    const linked = result === "LINKED" || result === "ALREADY_OWNED";
+    iapLog(linked ? "info" : "error", "link.result", { result, store });
+    if (linked) await acknowledgeIfPlay(outcome.receipt);
     return { outcome, result };
   } catch (error) {
     iapLog("error", "link.threw", { message: String((error as Error)?.message ?? error) });
@@ -176,9 +224,9 @@ export async function purchaseAndLink(
 }
 
 export type RestoreSummary = {
-  /** StoreKit transactions StoreKit handed back for this Apple ID. */
+  /** Receipts the store handed back for this account. */
   found: number;
-  /** Transactions the server verified and bound to this account. */
+  /** Receipts the server verified and bound to this account. */
   linked: number;
   /** Distinct server refusal codes, for the diagnostics panel. */
   failures: StoreLinkResult[];
@@ -187,27 +235,27 @@ export type RestoreSummary = {
 /**
  * Restore purchases.
  *
- * StoreKit replays the signed transactions Apple already knows about; each one
- * is posted to the server, which verifies it against the App Store Server API
- * and re-binds entitlements. The client still grants nothing on its own.
+ * The store replays the purchases it already knows about; each one is posted
+ * to the server, which verifies it against the store API and re-binds
+ * entitlements. The client still grants nothing on its own.
  */
 export async function restoreAndLink(
   link: (input: {
     data: { store: string; receipt: string };
   }) => Promise<{ result: StoreLinkResult }>,
 ): Promise<RestoreSummary> {
+  const store = activeStore() ?? "apple";
   const receipts = await restoreReceipts();
   const summary: RestoreSummary = { found: receipts.length, linked: 0, failures: [] };
   for (const receipt of receipts) {
     try {
-      const { result } = await link({ data: { store: "apple", receipt } });
-      if (result === "LINKED" || result === "ALREADY_OWNED") summary.linked += 1;
-      else if (!summary.failures.includes(result)) summary.failures.push(result);
-      iapLog(
-        result === "LINKED" || result === "ALREADY_OWNED" ? "info" : "error",
-        "restore.link.result",
-        { result },
-      );
+      const { result } = await link({ data: { store, receipt } });
+      const linked = result === "LINKED" || result === "ALREADY_OWNED";
+      if (linked) {
+        summary.linked += 1;
+        await acknowledgeIfPlay(receipt);
+      } else if (!summary.failures.includes(result)) summary.failures.push(result);
+      iapLog(linked ? "info" : "error", "restore.link.result", { result, store });
     } catch (error) {
       iapLog("error", "restore.link.threw", {
         message: String((error as Error)?.message ?? error),

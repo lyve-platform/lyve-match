@@ -49,13 +49,13 @@ export const STORE_PRODUCTS: StoreProduct[] = [
   },
   {
     store: "google",
-    productId: "lyve_premium_monthly",
+    productId: "premium_monthly",
     planCode: "premium_monthly",
     interval: "month",
   },
   {
     store: "google",
-    productId: "lyve_premium_annual",
+    productId: "premium_annual",
     planCode: "premium_annual",
     interval: "year",
   },

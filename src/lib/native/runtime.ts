@@ -15,17 +15,26 @@ export function nativePlatform(): NativePlatform {
 
   // The marker is added only by the signed iOS shell. It also lets diagnostics
   // distinguish the app WebView from Safari if bridge injection is damaged.
-  return navigator.userAgent.includes("LYVE-iOS/") ? "ios" : "web";
+  if (navigator.userAgent.includes("LYVE-iOS/")) return "ios";
+  if (navigator.userAgent.includes("LYVE-Android/")) return "android";
+  return "web";
 }
 
 export function isNativeApp(): boolean {
   return (
     typeof window !== "undefined" &&
-    (Capacitor.isNativePlatform() || navigator.userAgent.includes("LYVE-iOS/"))
+    (Capacitor.isNativePlatform() ||
+      navigator.userAgent.includes("LYVE-iOS/") ||
+      navigator.userAgent.includes("LYVE-Android/"))
   );
 }
 
 /** True only inside the iOS shell, where StoreKit purchases are available. */
 export function isIosApp(): boolean {
   return isNativeApp() && nativePlatform() === "ios";
+}
+
+/** True only inside the Android shell, where Play Billing is available. */
+export function isAndroidApp(): boolean {
+  return isNativeApp() && nativePlatform() === "android";
 }
