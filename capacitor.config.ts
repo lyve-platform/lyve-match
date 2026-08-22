@@ -22,6 +22,10 @@ const config: CapacitorConfig = {
     // TestFlight shell (the site opened in Safari, so StoreKit was unavailable).
     limitsNavigationsToAppBoundDomains: false,
   },
+  android: {
+    appendUserAgent: "LYVE-Android/1",
+    allowMixedContent: false,
+  },
   server: {
     url: "https://lyve-match.lovable.app",
     cleartext: false,
