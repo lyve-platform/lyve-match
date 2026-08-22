@@ -13,7 +13,16 @@ export default defineConfig({
     server: { entry: "server" },
   },
   vite: {
+    resolve: {
+      alias: {
+        // Replace the Node built-in that TanStack Start's dev browser bundle
+        // pulls in with a no-op browser stub. This prevents a runtime error
+        // when the module pre-bundler tries to instantiate AsyncLocalStorage.
+        "node:async_hooks": "/src/lib/async-hooks-stub.ts",
+      },
+    },
     optimizeDeps: {
+
       // Pre-bundle the dependencies the first render pulls in. Discovering them
       // lazily is what triggers a mid-request "optimized dependencies changed"
       // reload, which aborts in-flight SSR requests and shows a blank screen.

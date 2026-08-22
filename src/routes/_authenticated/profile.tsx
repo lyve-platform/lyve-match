@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 import { AccountShell } from "@/components/lyve/AccountShell";
 import { ProfileCompletion } from "@/components/lyve/ProfileCompletion";
 import { PhotoManager } from "@/components/lyve/PhotoManager";
-import { VerificationCard } from "@/components/lyve/VerificationCard";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -174,7 +174,6 @@ function ProfilePage() {
     <AccountShell title={t.profilePage.title} subtitle={t.profilePage.subtitle}>
       <ProfileCompletion account={account} />
 
-      <VerificationCard />
 
 
       {!account.onboarding.is_complete ? (

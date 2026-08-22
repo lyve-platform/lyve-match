@@ -203,15 +203,40 @@ function OnboardingPage() {
     const ok = await persist();
     if (!ok) return;
     if (stepIndex >= ONBOARDING_STEPS.length - 1) {
-      navigate({ to: "/profile" });
+      navigate({ to: "/discover" });
       return;
     }
     setStepIndex((index) => index + 1);
   }
 
+  async function finishNow() {
+    if (!user) return;
+    setErrorKey(null);
+    setBusy(true);
+    try {
+      // Persist any in-progress draft before finishing.
+      await persist();
+      const completed = Array.from(
+        new Set([...account!.onboarding.completed_steps, stepKey, "completion"]),
+      );
+      await saveOnboardingProgress(user.id, {
+        completed_steps: completed,
+        current_step: "completion",
+        is_complete: true,
+      });
+      await queryClient.invalidateQueries({ queryKey: accountQueryKey(user.id) });
+      navigate({ to: "/discover" });
+    } catch (error) {
+      setErrorKey(toErrorKey(error));
+    } finally {
+      setBusy(false);
+    }
+  }
+
   function toggleIn<T>(list: readonly T[], item: T): T[] {
     return list.includes(item) ? list.filter((value) => value !== item) : [...list, item];
   }
+
 
   return (
     <AccountShell title={t.onboarding.title} subtitle={t.onboarding.subtitle}>
@@ -469,7 +494,7 @@ function OnboardingPage() {
             ? t.onboarding.actions.finish
             : t.onboarding.actions.continue}
         </Button>
-        {!step.required && stepIndex < ONBOARDING_STEPS.length - 1 ? (
+        {stepIndex < ONBOARDING_STEPS.length - 1 ? (
           <Button
             variant="ghost"
             className="min-h-11 rounded-full"
@@ -483,6 +508,15 @@ function OnboardingPage() {
             {t.onboarding.actions.skip}
           </Button>
         ) : null}
+        <Button
+          variant="outline"
+          className="min-h-11 rounded-full"
+          disabled={busy}
+          onClick={finishNow}
+        >
+          {busy ? <Loader2 aria-hidden="true" className="animate-spin" /> : null}
+          Explore now
+        </Button>
       </div>
     </AccountShell>
   );

@@ -2,7 +2,6 @@ import { Link, createFileRoute } from "@tanstack/react-router";
 import { Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AccountShell } from "@/components/lyve/AccountShell";
-import { VerifiedBadge } from "@/components/lyve/VerifiedBadge";
 import { SafetyMenu } from "@/components/lyve/SafetyMenu";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -92,7 +91,6 @@ function LikesPage() {
                       {person.age ? (
                         <span className="text-muted-foreground">, {person.age}</span>
                       ) : null}
-                      <VerifiedBadge verified={person.verified} className="ms-2 align-middle" />
                     </h2>
                     <SafetyMenu profileId={person.profileId} name={person.firstName || "—"} />
                   </div>
