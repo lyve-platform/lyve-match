@@ -91,7 +91,6 @@ function LikesPage() {
                       {person.age ? (
                         <span className="text-muted-foreground">, {person.age}</span>
                       ) : null}
-                      <VerifiedBadge verified={person.verified} className="ms-2 align-middle" />
                     </h2>
                     <SafetyMenu profileId={person.profileId} name={person.firstName || "—"} />
                   </div>
