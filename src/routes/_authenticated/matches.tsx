@@ -3,7 +3,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { AccountShell } from "@/components/lyve/AccountShell";
-import { VerifiedBadge } from "@/components/lyve/VerifiedBadge";
 import { SafetyMenu } from "@/components/lyve/SafetyMenu";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
