@@ -174,7 +174,6 @@ function ProfilePage() {
     <AccountShell title={t.profilePage.title} subtitle={t.profilePage.subtitle}>
       <ProfileCompletion account={account} />
 
-      <VerificationCard />
 
 
       {!account.onboarding.is_complete ? (
