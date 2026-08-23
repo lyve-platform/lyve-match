@@ -29,6 +29,7 @@ import {
 } from "@/lib/native/iap";
 import { PremiumDiagnostics } from "@/components/lyve/PremiumDiagnostics";
 import { iapLog } from "@/lib/native/iap-log";
+import { nativePlatform, shellMarker } from "@/lib/native/runtime";
 import { linkStorePurchase } from "@/lib/billing-store.functions";
 import type { BillingSnapshot } from "@/lib/billing-core";
 

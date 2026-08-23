@@ -38,3 +38,10 @@ export function isIosApp(): boolean {
 export function isAndroidApp(): boolean {
   return isNativeApp() && nativePlatform() === "android";
 }
+
+/** Which shell marker the WebView user agent carries, for diagnostics only. */
+export function shellMarker(userAgent: string): string {
+  if (userAgent.includes("LYVE-iOS/")) return "ios-shell";
+  if (userAgent.includes("LYVE-Android/")) return "android-shell";
+  return "browser";
+}
