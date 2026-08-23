@@ -37,6 +37,8 @@ import java.util.Map;
 @CapacitorPlugin(name = "LyveBilling")
 public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
 
+    private static final int BRIDGE_VERSION = 2;
+
     private BillingClient billingClient;
     private final Map<String, ProductDetails> details = new HashMap<>();
     private PluginCall pendingPurchase;
@@ -168,6 +170,7 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
                         JSObject response = new JSObject();
                         response.put("products", out);
                         response.put("storefront", "play");
+                        response.put("bridgeVersion", BRIDGE_VERSION);
                         response.put("missing", missing);
                         ready.resolve(response);
                     }
@@ -237,6 +240,10 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
             return;
         }
         if (code != BillingClient.BillingResponseCode.OK) {
+            if (code == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED) {
+                recoverOwnedPurchase(call);
+                return;
+            }
             call.setKeepAlive(false);
             call.reject("purchase_failed:" + code);
             return;
@@ -247,6 +254,10 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
         // Play can report OK while omitting the purchase list (notably when an
         // already-owned subscription is selected). Query current ownership
         // instead of converting a successful response into purchase_failed:0.
+        recoverOwnedPurchase(call);
+    }
+
+    private void recoverOwnedPurchase(PluginCall call) {
         billingClient.queryPurchasesAsync(
             QueryPurchasesParams
                 .newBuilder()

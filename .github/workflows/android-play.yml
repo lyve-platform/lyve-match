@@ -144,7 +144,7 @@ jobs:
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
         with:
-          name: lyve-android-aab
+          name: lyve-android-${{ github.event.inputs.version_name || '1.0.1' }}-${{ github.event.inputs.version_code || github.run_number }}-aab
 
           path: android/app/build/outputs/bundle/release/*.aab
           if-no-files-found: error
