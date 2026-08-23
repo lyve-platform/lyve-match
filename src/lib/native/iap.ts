@@ -225,7 +225,9 @@ export async function purchaseAndLink(
     // subscription — replay the existing purchase so the server can link it.
     const summary = await restoreAndLink(link);
     if (summary.linked > 0) return { outcome, result: "ALREADY_OWNED" };
-    return { outcome, result: summary.failures[0] };
+    const failure = summary.failures[0];
+    return failure ? { outcome, result: failure } : { outcome };
+
   }
   if (outcome.kind !== "receipt") return { outcome };
 
