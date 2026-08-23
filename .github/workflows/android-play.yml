@@ -14,6 +14,15 @@ on:
         description: "Version code (leave empty to use the run number)"
         required: false
         default: ""
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/android-play.yml"
+      - "android/**"
+      - "capacitor.config.ts"
+      - "src/lib/native/**"
+      - "src/routes/_authenticated/premium.tsx"
   pull_request:
     branches:
       - main
@@ -29,6 +38,9 @@ jobs:
 
     env:
       APPLICATION_ID: app.lyve.android
+      # capacitor.config.ts is shared with iOS; force the Android identity while
+      # generating the native runtime config embedded in the Play bundle.
+      CAPACITOR_APP_ID: app.lyve.android
 
     steps:
       - uses: actions/checkout@v5
@@ -74,6 +86,11 @@ jobs:
           done
           grep -q "registerPlugin(LyveBilling.class)" android/app/src/main/java/app/lyve/android/MainActivity.java \
             || { echo "::error::LyveBilling is not registered in MainActivity."; exit 1; }
+          config="android/app/src/main/assets/capacitor.config.json"
+          grep -q '"appId": "app.lyve.android"' "$config" \
+            || { echo "::error::The embedded Capacitor identity is not app.lyve.android."; cat "$config"; exit 1; }
+          grep -q '"appendUserAgent": "LYVE-Android/1"' "$config" \
+            || { echo "::error::The Android shell marker is missing from the embedded config."; exit 1; }
 
       - name: Decode upload keystore
         id: keystore

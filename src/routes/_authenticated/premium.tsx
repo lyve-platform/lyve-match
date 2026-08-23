@@ -90,6 +90,11 @@ function PremiumPage() {
         reason: state.reason,
         platform: nativePlatform(),
         shell: typeof navigator === "undefined" ? "unknown" : shellMarker(navigator.userAgent),
+        appOrigin: typeof window === "undefined" ? "unknown" : window.location.origin,
+        capacitorPlatform:
+          typeof window === "undefined"
+            ? "unknown"
+            : String((window as Window & { Capacitor?: { getPlatform?: () => string } }).Capacitor?.getPlatform?.() ?? "missing"),
       });
       return;
     }
