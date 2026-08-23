@@ -19,6 +19,7 @@ import {
   type IapLogEntry,
 } from "@/lib/native/iap-log";
 import type { IapAvailability } from "@/lib/native/iap";
+import { nativePlatform, shellMarker } from "@/lib/native/runtime";
 import type { BillingSnapshot } from "@/lib/billing-core";
 
 type Props = {
@@ -48,8 +49,12 @@ export function PremiumDiagnostics({ snapshot, availability, productsLoaded }: P
   const copy = t.premiumPage.diagnostics;
   const [log, setLog] = useState<IapLogEntry[]>([]);
   const [open, setOpen] = useState(false);
+  const [device, setDevice] = useState("");
 
   useEffect(() => subscribeIapLog(setLog), []);
+  useEffect(() => {
+    setDevice(`${nativePlatform()} / ${shellMarker(navigator.userAgent)}`);
+  }, []);
 
   const failure = lastIapFailure(log);
   const storeKitValue = availability.available
@@ -81,6 +86,7 @@ export function PremiumDiagnostics({ snapshot, availability, productsLoaded }: P
 
       <div className="pt-2">
         <Row label={copy.storeKit} value={storeKitValue} ok={availability.available} />
+        <Row label={copy.device} value={device || "…"} ok={null} />
         <Row
           label={copy.products}
           value={String(productsLoaded)}
