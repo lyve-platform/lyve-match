@@ -227,32 +227,62 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
         PluginCall call = pendingPurchase;
         pendingPurchase = null;
         if (call == null) return;
-        call.setKeepAlive(false);
 
         int code = result.getResponseCode();
         JSObject response = new JSObject();
         if (code == BillingClient.BillingResponseCode.USER_CANCELED) {
+            call.setKeepAlive(false);
             response.put("cancelled", true);
             call.resolve(response);
             return;
         }
-        if (code != BillingClient.BillingResponseCode.OK || purchases == null) {
+        if (code != BillingClient.BillingResponseCode.OK) {
+            call.setKeepAlive(false);
             call.reject("purchase_failed:" + code);
             return;
         }
+
+        if (resolvePurchaseResult(call, purchases)) return;
+
+        // Play can report OK while omitting the purchase list (notably when an
+        // already-owned subscription is selected). Query current ownership
+        // instead of converting a successful response into purchase_failed:0.
+        billingClient.queryPurchasesAsync(
+            QueryPurchasesParams
+                .newBuilder()
+                .setProductType(BillingClient.ProductType.SUBS)
+                .build(),
+            (queryResult, ownedPurchases) -> {
+                if (queryResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                    call.setKeepAlive(false);
+                    call.reject("purchase_recovery_failed:" + queryResult.getResponseCode());
+                    return;
+                }
+                if (resolvePurchaseResult(call, ownedPurchases)) return;
+                call.setKeepAlive(false);
+                call.reject("purchase_no_token");
+            }
+        );
+    }
+
+    private boolean resolvePurchaseResult(PluginCall call, List<Purchase> purchases) {
+        if (purchases == null) return false;
         for (Purchase purchase : purchases) {
+            JSObject response = new JSObject();
             if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+                call.setKeepAlive(false);
                 response.put("jws", purchase.getPurchaseToken());
                 call.resolve(response);
-                return;
+                return true;
             }
             if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING) {
+                call.setKeepAlive(false);
                 response.put("pending", true);
                 call.resolve(response);
-                return;
+                return true;
             }
         }
-        call.reject("purchase_no_token");
+        return false;
     }
 
     /** Replays purchase tokens Play already knows about for this Google account. */
@@ -267,6 +297,10 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
                         .setProductType(BillingClient.ProductType.SUBS)
                         .build(),
                     (result, purchases) -> {
+                        if (result.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                            ready.reject("restore_failed:" + result.getResponseCode());
+                            return;
+                        }
                         JSArray tokens = new JSArray();
                         if (purchases != null) {
                             for (Purchase purchase : purchases) {
