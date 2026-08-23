@@ -64,11 +64,11 @@ export const enBilling = {
     diagnostics: {
       title: "Premium status",
       subtitle:
-        "What this device sees from the App Store, and what your LYVE account is actually entitled to.",
-      storeKit: "App Store connection",
+        "What this device sees from the app store, and what your LYVE account is actually entitled to.",
+      storeKit: "Store connection",
       storeKitReady: "Connected",
-      storeKitWeb: "Web browser — purchases happen in the iOS app",
-      storeKitMissing: "Unavailable in this build",
+      storeKitWeb: "Web browser — purchases happen in the LYVE iOS or Android app",
+      storeKitMissing: "Store service unavailable in this build",
       products: "Subscription products loaded",
       entitlement: "Premium entitlement",
       entitlementActive: "Active",
