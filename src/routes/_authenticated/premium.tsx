@@ -83,7 +83,13 @@ function PremiumPage() {
     const state = iapAvailability();
     setAvailability(state);
     if (!state.available) {
-      iapLog("info", "storekit.unavailable", { reason: state.reason });
+      // Record the shell fingerprint too: "not_native" from inside a store app
+      // means bridge injection failed, which is a very different bug.
+      iapLog("info", "storekit.unavailable", {
+        reason: state.reason,
+        platform: nativePlatform(),
+        shell: typeof navigator === "undefined" ? "unknown" : shellMarker(navigator.userAgent),
+      });
       return;
     }
     const ids = BILLING_PLANS.map((plan) => productIdForPlan(plan.code)).filter(
