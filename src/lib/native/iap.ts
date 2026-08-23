@@ -129,7 +129,14 @@ export type IapOutcome =
   | { kind: "unavailable" }
   | { kind: "cancelled" }
   | { kind: "failed" }
+  /** The store says this account already owns the subscription. */
+  | { kind: "already_owned" }
   | { kind: "receipt"; receipt: string };
+
+/** Store errors that mean "you already bought this", not "the purchase failed". */
+function isAlreadyOwned(message: string): boolean {
+  return /purchase_failed:7\b/.test(message) || /already\s*(own|subscrib|purchas)/i.test(message);
+}
 
 /** Runs the native purchase sheet and returns the store receipt. */
 export async function purchaseProduct(productId: IapProductId): Promise<IapOutcome> {
@@ -152,13 +159,16 @@ export async function purchaseProduct(productId: IapProductId): Promise<IapOutco
     iapLog("error", "purchase.no_transaction", { productId, pending: result?.pending === true });
     return { kind: "failed" };
   } catch (error) {
-    iapLog("error", "purchase.threw", {
-      productId,
-      message: String((error as Error)?.message ?? error),
-    });
+    const message = String((error as Error)?.message ?? error);
+    if (isAlreadyOwned(message)) {
+      iapLog("warn", "purchase.already_owned", { productId });
+      return { kind: "already_owned" };
+    }
+    iapLog("error", "purchase.threw", { productId, message });
     return { kind: "failed" };
   }
 }
+
 
 /** Returns receipts the store already knows about for this account. */
 export async function restoreReceipts(): Promise<string[]> {
