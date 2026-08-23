@@ -27,7 +27,12 @@ export type IapProduct = {
 type LyveIapPlugin = {
   products(options: {
     productIds: string[];
-  }): Promise<{ products?: IapProduct[]; storefront?: string; missing?: string[] }>;
+  }): Promise<{
+    products?: IapProduct[];
+    storefront?: string;
+    bridgeVersion?: number;
+    missing?: string[];
+  }>;
   purchase(options: {
     productId: string;
   }): Promise<{ jws?: string; cancelled?: boolean; pending?: boolean }>;
@@ -116,6 +121,7 @@ export async function fetchProducts(productIds: IapProductId[]): Promise<IapProd
       iapLog("info", "products.loaded", {
         count: products.length,
         storefront: result?.storefront ?? "unknown",
+        bridgeVersion: result?.bridgeVersion ?? "legacy",
       });
     }
     return products;
