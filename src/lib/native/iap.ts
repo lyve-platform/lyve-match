@@ -220,7 +220,15 @@ export async function purchaseAndLink(
 ): Promise<{ outcome: IapOutcome; result?: StoreLinkResult }> {
   const store = activeStore() ?? "apple";
   const outcome = await purchaseProduct(productId);
+  if (outcome.kind === "already_owned" || outcome.kind === "failed") {
+    // The store refused a second purchase because this account already owns the
+    // subscription — replay the existing purchase so the server can link it.
+    const summary = await restoreAndLink(link);
+    if (summary.linked > 0) return { outcome, result: "ALREADY_OWNED" };
+    return { outcome, result: summary.failures[0] };
+  }
   if (outcome.kind !== "receipt") return { outcome };
+
   try {
     const { result } = await link({ data: { store, receipt: outcome.receipt } });
     const linked = result === "LINKED" || result === "ALREADY_OWNED";
