@@ -69,6 +69,7 @@ export const enBilling = {
       storeKitReady: "Connected",
       storeKitWeb: "Web browser — purchases happen in the LYVE iOS or Android app",
       storeKitMissing: "Store service unavailable in this build",
+      device: "Device runtime",
       products: "Subscription products loaded",
       entitlement: "Premium entitlement",
       entitlementActive: "Active",
