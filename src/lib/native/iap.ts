@@ -141,7 +141,10 @@ export type IapOutcome =
 
 /** Store errors that mean "you already bought this", not "the purchase failed". */
 function isAlreadyOwned(message: string): boolean {
-  return /purchase_failed:7\b/.test(message) || /already\s*(own|subscrib|purchas)/i.test(message);
+  // Play commonly reports an owned subscription as ITEM_ALREADY_OWNED (7),
+  // but some Billing v7 purchase paths surface DEVELOPER_ERROR (5) instead.
+  // Both must replay current ownership; the server remains the authority.
+  return /purchase_failed:(5|7)\b/.test(message) || /already\s*(own|subscrib|purchas)/i.test(message);
 }
 
 /** Runs the native purchase sheet and returns the store receipt. */
