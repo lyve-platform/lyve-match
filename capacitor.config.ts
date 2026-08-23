@@ -10,8 +10,10 @@ import type { CapacitorConfig } from "@capacitor/cli";
  * `server.url` points at the hosted app so the shell always runs the current
  * release. Remove it and ship `dist/client` to bundle the app offline.
  */
+const appId = process.env["CAPACITOR_APP_ID"] ?? "app.lyve.ios";
+
 const config: CapacitorConfig = {
-  appId: "app.lyve.ios",
+  appId,
   appName: "LYVE Match",
   webDir: "dist/client",
   ios: {
