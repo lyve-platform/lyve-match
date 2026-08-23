@@ -86,6 +86,7 @@ export function PremiumDiagnostics({ snapshot, availability, productsLoaded }: P
 
       <div className="pt-2">
         <Row label={copy.storeKit} value={storeKitValue} ok={availability.available} />
+        <Row label={copy.device} value={device || "…"} ok={null} />
         <Row
           label={copy.products}
           value={String(productsLoaded)}
