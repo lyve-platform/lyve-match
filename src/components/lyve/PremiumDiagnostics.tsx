@@ -19,6 +19,7 @@ import {
   type IapLogEntry,
 } from "@/lib/native/iap-log";
 import type { IapAvailability } from "@/lib/native/iap";
+import { nativePlatform, shellMarker } from "@/lib/native/runtime";
 import type { BillingSnapshot } from "@/lib/billing-core";
 
 type Props = {
