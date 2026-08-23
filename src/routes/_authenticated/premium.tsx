@@ -29,6 +29,7 @@ import {
 } from "@/lib/native/iap";
 import { PremiumDiagnostics } from "@/components/lyve/PremiumDiagnostics";
 import { iapLog } from "@/lib/native/iap-log";
+import { nativePlatform, shellMarker } from "@/lib/native/runtime";
 import { linkStorePurchase } from "@/lib/billing-store.functions";
 import type { BillingSnapshot } from "@/lib/billing-core";
 
@@ -83,7 +84,13 @@ function PremiumPage() {
     const state = iapAvailability();
     setAvailability(state);
     if (!state.available) {
-      iapLog("info", "storekit.unavailable", { reason: state.reason });
+      // Record the shell fingerprint too: "not_native" from inside a store app
+      // means bridge injection failed, which is a very different bug.
+      iapLog("info", "storekit.unavailable", {
+        reason: state.reason,
+        platform: nativePlatform(),
+        shell: typeof navigator === "undefined" ? "unknown" : shellMarker(navigator.userAgent),
+      });
       return;
     }
     const ids = BILLING_PLANS.map((plan) => productIdForPlan(plan.code)).filter(
