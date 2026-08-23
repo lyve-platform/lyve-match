@@ -124,10 +124,11 @@ function PremiumPage() {
     try {
       const { outcome, result } = await purchaseAndLink(productId, link);
       if (outcome.kind === "cancelled") return;
-      if (outcome.kind !== "receipt" || !result) {
+      if (!result) {
         toast.error(copy.errors.GENERIC);
         return;
       }
+
       if (result === "LINKED" || result === "ALREADY_OWNED") {
         toast.success(copy.actions.restored);
         await actions.restore.mutateAsync();
