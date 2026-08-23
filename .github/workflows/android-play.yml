@@ -14,6 +14,15 @@ on:
         description: "Version code (leave empty to use the run number)"
         required: false
         default: ""
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/android-play.yml"
+      - "android/**"
+      - "capacitor.config.ts"
+      - "src/lib/native/**"
+      - "src/routes/_authenticated/premium.tsx"
   pull_request:
     branches:
       - main
