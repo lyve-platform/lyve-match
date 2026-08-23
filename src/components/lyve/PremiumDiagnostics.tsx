@@ -48,8 +48,12 @@ export function PremiumDiagnostics({ snapshot, availability, productsLoaded }: P
   const copy = t.premiumPage.diagnostics;
   const [log, setLog] = useState<IapLogEntry[]>([]);
   const [open, setOpen] = useState(false);
+  const [device, setDevice] = useState("");
 
   useEffect(() => subscribeIapLog(setLog), []);
+  useEffect(() => {
+    setDevice(`${nativePlatform()} / ${shellMarker(navigator.userAgent)}`);
+  }, []);
 
   const failure = lastIapFailure(log);
   const storeKitValue = availability.available
