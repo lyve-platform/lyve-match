@@ -21,6 +21,9 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 import org.json.JSONArray;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +40,9 @@ import java.util.Map;
 @CapacitorPlugin(name = "LyveBilling")
 public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
 
-    private static final int BRIDGE_VERSION = 3;
+    private static final int BRIDGE_VERSION = 4;
+    private static final int RECOVERY_RETRIES = 2;
+    private static final long RECOVERY_RETRY_DELAY_MS = 750L;
 
     private BillingClient billingClient;
     private final Map<String, ProductDetails> details = new HashMap<>();
@@ -241,8 +246,7 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
         BillingResult launch = billingClient.launchBillingFlow(getActivity(), params);
         if (launch.getResponseCode() != BillingClient.BillingResponseCode.OK) {
             pendingPurchase = null;
-            if (launch.getResponseCode() == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED ||
-                launch.getResponseCode() == BillingClient.BillingResponseCode.DEVELOPER_ERROR) {
+            if (shouldRecoverOwnership(launch.getResponseCode())) {
                 recoverOwnedPurchase(call);
                 return;
             }
@@ -266,8 +270,7 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
             return;
         }
         if (code != BillingClient.BillingResponseCode.OK) {
-            if (code == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED ||
-                code == BillingClient.BillingResponseCode.DEVELOPER_ERROR) {
+            if (shouldRecoverOwnership(code)) {
                 recoverOwnedPurchase(call);
                 return;
             }
@@ -285,6 +288,10 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
     }
 
     private void recoverOwnedPurchase(PluginCall call) {
+        recoverOwnedPurchase(call, RECOVERY_RETRIES);
+    }
+
+    private void recoverOwnedPurchase(PluginCall call, int retriesRemaining) {
         billingClient.queryPurchasesAsync(
             QueryPurchasesParams
                 .newBuilder()
@@ -292,6 +299,13 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
                 .build(),
             (queryResult, ownedPurchases) -> {
                 if (queryResult.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+                    if (retriesRemaining > 0 && isTransientBillingError(queryResult.getResponseCode())) {
+                        new Handler(Looper.getMainLooper()).postDelayed(
+                            () -> recoverOwnedPurchase(call, retriesRemaining - 1),
+                            RECOVERY_RETRY_DELAY_MS
+                        );
+                        return;
+                    }
                     call.setKeepAlive(false);
                     call.reject("purchase_recovery_failed:" + queryResult.getResponseCode());
                     return;
@@ -301,6 +315,17 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
                 call.reject("purchase_no_token");
             }
         );
+    }
+
+    private static boolean shouldRecoverOwnership(int responseCode) {
+        return responseCode == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED ||
+            responseCode == BillingClient.BillingResponseCode.DEVELOPER_ERROR ||
+            isTransientBillingError(responseCode);
+    }
+
+    private static boolean isTransientBillingError(int responseCode) {
+        return responseCode == BillingClient.BillingResponseCode.SERVICE_UNAVAILABLE ||
+            responseCode == BillingClient.BillingResponseCode.ERROR;
     }
 
     private boolean resolvePurchaseResult(PluginCall call, List<Purchase> purchases) {
