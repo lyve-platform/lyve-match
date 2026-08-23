@@ -37,7 +37,7 @@ import java.util.Map;
 @CapacitorPlugin(name = "LyveBilling")
 public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
 
-    private static final int BRIDGE_VERSION = 2;
+    private static final int BRIDGE_VERSION = 3;
 
     private BillingClient billingClient;
     private final Map<String, ProductDetails> details = new HashMap<>();
@@ -195,34 +195,60 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
                     ready.reject("product_not_loaded");
                     return;
                 }
-                String token = offerToken(cached);
-                if (token == null) {
-                    ready.reject("no_offer");
-                    return;
-                }
-                BillingFlowParams params = BillingFlowParams
-                    .newBuilder()
-                    .setProductDetailsParamsList(
-                        List.of(
-                            BillingFlowParams.ProductDetailsParams
-                                .newBuilder()
-                                .setProductDetails(cached)
-                                .setOfferToken(token)
-                                .build()
-                        )
-                    )
-                    .build();
-
-                pendingPurchase = ready;
-                ready.setKeepAlive(true);
-                BillingResult launch = billingClient.launchBillingFlow(getActivity(), params);
-                if (launch.getResponseCode() != BillingClient.BillingResponseCode.OK) {
-                    pendingPurchase = null;
-                    ready.setKeepAlive(false);
-                    ready.reject("launch_failed:" + launch.getResponseCode());
-                }
+                // Query ownership before opening the sheet. Play may return
+                // DEVELOPER_ERROR (5), rather than ITEM_ALREADY_OWNED (7), when
+                // an account selects a subscription it already owns. Returning
+                // the existing token is both deterministic and avoids a false
+                // purchase failure for that valid subscription.
+                billingClient.queryPurchasesAsync(
+                    QueryPurchasesParams
+                        .newBuilder()
+                        .setProductType(BillingClient.ProductType.SUBS)
+                        .build(),
+                    (queryResult, ownedPurchases) -> {
+                        if (queryResult.getResponseCode() == BillingClient.BillingResponseCode.OK &&
+                            resolveOwnedProduct(ready, ownedPurchases, productId)) {
+                            return;
+                        }
+                        launchPurchaseFlow(ready, cached);
+                    }
+                );
             }
         );
+    }
+
+    private void launchPurchaseFlow(PluginCall call, ProductDetails product) {
+        String token = offerToken(product);
+        if (token == null) {
+            call.reject("no_offer");
+            return;
+        }
+        BillingFlowParams params = BillingFlowParams
+            .newBuilder()
+            .setProductDetailsParamsList(
+                List.of(
+                    BillingFlowParams.ProductDetailsParams
+                        .newBuilder()
+                        .setProductDetails(product)
+                        .setOfferToken(token)
+                        .build()
+                )
+            )
+            .build();
+
+        pendingPurchase = call;
+        call.setKeepAlive(true);
+        BillingResult launch = billingClient.launchBillingFlow(getActivity(), params);
+        if (launch.getResponseCode() != BillingClient.BillingResponseCode.OK) {
+            pendingPurchase = null;
+            if (launch.getResponseCode() == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED ||
+                launch.getResponseCode() == BillingClient.BillingResponseCode.DEVELOPER_ERROR) {
+                recoverOwnedPurchase(call);
+                return;
+            }
+            call.setKeepAlive(false);
+            call.reject("launch_failed:" + launch.getResponseCode());
+        }
     }
 
     @Override
@@ -240,7 +266,8 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
             return;
         }
         if (code != BillingClient.BillingResponseCode.OK) {
-            if (code == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED) {
+            if (code == BillingClient.BillingResponseCode.ITEM_ALREADY_OWNED ||
+                code == BillingClient.BillingResponseCode.DEVELOPER_ERROR) {
                 recoverOwnedPurchase(call);
                 return;
             }
@@ -288,6 +315,26 @@ public class LyveBilling extends Plugin implements PurchasesUpdatedListener {
             }
             if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING) {
                 call.setKeepAlive(false);
+                response.put("pending", true);
+                call.resolve(response);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean resolveOwnedProduct(PluginCall call, List<Purchase> purchases, String productId) {
+        if (purchases == null) return false;
+        for (Purchase purchase : purchases) {
+            if (!purchase.getProducts().contains(productId)) continue;
+            if (purchase.getPurchaseState() == Purchase.PurchaseState.PURCHASED) {
+                JSObject response = new JSObject();
+                response.put("jws", purchase.getPurchaseToken());
+                call.resolve(response);
+                return true;
+            }
+            if (purchase.getPurchaseState() == Purchase.PurchaseState.PENDING) {
+                JSObject response = new JSObject();
                 response.put("pending", true);
                 call.resolve(response);
                 return true;
