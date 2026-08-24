@@ -137,6 +137,8 @@ export type VerifiedPurchase = {
   environment: StoreEnvironment;
   periodStart: string | null;
   periodEnd: string | null;
+  /** Authoritative current state, present when verification used a store API. */
+  snapshot: StoreSnapshot | null;
 };
 
 export type PurchaseVerification =
@@ -213,6 +215,7 @@ export async function verifyStorePurchase(
       environment: env,
       periodStart: iso(claims["period_start"]),
       periodEnd: iso(claims["period_end"]),
+      snapshot: null,
     },
   };
 }
@@ -363,8 +366,9 @@ export function normalizeGoogleEvent(parsed: unknown): StoreEventVerification {
 /* 3. Real store rails (App Store Server API / Google Play)             */
 /* ------------------------------------------------------------------ */
 
-function snapshotToPurchase(snapshot: StoreSnapshot): VerifiedPurchase {
-  const product = productFor(snapshot.store, snapshot.productId)!;
+function snapshotToPurchase(snapshot: StoreSnapshot): VerifiedPurchase | null {
+  const product = productFor(snapshot.store, snapshot.productId);
+  if (!product) return null;
   return {
     store: snapshot.store,
     purchaseRef: snapshot.purchaseRef,
@@ -373,6 +377,7 @@ function snapshotToPurchase(snapshot: StoreSnapshot): VerifiedPurchase {
     environment: snapshot.environment,
     periodStart: snapshot.periodStart,
     periodEnd: snapshot.periodEnd,
+    snapshot,
   };
 }
 
@@ -412,7 +417,8 @@ export async function verifyPurchaseWithStoreApi(
   if (result.snapshot.environment !== configuredStoreEnvironment()) {
     return { ok: false, reason: "WRONG_ENVIRONMENT" };
   }
-  return { ok: true, purchase: snapshotToPurchase(result.snapshot) };
+  const purchase = snapshotToPurchase(result.snapshot);
+  return purchase ? { ok: true, purchase } : { ok: false, reason: "UNKNOWN_PRODUCT" };
 }
 
 function millisToIso(value: unknown): string | null {
