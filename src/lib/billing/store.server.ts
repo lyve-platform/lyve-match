@@ -13,6 +13,7 @@
  */
 import type { Database } from "@/integrations/supabase/types";
 import { entitlementsForPlan } from "@/lib/billing.server";
+import { createHash } from "crypto";
 import {
   productFor,
   type StoreEventResult,
@@ -67,6 +68,40 @@ export async function linkVerifiedPurchase(
 
   const outcome = String(data);
   if (outcome === "owned_by_other") return { result: "OWNED_BY_OTHER_ACCOUNT" };
+
+  // A client-initiated purchase may arrive before the store notification. The
+  // same authoritative store response used for verification must therefore
+  // activate the subscription immediately, before the client acknowledges it.
+  // Without this step Play leaves the purchase unacknowledged and can refund it.
+  if (purchase.snapshot) {
+    const product = productFor(store, purchase.productId);
+    if (!product) return { result: "UNKNOWN_PRODUCT" };
+    const snapshot = purchase.snapshot;
+    const eventId = `link:${createHash("sha256")
+      .update(`${store}:${purchase.purchaseRef}:${snapshot.stateToken}`)
+      .digest("hex")}`;
+    const { error: applyError } = await supabaseAdmin.rpc("billing_apply_store_event", {
+      p_provider: store as Provider,
+      p_purchase_ref: purchase.purchaseRef,
+      p_event_id: eventId,
+      p_event_at: new Date().toISOString(),
+      p_status: snapshot.lifecycle.status as Status,
+      p_plan_code: purchase.planCode,
+      p_interval: product.interval as Interval,
+      p_currency: null as unknown as string,
+      p_period_start: purchase.periodStart,
+      p_period_end: purchase.periodEnd,
+      p_cancel_at_period_end: snapshot.lifecycle.cancelAtPeriodEnd,
+      p_entitlements: entitlementsForPlan(purchase.planCode),
+      p_revoke: snapshot.lifecycle.revoke,
+      p_reason: `purchase_link:${snapshot.lifecycle.reason}`,
+    } as never);
+    if (applyError) {
+      console.error("[store] initial state apply failed", { code: applyError.code });
+      return { result: "VERIFICATION_FAILED" };
+    }
+  }
+
   return {
     result: outcome === "linked" ? "LINKED" : "ALREADY_OWNED",
     planCode: purchase.planCode,
