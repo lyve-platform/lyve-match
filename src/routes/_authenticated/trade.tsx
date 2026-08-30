@@ -30,7 +30,9 @@ import {
   type DeskSnapshot,
 } from "@/lib/mt5.functions";
 import { buildGrid, formatMoney, roundVolume } from "@/lib/mt5-core";
+import { BotPanel } from "@/components/trade/BotPanel";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/trade")({
   head: () => ({
@@ -438,17 +440,25 @@ function Desk({
         </div>
       </div>
 
-      <Tabs defaultValue="strategy">
-        <TabsList className="grid w-full grid-cols-2 rounded-full p-1">
+      <Tabs defaultValue="bot">
+        <TabsList className="grid w-full grid-cols-3 rounded-full p-1">
+          <TabsTrigger value="bot" className="rounded-full">
+            Bot
+          </TabsTrigger>
           <TabsTrigger value="strategy" className="rounded-full">
-            Strategy
+            Manual grid
           </TabsTrigger>
           <TabsTrigger value="positions" className="rounded-full">
             Positions ({data.positions.length})
           </TabsTrigger>
         </TabsList>
 
+        <TabsContent value="bot" className="mt-4">
+          <BotPanel symbol={symbol} />
+        </TabsContent>
+
         <TabsContent value="strategy" className="mt-4 space-y-4">
+
           <div className="rounded-3xl border border-border bg-card p-5 shadow-soft">
             <div className="flex items-center gap-2">
               <Layers className="size-4 text-muted-foreground" aria-hidden />

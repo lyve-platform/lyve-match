@@ -423,6 +423,24 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_cron_secret: {
+        Row: {
+          created_at: string
+          id: boolean
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          id?: boolean
+          token: string
+        }
+        Update: {
+          created_at?: string
+          id?: boolean
+          token?: string
+        }
+        Relationships: []
+      }
       bot_runs: {
         Row: {
           action: string
