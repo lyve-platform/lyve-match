@@ -26,14 +26,15 @@ async function call<T>(
   path: string,
   init: { method?: string; body?: unknown } = {},
 ): Promise<T> {
-  const res = await fetch(`${base}${path}`, {
+  const request: RequestInit = {
     method: init.method ?? "GET",
     headers: {
       "auth-token": token(),
       "content-type": "application/json",
     },
-    body: init.body === undefined ? undefined : JSON.stringify(init.body),
-  });
+  };
+  if (init.body !== undefined) request.body = JSON.stringify(init.body);
+  const res = await fetch(`${base}${path}`, request);
   const text = await res.text();
   if (!res.ok) {
     let message = text.slice(0, 300);
