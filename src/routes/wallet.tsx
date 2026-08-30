@@ -66,7 +66,15 @@ function WalletLayout() {
             <a href="/wallet" aria-label="LYVE Wallet" className="min-w-0">
               <Logo />
             </a>
-            <ThemeToggle />
+            <div className="flex items-center gap-2">
+              <a
+                href="/trade"
+                className="rounded-full border border-border px-3 py-1.5 text-sm font-medium transition-colors hover:border-foreground/25"
+              >
+                Trading
+              </a>
+              <ThemeToggle />
+            </div>
           </div>
         </header>
         <main id="main" className="px-4 pb-24 pt-8 sm:px-6">
