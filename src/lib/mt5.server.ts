@@ -123,8 +123,8 @@ export type Position = {
   currentPrice: number;
   profit: number;
   swap: number;
-  stopLoss?: number;
-  takeProfit?: number;
+  stopLoss?: number | undefined;
+  takeProfit?: number | undefined;
   time: string;
 };
 
@@ -179,9 +179,9 @@ export function marketOrder(
     side: "buy" | "sell";
     symbol: string;
     volume: number;
-    stopLoss?: number;
-    takeProfit?: number;
-    comment?: string;
+    stopLoss?: number | undefined;
+    takeProfit?: number | undefined;
+    comment?: string | undefined;
   },
 ): Promise<TradeResult> {
   return call<TradeResult>(clientBase(), `/users/current/accounts/${accountId}/trade`, {

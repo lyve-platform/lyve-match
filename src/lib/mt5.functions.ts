@@ -37,8 +37,8 @@ export type DeskSnapshot = {
     openPrice: number;
     currentPrice: number;
     profit: number;
-    stopLoss?: number;
-    takeProfit?: number;
+    stopLoss?: number | undefined;
+    takeProfit?: number | undefined;
   }>;
   error: string | null;
 };
