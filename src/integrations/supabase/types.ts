@@ -315,6 +315,138 @@ export type Database = {
           },
         ]
       }
+      bot_baskets: {
+        Row: {
+          avg_price: number | null
+          closed_at: string | null
+          direction: string
+          id: string
+          last_entry_price: number | null
+          legs_filled: number
+          opened_at: string
+          realized_usd: number | null
+          symbol: string
+          total_volume: number
+          user_id: string
+        }
+        Insert: {
+          avg_price?: number | null
+          closed_at?: string | null
+          direction: string
+          id?: string
+          last_entry_price?: number | null
+          legs_filled?: number
+          opened_at?: string
+          realized_usd?: number | null
+          symbol: string
+          total_volume?: number
+          user_id: string
+        }
+        Update: {
+          avg_price?: number | null
+          closed_at?: string | null
+          direction?: string
+          id?: string
+          last_entry_price?: number | null
+          legs_filled?: number
+          opened_at?: string
+          realized_usd?: number | null
+          symbol?: string
+          total_volume?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bot_configs: {
+        Row: {
+          base_lot: number
+          created_at: string
+          daily_loss_usd: number
+          day_key: string | null
+          day_realized_usd: number
+          direction: string
+          disabled_reason: string | null
+          enabled: boolean
+          last_tick_at: string | null
+          max_legs: number
+          max_loss_usd: number
+          max_total_lots: number
+          min_margin_pct: number
+          multiplier: number
+          step_points: number
+          symbol: string
+          target_usd: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          base_lot?: number
+          created_at?: string
+          daily_loss_usd?: number
+          day_key?: string | null
+          day_realized_usd?: number
+          direction?: string
+          disabled_reason?: string | null
+          enabled?: boolean
+          last_tick_at?: string | null
+          max_legs?: number
+          max_loss_usd?: number
+          max_total_lots?: number
+          min_margin_pct?: number
+          multiplier?: number
+          step_points?: number
+          symbol?: string
+          target_usd?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          base_lot?: number
+          created_at?: string
+          daily_loss_usd?: number
+          day_key?: string | null
+          day_realized_usd?: number
+          direction?: string
+          disabled_reason?: string | null
+          enabled?: boolean
+          last_tick_at?: string | null
+          max_legs?: number
+          max_loss_usd?: number
+          max_total_lots?: number
+          min_margin_pct?: number
+          multiplier?: number
+          step_points?: number
+          symbol?: string
+          target_usd?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bot_runs: {
+        Row: {
+          action: string
+          created_at: string
+          detail: Json
+          id: string
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          detail?: Json
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       conversation_members: {
         Row: {
           conversation_id: string
