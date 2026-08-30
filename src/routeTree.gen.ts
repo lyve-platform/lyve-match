@@ -28,6 +28,7 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedTradeRouteImport } from './routes/_authenticated/trade'
 import { Route as WalletIndexRouteImport } from './routes/wallet.index'
 import { Route as WalletReceiveRouteImport } from './routes/wallet.receive'
 import { Route as WalletSendRouteImport } from './routes/wallet.send'
@@ -136,6 +137,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedTradeRoute = AuthenticatedTradeRouteImport.update({
+  id: '/trade',
+  path: '/trade',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const WalletIndexRoute = WalletIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -228,6 +234,7 @@ export interface FileRoutesByFullPath {
   '/premium': typeof AuthenticatedPremiumRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/trade': typeof AuthenticatedTradeRoute
   '/wallet/receive': typeof WalletReceiveRoute
   '/wallet/send': typeof WalletSendRoute
   '/wallet/': typeof WalletIndexRoute
@@ -259,6 +266,7 @@ export interface FileRoutesByTo {
   '/premium': typeof AuthenticatedPremiumRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/trade': typeof AuthenticatedTradeRoute
   '/wallet/receive': typeof WalletReceiveRoute
   '/wallet/send': typeof WalletSendRoute
   '/wallet': typeof WalletIndexRoute
@@ -294,6 +302,7 @@ export interface FileRoutesById {
   '/_authenticated/premium': typeof AuthenticatedPremiumRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/trade': typeof AuthenticatedTradeRoute
   '/wallet/receive': typeof WalletReceiveRoute
   '/wallet/send': typeof WalletSendRoute
   '/wallet/': typeof WalletIndexRoute
@@ -329,6 +338,7 @@ export interface FileRouteTypes {
     | '/premium'
     | '/profile'
     | '/settings'
+    | '/trade'
     | '/wallet/receive'
     | '/wallet/send'
     | '/wallet/'
@@ -360,6 +370,7 @@ export interface FileRouteTypes {
     | '/premium'
     | '/profile'
     | '/settings'
+    | '/trade'
     | '/wallet/receive'
     | '/wallet/send'
     | '/wallet'
@@ -394,6 +405,7 @@ export interface FileRouteTypes {
     | '/_authenticated/premium'
     | '/_authenticated/profile'
     | '/_authenticated/settings'
+    | '/_authenticated/trade'
     | '/wallet/receive'
     | '/wallet/send'
     | '/wallet/'
@@ -562,6 +574,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/trade': {
+      id: '/_authenticated/trade'
+      path: '/trade'
+      fullPath: '/trade'
+      preLoaderRoute: typeof AuthenticatedTradeRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/wallet/': {
       id: '/wallet/'
       path: '/'
@@ -681,6 +700,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
   AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedTradeRoute: typeof AuthenticatedTradeRoute
   AuthenticatedMessagesConversationIdRoute: typeof AuthenticatedMessagesConversationIdRoute
   AuthenticatedMessagesIndexRoute: typeof AuthenticatedMessagesIndexRoute
 }
@@ -695,6 +715,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
   AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedTradeRoute: AuthenticatedTradeRoute,
   AuthenticatedMessagesConversationIdRoute:
     AuthenticatedMessagesConversationIdRoute,
   AuthenticatedMessagesIndexRoute: AuthenticatedMessagesIndexRoute,
