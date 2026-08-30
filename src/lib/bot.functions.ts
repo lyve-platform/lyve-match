@@ -27,7 +27,7 @@ export type BotSettings = {
 export type BotRun = {
   id: string;
   action: string;
-  detail: Record<string, unknown>;
+  detail: Record<string, string | number | boolean | null>;
   createdAt: string;
 };
 
@@ -95,7 +95,7 @@ async function loadState(supabase: Db, userId: string): Promise<BotState> {
     runs: ((runs as Row[] | null) ?? []).map((r) => ({
       id: String(r["id"]),
       action: String(r["action"]),
-      detail: (r["detail"] as Record<string, unknown>) ?? {},
+      detail: (r["detail"] as Record<string, string | number | boolean | null>) ?? {},
       createdAt: String(r["created_at"]),
     })),
   };
@@ -244,6 +244,7 @@ export const runBotNow = createServerFn({ method: "POST" })
       .maybeSingle();
     if (!config) return { action: "skipped", reason: "no_config" };
     const { tickUser } = await import("./bot.server");
-    const result = await tickUser({ ...(config as never), enabled: true });
+    const row = { ...(config as Record<string, unknown>), enabled: true };
+    const result = await tickUser(row as never);
     return { action: result.action, reason: result.reason };
   });
