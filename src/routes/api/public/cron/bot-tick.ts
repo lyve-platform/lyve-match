@@ -25,17 +25,35 @@ export const Route = createFileRoute("/api/public/cron/bot-tick")({
   server: {
     handlers: {
       POST: async ({ request }) => {
-        const expected = process.env["BOT_CRON_SECRET"];
-        if (!expected || expected.length < 16) {
-          return json(503, { ok: false, result: "NOT_CONFIGURED" });
-        }
-
         const presented = presentedSecret(request) ?? "";
-        const a = Buffer.from(presented);
-        const b = Buffer.from(expected);
-        if (a.length !== b.length || !timingSafeEqual(a, b)) {
-          return json(401, { ok: false, result: "UNAUTHORIZED" });
+        if (presented.length < 16) return json(401, { ok: false, result: "UNAUTHORIZED" });
+
+        // Accept either the environment secret or the database-held scheduler
+        // token (used by the in-database scheduler, which cannot read env).
+        const candidates: string[] = [];
+        const envSecret = process.env["BOT_CRON_SECRET"];
+        if (envSecret && envSecret.length >= 16) candidates.push(envSecret);
+        try {
+          const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+          const { data } = await supabaseAdmin
+            .from("bot_cron_secret")
+            .select("token")
+            .limit(1)
+            .maybeSingle();
+          const token = (data?.token as string | undefined) ?? "";
+          if (token.length >= 16) candidates.push(token);
+        } catch {
+          /* database token unavailable — fall back to env only */
         }
+        if (candidates.length === 0) return json(503, { ok: false, result: "NOT_CONFIGURED" });
+
+        const a = Buffer.from(presented);
+        const matches = candidates.some((candidate) => {
+          const b = Buffer.from(candidate);
+          return a.length === b.length && timingSafeEqual(a, b);
+        });
+        if (!matches) return json(401, { ok: false, result: "UNAUTHORIZED" });
+
 
         if (!process.env["METAAPI_TOKEN"]) {
           return json(503, { ok: false, result: "BROKER_NOT_CONFIGURED" });
