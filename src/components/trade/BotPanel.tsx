@@ -349,7 +349,7 @@ function Cell({
 }: {
   label: string;
   value: string;
-  tone?: "danger";
+  tone?: "danger" | undefined;
 }) {
   return (
     <div className="rounded-2xl border border-border bg-surface px-3 py-2">
