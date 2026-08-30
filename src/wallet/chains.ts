@@ -49,7 +49,7 @@ export const WALLET_CHAINS: WalletChain[] = [
   },
 ];
 
-export const DEFAULT_CHAIN = WALLET_CHAINS[0];
+export const DEFAULT_CHAIN: WalletChain = WALLET_CHAINS[0]!;
 
 export function getWalletChain(key: string): WalletChain {
   return WALLET_CHAINS.find((c) => c.key === key) ?? DEFAULT_CHAIN;

@@ -8,8 +8,12 @@ import {
   type ReactNode,
 } from "react";
 import { english, generateMnemonic, mnemonicToAccount, type HDAccount } from "viem/accounts";
-import { validateMnemonic } from "viem/accounts";
-import { decryptMnemonic, encryptMnemonic, normalizeMnemonic } from "./crypto";
+import {
+  decryptMnemonic,
+  encryptMnemonic,
+  isValidWordCount,
+  normalizeMnemonic,
+} from "./crypto";
 import { clearVault, loadVault, saveVault, type WalletVault } from "./vault";
 import { DEFAULT_CHAIN, type WalletChain } from "./chains";
 
@@ -46,15 +50,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const existing = loadVault();
     setVault(existing);
     setStatus(existing ? "locked" : "empty");
-    try {
-      const stored = localStorage.getItem(CHAIN_KEY);
-      if (stored) {
-        const found = (await0 => await0)(null);
-        void found;
-      }
-    } catch {
-      /* ignore */
-    }
   }, []);
 
   const setChain = useCallback((next: WalletChain) => {
@@ -114,7 +109,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const importWallet = useCallback(
     async (rawMnemonic: string, pin: string): Promise<void> => {
       const phrase = normalizeMnemonic(rawMnemonic);
-      if (!validateMnemonic(phrase, english)) throw new Error("invalid_mnemonic");
+      const words = phrase.split(" ").filter(Boolean);
+      const dictionary = new Set<string>(english);
+      if (!isValidWordCount(phrase) || words.some((w) => !dictionary.has(w))) {
+        throw new Error("invalid_mnemonic");
+      }
       await finalize(phrase, pin);
     },
     [finalize],
