@@ -38,6 +38,7 @@ import { Route as AuthenticatedAdminStoreReadinessRouteImport } from './routes/_
 import { Route as AuthenticatedMessagesIndexRouteImport } from './routes/_authenticated/messages.index'
 import { Route as AuthenticatedMessagesConversationIdRouteImport } from './routes/_authenticated/messages.$conversationId'
 import { Route as ApiPublicCronAccountPurgeRouteImport } from './routes/api/public/cron/account-purge'
+import { Route as ApiPublicCronBotTickRouteImport } from './routes/api/public/cron/bot-tick'
 import { Route as ApiPublicCronStoreReconcileRouteImport } from './routes/api/public/cron/store-reconcile'
 import { Route as ApiPublicWebhooksAppleRouteImport } from './routes/api/public/webhooks/apple'
 import { Route as ApiPublicWebhooksBillingRouteImport } from './routes/api/public/webhooks/billing'
@@ -192,6 +193,11 @@ const ApiPublicCronAccountPurgeRoute =
     path: '/api/public/cron/account-purge',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPublicCronBotTickRoute = ApiPublicCronBotTickRouteImport.update({
+  id: '/api/public/cron/bot-tick',
+  path: '/api/public/cron/bot-tick',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicCronStoreReconcileRoute =
   ApiPublicCronStoreReconcileRouteImport.update({
     id: '/api/public/cron/store-reconcile',
@@ -244,6 +250,7 @@ export interface FileRoutesByFullPath {
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/messages/': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
+  '/api/public/cron/bot-tick': typeof ApiPublicCronBotTickRoute
   '/api/public/cron/store-reconcile': typeof ApiPublicCronStoreReconcileRoute
   '/api/public/webhooks/apple': typeof ApiPublicWebhooksAppleRoute
   '/api/public/webhooks/billing': typeof ApiPublicWebhooksBillingRoute
@@ -276,6 +283,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/messages': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
+  '/api/public/cron/bot-tick': typeof ApiPublicCronBotTickRoute
   '/api/public/cron/store-reconcile': typeof ApiPublicCronStoreReconcileRoute
   '/api/public/webhooks/apple': typeof ApiPublicWebhooksAppleRoute
   '/api/public/webhooks/billing': typeof ApiPublicWebhooksBillingRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/messages/': typeof AuthenticatedMessagesIndexRoute
   '/api/public/cron/account-purge': typeof ApiPublicCronAccountPurgeRoute
+  '/api/public/cron/bot-tick': typeof ApiPublicCronBotTickRoute
   '/api/public/cron/store-reconcile': typeof ApiPublicCronStoreReconcileRoute
   '/api/public/webhooks/apple': typeof ApiPublicWebhooksAppleRoute
   '/api/public/webhooks/billing': typeof ApiPublicWebhooksBillingRoute
@@ -348,6 +357,7 @@ export interface FileRouteTypes {
     | '/admin/'
     | '/messages/'
     | '/api/public/cron/account-purge'
+    | '/api/public/cron/bot-tick'
     | '/api/public/cron/store-reconcile'
     | '/api/public/webhooks/apple'
     | '/api/public/webhooks/billing'
@@ -380,6 +390,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/messages'
     | '/api/public/cron/account-purge'
+    | '/api/public/cron/bot-tick'
     | '/api/public/cron/store-reconcile'
     | '/api/public/webhooks/apple'
     | '/api/public/webhooks/billing'
@@ -415,6 +426,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/'
     | '/_authenticated/messages/'
     | '/api/public/cron/account-purge'
+    | '/api/public/cron/bot-tick'
     | '/api/public/cron/store-reconcile'
     | '/api/public/webhooks/apple'
     | '/api/public/webhooks/billing'
@@ -433,6 +445,7 @@ export interface RootRouteChildren {
   TermsRoute: typeof TermsRoute
   WalletRoute: typeof WalletRouteWithChildren
   ApiPublicCronAccountPurgeRoute: typeof ApiPublicCronAccountPurgeRoute
+  ApiPublicCronBotTickRoute: typeof ApiPublicCronBotTickRoute
   ApiPublicCronStoreReconcileRoute: typeof ApiPublicCronStoreReconcileRoute
   ApiPublicWebhooksAppleRoute: typeof ApiPublicWebhooksAppleRoute
   ApiPublicWebhooksBillingRoute: typeof ApiPublicWebhooksBillingRoute
@@ -644,6 +657,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicCronAccountPurgeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/cron/bot-tick': {
+      id: '/api/public/cron/bot-tick'
+      path: '/api/public/cron/bot-tick'
+      fullPath: '/api/public/cron/bot-tick'
+      preLoaderRoute: typeof ApiPublicCronBotTickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/cron/store-reconcile': {
       id: '/api/public/cron/store-reconcile'
       path: '/api/public/cron/store-reconcile'
@@ -751,6 +771,7 @@ const rootRouteChildren: RootRouteChildren = {
   TermsRoute: TermsRoute,
   WalletRoute: WalletRouteWithChildren,
   ApiPublicCronAccountPurgeRoute: ApiPublicCronAccountPurgeRoute,
+  ApiPublicCronBotTickRoute: ApiPublicCronBotTickRoute,
   ApiPublicCronStoreReconcileRoute: ApiPublicCronStoreReconcileRoute,
   ApiPublicWebhooksAppleRoute: ApiPublicWebhooksAppleRoute,
   ApiPublicWebhooksBillingRoute: ApiPublicWebhooksBillingRoute,
