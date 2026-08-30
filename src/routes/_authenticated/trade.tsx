@@ -30,7 +30,9 @@ import {
   type DeskSnapshot,
 } from "@/lib/mt5.functions";
 import { buildGrid, formatMoney, roundVolume } from "@/lib/mt5-core";
+import { BotPanel } from "@/components/trade/BotPanel";
 import { cn } from "@/lib/utils";
+
 
 export const Route = createFileRoute("/_authenticated/trade")({
   head: () => ({
