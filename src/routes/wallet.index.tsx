@@ -13,7 +13,7 @@ import {
   RefreshCw,
   Sparkles,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, type ComponentType } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -209,7 +209,7 @@ function EmptyRow({
   icon: Icon,
 }: {
   text: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: ComponentType<{ className?: string }>;
 }) {
   return (
     <div className="flex flex-col items-center gap-2 rounded-2xl border border-dashed border-border bg-surface/60 px-4 py-8 text-center">
