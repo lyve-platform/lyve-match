@@ -18,6 +18,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SafetyRouteImport } from './routes/safety'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as WalletRouteImport } from './routes/wallet'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAppealRouteImport } from './routes/_authenticated/appeal'
 import { Route as AuthenticatedDiscoverRouteImport } from './routes/_authenticated/discover'
@@ -27,6 +28,9 @@ import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authentic
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as WalletIndexRouteImport } from './routes/wallet.index'
+import { Route as WalletReceiveRouteImport } from './routes/wallet.receive'
+import { Route as WalletSendRouteImport } from './routes/wallet.send'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminStoreReadinessRouteImport } from './routes/_authenticated/admin.store-readiness'
@@ -82,6 +86,11 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WalletRoute = WalletRouteImport.update({
+  id: '/wallet',
+  path: '/wallet',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
   id: '/admin',
   path: '/admin',
@@ -126,6 +135,21 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const WalletIndexRoute = WalletIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => WalletRoute,
+} as any)
+const WalletReceiveRoute = WalletReceiveRouteImport.update({
+  id: '/receive',
+  path: '/receive',
+  getParentRoute: () => WalletRoute,
+} as any)
+const WalletSendRoute = WalletSendRouteImport.update({
+  id: '/send',
+  path: '/send',
+  getParentRoute: () => WalletRoute,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
@@ -194,6 +218,7 @@ export interface FileRoutesByFullPath {
   '/safety': typeof SafetyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/wallet': typeof WalletRouteWithChildren
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/appeal': typeof AuthenticatedAppealRoute
   '/discover': typeof AuthenticatedDiscoverRoute
@@ -203,6 +228,9 @@ export interface FileRoutesByFullPath {
   '/premium': typeof AuthenticatedPremiumRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/wallet/receive': typeof WalletReceiveRoute
+  '/wallet/send': typeof WalletSendRoute
+  '/wallet/': typeof WalletIndexRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -231,6 +259,9 @@ export interface FileRoutesByTo {
   '/premium': typeof AuthenticatedPremiumRoute
   '/profile': typeof AuthenticatedProfileRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/wallet/receive': typeof WalletReceiveRoute
+  '/wallet/send': typeof WalletSendRoute
+  '/wallet': typeof WalletIndexRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -253,6 +284,7 @@ export interface FileRoutesById {
   '/safety': typeof SafetyRoute
   '/support': typeof SupportRoute
   '/terms': typeof TermsRoute
+  '/wallet': typeof WalletRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/appeal': typeof AuthenticatedAppealRoute
   '/_authenticated/discover': typeof AuthenticatedDiscoverRoute
@@ -262,6 +294,9 @@ export interface FileRoutesById {
   '/_authenticated/premium': typeof AuthenticatedPremiumRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/wallet/receive': typeof WalletReceiveRoute
+  '/wallet/send': typeof WalletSendRoute
+  '/wallet/': typeof WalletIndexRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/store-readiness': typeof AuthenticatedAdminStoreReadinessRoute
   '/_authenticated/messages/$conversationId': typeof AuthenticatedMessagesConversationIdRoute
@@ -284,6 +319,7 @@ export interface FileRouteTypes {
     | '/safety'
     | '/support'
     | '/terms'
+    | '/wallet'
     | '/admin'
     | '/appeal'
     | '/discover'
@@ -293,6 +329,9 @@ export interface FileRouteTypes {
     | '/premium'
     | '/profile'
     | '/settings'
+    | '/wallet/receive'
+    | '/wallet/send'
+    | '/wallet/'
     | '/admin/settings'
     | '/admin/store-readiness'
     | '/messages/$conversationId'
@@ -321,6 +360,9 @@ export interface FileRouteTypes {
     | '/premium'
     | '/profile'
     | '/settings'
+    | '/wallet/receive'
+    | '/wallet/send'
+    | '/wallet'
     | '/admin/settings'
     | '/admin/store-readiness'
     | '/messages/$conversationId'
@@ -342,6 +384,7 @@ export interface FileRouteTypes {
     | '/safety'
     | '/support'
     | '/terms'
+    | '/wallet'
     | '/_authenticated/admin'
     | '/_authenticated/appeal'
     | '/_authenticated/discover'
@@ -351,6 +394,9 @@ export interface FileRouteTypes {
     | '/_authenticated/premium'
     | '/_authenticated/profile'
     | '/_authenticated/settings'
+    | '/wallet/receive'
+    | '/wallet/send'
+    | '/wallet/'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/store-readiness'
     | '/_authenticated/messages/$conversationId'
@@ -373,6 +419,7 @@ export interface RootRouteChildren {
   SafetyRoute: typeof SafetyRoute
   SupportRoute: typeof SupportRoute
   TermsRoute: typeof TermsRoute
+  WalletRoute: typeof WalletRouteWithChildren
   ApiPublicCronAccountPurgeRoute: typeof ApiPublicCronAccountPurgeRoute
   ApiPublicCronStoreReconcileRoute: typeof ApiPublicCronStoreReconcileRoute
   ApiPublicWebhooksAppleRoute: typeof ApiPublicWebhooksAppleRoute
@@ -445,6 +492,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/wallet': {
+      id: '/wallet'
+      path: '/wallet'
+      fullPath: '/wallet'
+      preLoaderRoute: typeof WalletRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/admin': {
       id: '/_authenticated/admin'
       path: '/admin'
@@ -507,6 +561,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/wallet/': {
+      id: '/wallet/'
+      path: '/'
+      fullPath: '/wallet/'
+      preLoaderRoute: typeof WalletIndexRouteImport
+      parentRoute: typeof WalletRoute
+    }
+    '/wallet/receive': {
+      id: '/wallet/receive'
+      path: '/receive'
+      fullPath: '/wallet/receive'
+      preLoaderRoute: typeof WalletReceiveRouteImport
+      parentRoute: typeof WalletRoute
+    }
+    '/wallet/send': {
+      id: '/wallet/send'
+      path: '/send'
+      fullPath: '/wallet/send'
+      preLoaderRoute: typeof WalletSendRouteImport
+      parentRoute: typeof WalletRoute
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -628,6 +703,21 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface WalletRouteChildren {
+  WalletReceiveRoute: typeof WalletReceiveRoute
+  WalletSendRoute: typeof WalletSendRoute
+  WalletIndexRoute: typeof WalletIndexRoute
+}
+
+const WalletRouteChildren: WalletRouteChildren = {
+  WalletReceiveRoute: WalletReceiveRoute,
+  WalletSendRoute: WalletSendRoute,
+  WalletIndexRoute: WalletIndexRoute,
+}
+
+const WalletRouteWithChildren =
+  WalletRoute._addFileChildren(WalletRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -638,6 +728,7 @@ const rootRouteChildren: RootRouteChildren = {
   SafetyRoute: SafetyRoute,
   SupportRoute: SupportRoute,
   TermsRoute: TermsRoute,
+  WalletRoute: WalletRouteWithChildren,
   ApiPublicCronAccountPurgeRoute: ApiPublicCronAccountPurgeRoute,
   ApiPublicCronStoreReconcileRoute: ApiPublicCronStoreReconcileRoute,
   ApiPublicWebhooksAppleRoute: ApiPublicWebhooksAppleRoute,
